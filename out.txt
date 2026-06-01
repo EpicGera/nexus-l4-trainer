@@ -1,0 +1,53 @@
+26   const [logs, setLogs] = useState<ExerciseLog[]>([]);
+27   const [weight, setWeight] = useState('');
+28   const [reps, setReps] = useState('');
+29   const [rpe, setRpe] = useState('8'); // default common RPE
+30   const [rir, setRir] = useState('2'); // default RIR for RPE 8
+31   const [isExpanded, setIsExpanded] = useState(false);
+32   const [historicMax, setHistoricMax] = useState<number>(0);
+33   const [lastLog, setLastLog] = useState<ExerciseLog | null>(null);
+34   const [historicAvgRpe, setHistoricAvgRpe] = useState<number | null>(null);
+35   const [rpeTrend, setRpeTrend] = useState<{name: string; rpe: number; timestamp: number}[]>([]);
+36   const [isFlashing, setIsFlashing] = useState(false);
+37   const [biomechanicsChecklist, setBiomechanicsChecklist] = useState({
+42   const [showPacing, setShowPacing] = useState(false);
+43   const [calInput, setCalInput] = useState('15');
+44   const [showAdvancedL4, setShowAdvancedL4] = useState(false);
+105       setRir('N/D');
+107       setRir('2');
+112     setRpe(newRpe);
+121         setRir(String(computedRir));
+123         setRir('N/D');
+126       setRir('N/D');
+131     setRir(newRir);
+141         setRpe(String(computedRpe));
+146   const [athlete, setAthlete] = useState(() => {
+182         localStorage.setItem('nexus_athlete_state', JSON.stringify(athlete));
+192           setAthlete(JSON.parse(saved));
+266       setHistoricMax(maxWeight);
+267       setLastLog(latestLog);
+270           setHistoricAvgRpe(allRpes.reduce((a, b) => a + b, 0) / allRpes.length);
+272           setHistoricAvgRpe(null);
+286       setRpeTrend(sessionsArray.slice(-4));
+396         setLogs(JSON.parse(saved));
+401       setLogs([]);
+420     setLogs(updatedLogs);
+421     localStorage.setItem(localStorageKey, JSON.stringify(updatedLogs));
+431       setIsFlashing(true);
+432       setTimeout(() => {
+433         setIsFlashing(false);
+462     setWeight('');
+463     setReps('');
+465       setRir('N/D');
+467       setRir('2');
+576           onClick={() => setIsExpanded(!isExpanded)}
+680                   onChange={e => setWeight(e.target.value)}
+690                       setWeight(cleanW);
+709                   onChange={e => setReps(e.target.value)}
+885               onClick={() => setShowAdvancedL4(!showAdvancedL4)}
+938                         onChange={(e) => setBiomechanicsChecklist(prev => ({ ...prev, [item.key]: e.target.checked }))}
+953                 onClick={() => setShowPacing(!showPacing)}
+1001                                 onChange={(e) => setCalInput(e.target.value)}
+1011                                     onClick={() => setCalInput(preset)}
+1084                         setRpe(item.rpeValue);
+1085                         setRir(String(item.rir));

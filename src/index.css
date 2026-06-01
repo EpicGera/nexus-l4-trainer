@@ -1,0 +1,287 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-brutalist: "Anton", "Impact", sans-serif;
+  --font-condensed: "Roboto Condensed", sans-serif;
+  
+  --color-pure-black: #0E0E11;
+  --color-pure-white: #FFFFFF;
+  --color-electric-blue: #1F51FF;
+  --color-neon-pink: #FF007F;
+  
+  --shadow-blue-glow: 0 0 15px 2px rgba(31, 81, 255, 0.6);
+  --shadow-pink-glow: 0 0 15px 2px rgba(255, 0, 127, 0.6);
+}
+
+.bg-neon-pink {
+  background-color: #FF007F;
+}
+
+.bg-neon-yellow {
+  background-color: #CCFF00;
+}
+
+.bg-neon-orange {
+  background-color: #FF5A00;
+}
+
+.bg-neon-green {
+  background-color: #39FF14;
+}
+
+.bg-neon-cyan {
+  background-color: #00F0FF;
+}
+
+body {
+  background-color: #0E0E11;
+  color: #FFFFFF;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.font-brutalist {
+  font-family: "Anton", "Impact", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Custom Scrollbar Hide */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Responsive adjustments for main app body/content wrapper to prevent clipping based on header height and safe areas */
+.app-content-wrapper {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.pt-safe {
+  padding-top: calc(var(--header-height, 115px) + env(safe-area-inset-top, 0px)) !important;
+}
+
+@media (min-width: 375px) {
+  .app-content-wrapper {
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
+
+@media (min-width: 640px) {
+  .app-content-wrapper {
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .app-content-wrapper {
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .app-content-wrapper {
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* Precise styling for target selector classes to prevent overlapping/clipping and support notches */
+.fixed.top-0.left-0.right-0.z-50.bg-\[\#0A0A0E\]\/95.border-b-2.border-white\/10.no-print.backdrop-blur-md.shadow-\[0_4px_30px_rgba\(0\,0\,0\,0.85\)\] {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 4px;
+}
+
+@media (max-width: 374px) {
+  /* Reduce vertical padding below 375px to maximize usable height */
+  .fixed.top-0.left-0.right-0.z-50.bg-\[\#0A0A0E\]\/95.border-b-2.border-white\/10.no-print.backdrop-blur-md.shadow-\[0_4px_30px_rgba\(0\,0\,0\,0.85\)\] {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: 2px !important;
+  }
+  
+  /* Reduce font size of 'NEXUS L4 MASTER' branding to prevent overflow */
+  .fixed.top-0.left-0.right-0.z-50.bg-\[\#0A0A0E\]\/50.border-b-2.border-white\/10.no-print.backdrop-blur-md.shadow-\[0_4px_30px_rgba\(0\,0\,0\,0.85\)\] .font-brutalist,
+  .fixed.top-0.left-0.right-0.z-50.bg-\[\#0A0A0E\]\/95.border-b-2.border-white\/10.no-print.backdrop-blur-md.shadow-\[0_4px_30px_rgba\(0\,0\,0\,0.85\)\] .font-brutalist {
+    font-size: 6.5px !important;
+  }
+  
+  /* Wrap internal header flex containers to prevent any layout breaking or horizontal scroll */
+  .fixed.top-0.left-0.right-0.z-50.bg-\[\#0A0A0E\]\/95.border-b-2.border-white\/10.no-print.backdrop-blur-md.shadow-\[0_4px_30px_rgba\(0\,0\,0\,0.85\)\] .flex {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* Subtabs styles */
+.tab-btn {
+  background-color: #000000;
+  color: #FFFFFF;
+  font-family: inherit; /* Use default clean responsive font */
+  font-size: 0.75rem; /* More minimalist than 1.125rem */
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.85rem; /* More compact and easy to use */
+  border: none;
+  border-radius: 0.375rem; /* Modern rounded corner */
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+.tab-btn.active {
+  background-color: var(--color-electric-blue);
+  color: #000000;
+}
+
+/* Styled exercise item list */
+.exercise-list-item {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.exercise-list-item::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 1.5rem; /* Matches the line-height of the first line of text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-electric-blue);
+  font-size: 14px;
+}
+
+.cue {
+  text-transform: none;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 400;
+  color: #a3a3a3;
+  font-size: 0.875rem;
+  display: block;
+  margin-top: 0.25rem;
+  border-left: 2px solid var(--color-electric-blue);
+  padding-left: 0.5rem;
+}
+
+/* Main completable workout buttons style */
+.status-btn {
+  width: 100%;
+  padding: 1rem;
+  font-family: "Anton", "Impact", sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.07em;
+  text-align: center;
+  border: none;
+  background-color: #1a1a20;
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.status-btn:hover {
+  background-color: #374151;
+  color: #FFFFFF;
+  box-shadow: none;
+}
+
+.status-btn.completed {
+  background-color: #10B981;
+  border: none;
+  color: #0E0E11;
+  box-shadow: none;
+}
+
+.status-btn.completed:hover {
+  background-color: #059669;
+  border: none;
+  color: #FFFFFF;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-family: sans-serif !important;
+    text-transform: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Clinically intense custom flash animation for RPE 9+ registrations */
+@keyframes flash-intense {
+  0% {
+    background: #E11D48;
+    box-shadow: 0 0 30px rgba(225, 29, 72, 0.85);
+    transform: scale(1.04);
+  }
+  15% {
+    background: #F59E0B; /* Amber peak */
+    box-shadow: 0 0 45px rgba(245, 158, 11, 1), inset 0 0 15px rgba(255, 255, 255, 0.9);
+    transform: scale(0.97);
+  }
+  35% {
+    background: #EC4899; /* Hot Pink core */
+    box-shadow: 0 0 35px rgba(236, 72, 153, 0.85);
+    transform: scale(1.03);
+  }
+  55% {
+    background: #DC2626; /* Dark pure red */
+    box-shadow: 0 0 25px rgba(220, 38, 38, 0.7);
+    transform: scale(0.98);
+  }
+  75% {
+    background: #F59E0B;
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.7);
+    transform: scale(1.02);
+  }
+  100% {
+    background: #E11D48;
+    box-shadow: 0 0 20px rgba(225, 29, 72, 0.6);
+    transform: scale(1);
+  }
+}
+
+.animate-flash-intense {
+  animation: flash-intense 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes rpeAlertPulse {
+  0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); border-color: rgba(249, 115, 22, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(249, 115, 22, 0); border-color: rgba(249, 115, 22, 0.2); }
+  100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); border-color: rgba(249, 115, 22, 0.5); }
+}
+
+@keyframes rpeCriticalPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); border-color: rgba(239, 68, 68, 0.8); }
+  70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); border-color: rgba(239, 68, 68, 0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); border-color: rgba(239, 68, 68, 0.8); }
+}
+
+.rpe-alert-glow {
+  animation: rpeAlertPulse 2s infinite;
+  border-color: rgba(249, 115, 22, 0.5) !important;
+}
+
+.rpe-critical-glow {
+  animation: rpeCriticalPulse 1s infinite;
+  border-color: rgba(239, 68, 68, 0.8) !important;
+}
+
+/* Workout grid styling handled dynamically in React components via Tailwind utility classes */

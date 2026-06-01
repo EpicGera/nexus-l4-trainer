@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Secured Users collection and localStorageSync subcollection
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /localStorageSync/{key} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create, update: if request.auth != null 
+          && request.auth.uid == userId 
+          && isValidLocalStorageSync(request.resource.data);
+        allow delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+
+  // Schema & Type validation helper function
+  function isValidLocalStorageSync(data) {
+    return data.keys().hasAll(['key', 'value', 'updatedAt'])
+      && data.keys().size() == 3
+      && data.key is string && data.key.size() <= 512
+      && data.value is string && data.value.size() <= 1048576  // up to 1MB of JSON string
+      && data.updatedAt is string && data.updatedAt.size() <= 128;
+  }
+}

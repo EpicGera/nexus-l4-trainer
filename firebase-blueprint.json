@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "LocalStorageSync": {
+      "title": "Local Storage Sync Entity",
+      "description": "A single key-value pair representation of the offline-first LocalStorage synced to the cloud.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The unique storage key identifier"
+        },
+        "value": {
+          "type": "string",
+          "description": "Serialized JSON value of the storage key"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last updated timestamp in ISO format"
+        }
+      },
+      "required": ["key", "value", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/localStorageSync/{key}": {
+      "schema": "LocalStorageSync",
+      "description": "Stores key-value pair backups of local storage to sync across devices for the authenticated user."
+    }
+  }
+}
