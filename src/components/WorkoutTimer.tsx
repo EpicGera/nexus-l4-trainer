@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { parseProtocol } from "../lib/protocolParser";
@@ -869,7 +870,7 @@ export default function WorkoutTimer({
                   className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono text-neutral-400 uppercase tracking-wider mr-8 shrink-0"
                 >
                   <img src="/logo.svg" className="w-3.5 h-3.5 shrink-0 object-contain" alt="Logo" />
-                  <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
+                  <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.replace(/<span[^>]*>.*?<\/span>/gi, '')) }} />
                 </span>
               ))}
             </div>
@@ -1271,7 +1272,7 @@ export default function WorkoutTimer({
                       className="inline-flex items-center gap-1.5 text-[10px] font-mono text-neutral-400 uppercase tracking-wider mr-6 shrink-0"
                     >
                       <img src="/logo.svg" className="w-3 h-3 shrink-0 object-contain" alt="Logo" />
-                      <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
+                      <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.replace(/<span[^>]*>.*?<\/span>/gi, '')) }} />
                     </span>
                   ))}
                 </div>
