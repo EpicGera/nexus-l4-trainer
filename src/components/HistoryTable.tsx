@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ResponsiveContainer,
   BarChart,
@@ -286,7 +286,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                 </tr>
               </thead>
               <motion.tbody
-                variants={historyTableContainerVariants}
+                variants={{} as any}
                 initial="hidden"
                 animate="show"
               >
@@ -311,7 +311,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                     return (
                       <motion.tr
                         key={rowKey}
-                        variants={historyTableRowVariants}
+                        variants={{} as any}
                         className={`border-b ${sessionAvgRpe > 9 ? "border-rose-500 shadow-sm bg-rose-500/5" : "border-white/5 last:border-b-0 hover:bg-white/5"} transition-all`}
                         id={`history_row_${rowKey}`}
                       >

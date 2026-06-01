@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { LayoutDashboard, TrendingUp, UserCheck } from "lucide-react";
 import {
   WEEK_ACCENT_COLORS,

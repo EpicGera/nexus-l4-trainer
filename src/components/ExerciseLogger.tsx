@@ -488,7 +488,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
       <AnimatePresence>
         {isExpanded && (
           <motion.div 
-            variants={containerVariants}
+            variants={{} as any}
             initial="hidden"
             animate="show"
             exit="hidden"
@@ -497,7 +497,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
             
             {/* RPE TREND CHART */}
             {rpeTrend.length > 1 && (
-              <motion.div variants={itemVariants} className="bg-[#0A0A0E] border border-white/5 rounded p-2 mb-2">
+              <motion.div variants={{} as any} className="bg-[#0A0A0E] border border-white/5 rounded p-2 mb-2">
                 <span className="text-[9px] font-bold tracking-widest text-[#00F0FF] uppercase mb-2 block">
                   📈 Tendencia RPE (Últimas sesiones)
                 </span>
@@ -526,7 +526,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
             )}
 
           {/* LOGGING FORM */}
-          <motion.div variants={itemVariants} className="w-full">
+          <motion.div variants={{} as any} className="w-full">
             <form onSubmit={handleAddLog} className="space-y-2.5 w-full">
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2 w-full">
               <div>
@@ -681,7 +681,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
 
           {/* L4 AUTO-CALCULATED RPE SUGGESTION (DYNAMIC ANALYSIS) */}
           {!isCardio && historicMax > 0 && (
-            <motion.div variants={itemVariants} className="space-y-2">
+            <motion.div variants={{} as any} className="space-y-2">
               <div className="bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 rounded-lg p-2.5 flex items-center justify-between gap-3 shadow-xs">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[9px] font-black tracking-widest text-[#E11D48] dark:text-rose-400 uppercase flex items-center gap-1 leading-none">
@@ -750,7 +750,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
           )}
 
           {/* ELEGANT MINIMALIST DISCLOSURE FOR ADVANCED TOOLS (Option 3 - Minimalist Accordion) */}
-          <motion.div variants={itemVariants} className="pt-1.5 no-print">
+          <motion.div variants={{} as any} className="pt-1.5 no-print">
             <button
               type="button"
               onClick={() => setShowAdvancedL4(!showAdvancedL4)}
@@ -972,7 +972,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
           )}
 
           {/* HISTORIC LOG LIST */}
-          <motion.div variants={itemVariants} className="w-full">
+          <motion.div variants={{} as any} className="w-full">
             {logs.length > 0 ? (
               <div className="border-t border-[var(--border-color)] pt-2.5">
                 <span className="block text-[9px] font-extrabold text-[var(--text-muted)] uppercase mb-2">

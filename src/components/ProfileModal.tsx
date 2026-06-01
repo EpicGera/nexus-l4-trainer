@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { Trophy, Check, Zap } from "lucide-react";
 import { AthleteState } from "../types/workout";
 import { MASTER_ACHIEVEMENTS } from "../lib/constants";
