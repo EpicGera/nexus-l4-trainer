@@ -9,7 +9,7 @@ export function getSuggestedRpe(
   maxWeight: number,
 ): { rpe: string; percentage: number } | null {
   if (!weightInput || maxWeight <= 0) return null;
-  const cleanWeight = parseFloat(weightInput.replace(/[^0-9.]/g, ""));
+  const cleanWeight = parseFloat(weightInput.replace(/[^0-9.-]/g, ""));
   if (isNaN(cleanWeight) || cleanWeight <= 0) return null;
 
   const percentage = Math.round((cleanWeight / maxWeight) * 100);

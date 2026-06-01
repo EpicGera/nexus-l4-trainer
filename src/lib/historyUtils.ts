@@ -6,16 +6,21 @@ export const getCleanExerciseName = (itemText: string): string => {
 
   // Strip reps and times at the start of the item (e.g. "15 Box Step-overs", "Min 1: 8 Deadlifts", "4x4 ")
   cleaned = cleaned.replace(
-    /^(Min\s+\d+:\s*)?\d+(\/\d+)?\s*(cal|calorie|calories|reps|repeticiones|m|crossovers)?\s+/i,
+    /^(Min\s+\d+:\s*)?\d+(\/\d+)?\s*(cal|calorie|calories|reps|repeticiones|m|crossovers|x\d+)?\s+/i,
     "",
   );
 
   // Strip parenthesized text if it is long (e.g. instructions/cues) or contains weight indicators like "barra" or "kg"
-  cleaned = cleaned.replace(/\s*\([^)]+barra[^)]*\)/i, "");
-  cleaned = cleaned.replace(/\s*\([^)]+kg[^)]*\)/i, "");
-  cleaned = cleaned.replace(/\s*@\s*[\d%-]+(\s*\(.*\))?/gi, "");
+  cleaned = cleaned.replace(/\s*\([^)]*barra[^)]*\)/i, "");
+  cleaned = cleaned.replace(/\s*\([^)]*kg[^)]*\)/i, "");
+  cleaned = cleaned.replace(/\s*@\s*[\d%-]+(?:kg)?(?:\s*\(.*\))?/gi, "");
   cleaned = cleaned.replace(/\s*\([\d%-]+kg\)/gi, "");
   cleaned = cleaned.replace(/\s*\([^)]{15,}\)/g, ""); // strip parentheses with 15+ characters
+
+  // Also clean if the entire string is just reps
+  if (/^\d*\s*(cal|calorie|calories|reps|repeticiones|m|crossovers|x\d+)?$/i.test(cleaned)) {
+      cleaned = "";
+  }
 
   return cleaned.trim();
 };

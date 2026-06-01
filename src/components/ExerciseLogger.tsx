@@ -1,4 +1,4 @@
-import DOMPurify from "dompurify";
+import DOMPurify from 'isomorphic-dompurify';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, Dumbbell, Star, ChevronDown, Sparkles, Award, FileText, Flame, Share2, Download, X } from 'lucide-react';
 import { jsPDF } from 'jspdf';

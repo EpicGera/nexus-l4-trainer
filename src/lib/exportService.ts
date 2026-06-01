@@ -116,39 +116,20 @@ export const handleExportGoogleSheets = async (
 };
 
 // --- Statistics Compilation ---
+interface CachedLogStats {
+  volume: number;
+  rpeSum: number;
+  rpeCount: number;
+  isValid: boolean;
+}
+
+const statsCache = new Map<string, { raw: string; stats: CachedLogStats }>();
+
 export const getMonthlyVolumeStats = () => {
-  const weeklyVolume: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
-  const weeklyCount: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
-  const weeklyRpeSum: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
-  const weeklyRpeCount: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
+  const weeklyVolume: Record<string, number> = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
+  const weeklyCount: Record<string, number> = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
+  const weeklyRpeSum: Record<string, number> = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
+  const weeklyRpeCount: Record<string, number> = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
 
   let totalVolume = 0;
   let totalLogsCount = 0;
@@ -159,28 +140,49 @@ export const getMonthlyVolumeStats = () => {
       if (key && key.startsWith("nexus_logs_")) {
         const raw = localStorage.getItem(key);
         if (raw) {
-          const parsedLogs = JSON.parse(raw);
-          if (Array.isArray(parsedLogs) && parsedLogs.length > 0) {
-            const parts = key.split("_");
-            const dayId = parts[2] || "";
-            const wkKey = dayId.substring(0, 2);
+          const parts = key.split("_");
+          const dayId = parts[2] || "";
+          const wkKey = dayId.substring(0, 2);
 
-            if (wkKey && weeklyVolume[wkKey] !== undefined) {
+          if (wkKey && weeklyVolume[wkKey] !== undefined) {
+            let stats: CachedLogStats;
+            const cached = statsCache.get(key);
+
+            if (cached && cached.raw === raw) {
+              stats = cached.stats;
+            } else {
+              stats = { volume: 0, rpeSum: 0, rpeCount: 0, isValid: false };
+              try {
+                const parsedLogs = JSON.parse(raw);
+                if (Array.isArray(parsedLogs) && parsedLogs.length > 0) {
+                  stats.isValid = true;
+                  parsedLogs.forEach((set: any) => {
+                    const wt = parseFloat(set.weight) || 0;
+                    const rp = parseFloat(set.reps) || 0;
+                    stats.volume += wt * rp;
+
+                    const rpVal = parseFloat(set.rpe);
+                    if (!isNaN(rpVal) && rpVal > 0) {
+                      stats.rpeSum += rpVal;
+                      stats.rpeCount++;
+                    }
+                  });
+                }
+              } catch (e) {
+                // Ignore parse errors
+              }
+              statsCache.set(key, { raw, stats });
+            }
+
+            if (stats.isValid) {
               weeklyCount[wkKey]++;
               totalLogsCount++;
 
-              parsedLogs.forEach((set) => {
-                const wt = parseFloat(set.weight) || 0;
-                const rp = parseFloat(set.reps) || 0;
-                weeklyVolume[wkKey] += wt * rp;
-                totalVolume += wt * rp;
+              weeklyVolume[wkKey] += stats.volume;
+              totalVolume += stats.volume;
 
-                const rpVal = parseFloat(set.rpe);
-                if (!isNaN(rpVal) && rpVal > 0) {
-                  weeklyRpeSum[wkKey] += rpVal;
-                  weeklyRpeCount[wkKey]++;
-                }
-              });
+              weeklyRpeSum[wkKey] += stats.rpeSum;
+              weeklyRpeCount[wkKey] += stats.rpeCount;
             }
           }
         }
@@ -190,14 +192,7 @@ export const getMonthlyVolumeStats = () => {
     console.error("Error calculating monthly stats:", e);
   }
 
-  return {
-    weeklyVolume,
-    weeklyCount,
-    weeklyRpeSum,
-    weeklyRpeCount,
-    totalVolume,
-    totalLogsCount,
-  };
+  return { weeklyVolume, weeklyCount, weeklyRpeSum, weeklyRpeCount, totalVolume, totalLogsCount };
 };
 
 // --- Weekly PDF Export ---
