@@ -1,4 +1,4 @@
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, Dumbbell, Star, ChevronDown, Sparkles, Award, FileText, Flame, Share2, Download, X } from 'lucide-react';
 import { jsPDF } from 'jspdf';
@@ -784,13 +784,8 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
                       <span className="text-electric-blue shrink-0 font-bold">▶</span>
                       <p 
                         className="text-neutral-200"
-                      >
-                        {tip.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-                          part.startsWith('**') && part.endsWith('**')
-                            ? <strong key={i} className="text-electric-blue font-extrabold">{part.slice(2, -2)}</strong>
-                            : <React.Fragment key={i}>{part}</React.Fragment>
-                        )}
-                      </p>
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(tip.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-electric-blue font-extrabold">$1</strong>')) }}
+                      />
                     </div>
                   ))}
                 </div>
