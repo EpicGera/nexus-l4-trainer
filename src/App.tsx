@@ -1721,17 +1721,13 @@ export default function App() {
                 className="mb-2 text-center flex flex-col justify-center items-center relative"
                 data-purpose="page-title"
               >
-                <div className="mb-2 md:mb-4 z-10 flex gap-3 select-none items-center">
-                  <img src="/logo.svg" alt="" className="w-6 h-6 md:w-8 md:h-8 object-contain animate-pulse" />
-                  <img src="/logo.svg" alt="" className="w-6 h-6 md:w-8 md:h-8 object-contain animate-pulse" style={{ animationDelay: "150ms" }} />
-                  <img src="/logo.svg" alt="" className="w-6 h-6 md:w-8 md:h-8 object-contain animate-pulse" style={{ animationDelay: "300ms" }} />
-                </div>
+
                 <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] 2xl:text-[11rem] font-black tracking-tighter leading-none uppercase flex flex-wrap justify-center items-center gap-x-4 transition-all duration-300 min-h-[5.5rem] md:min-h-[7rem] z-10">
                   <span>{activeDay.name}</span>
                   <img 
                     src="/logo.svg" 
                     alt="Nexus L4" 
-                    className="align-middle w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain cursor-pointer transition-all duration-300 hover:scale-110 inline-block"
+                    className="align-middle w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain cursor-pointer transition-all duration-300 hover:scale-110 inline-block"
                     onMouseEnter={(e) => {
                       e.currentTarget.style.filter = `drop-shadow(0 0 12px var(--color-electric-blue)) drop-shadow(0 0 25px var(--color-electric-blue))`;
                     }}

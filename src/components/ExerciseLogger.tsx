@@ -449,7 +449,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
         >
           <div className="flex flex-col gap-1 text-white min-w-0 font-condensed font-black text-base sm:text-[1.1rem] tracking-wide leading-tight mt-1 shrink w-full">
             <div className="relative pl-6 w-full text-left">
-              <span className="absolute left-0 top-0 h-[1.25em] w-4 flex items-center justify-center select-none"><img src="/logo.svg" className="w-3.5 h-3.5 object-contain" alt="" /></span>
+              <span className="absolute left-0 top-0 h-[1.25em] w-4 flex items-center justify-center select-none font-sans text-[14px] text-white">✦</span>
               <div className="flex-1 min-w-0 flex items-start justify-between w-full">
                 {rawItemHtml ? (
                   <div dangerouslySetInnerHTML={{ __html: rawItemHtml }} className="shrink pr-2" />

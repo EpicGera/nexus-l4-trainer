@@ -152,19 +152,16 @@ body {
 }
 
 .exercise-list-item::before {
-  content: '';
+  content: '✦';
   position: absolute;
   left: 0;
   top: 0;
-  width: 14px;
   height: 1.5rem; /* Matches the line-height of the first line of text */
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url('/logo.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  color: #ffffff;
+  font-size: 14px;
 }
 
 .cue {

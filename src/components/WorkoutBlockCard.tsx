@@ -121,9 +121,9 @@ export default function WorkoutBlockCard({
                     className="relative pl-6 normal-case text-neutral-200 min-w-0 break-words py-1.5 text-left w-full"
                   >
                     <span
-                      className="absolute left-0 top-1.5 h-[1.45em] w-4 flex items-center justify-center select-none"
+                      className="absolute left-0 top-1.5 h-[1.45em] w-4 flex items-center justify-center select-none font-sans text-[14px] text-white"
                     >
-                      <img src="/logo.svg" className="w-3.5 h-3.5 object-contain" alt="" />
+                      ✦
                     </span>
                     <div
                       dangerouslySetInnerHTML={{ __html: formattedItem }}
