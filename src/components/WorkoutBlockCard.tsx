@@ -5,6 +5,7 @@ import BrandInspirationAccordion from "./BrandInspirationAccordion";
 import ExerciseLogger from "./ExerciseLogger";
 import WorkoutHistoryControl from "./WorkoutHistoryControl";
 import { getCleanExerciseName } from "../lib/historyUtils";
+import DOMPurify from 'dompurify';
 
 interface WorkoutBlockCardProps {
   blockType: "warmup" | "strength" | "metcon" | "accessories";
@@ -126,7 +127,7 @@ export default function WorkoutBlockCard({
                       ✦
                     </span>
                     <div
-                      dangerouslySetInnerHTML={{ __html: formattedItem }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
                       className="flex-1 min-w-0"
                     />
                   </li>
