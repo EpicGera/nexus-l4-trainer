@@ -661,7 +661,10 @@ export default function WorkoutTimer({
                         ? "text-[#00F0FF]"
                         : "text-neutral-300"
                 }`}
-                style={{ textShadow: '0 0 30px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.15), 0 0 100px rgba(255,255,255,0.08)' }}
+                style={{ 
+                  textShadow: '0 0 30px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.15), 0 0 100px rgba(255,255,255,0.08)',
+                  WebkitTextStroke: '2px rgba(255,255,255,0.15)',
+                }}
               >
                 {formatTime(timeLeft)}
               </div>
@@ -848,6 +851,34 @@ export default function WorkoutTimer({
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* FULLSCREEN MARQUEE EXERCISE LIST */}
+        {items && items.length > 0 && (
+          <div className="w-full overflow-hidden border-t border-white/10 py-2.5 shrink-0 z-10">
+            <div
+              className="flex whitespace-nowrap"
+              style={{
+                animation: `marquee ${Math.max(15, items.length * 5)}s linear infinite`,
+              }}
+            >
+              {[...items, ...items].map((item, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono text-neutral-400 uppercase tracking-wider mr-8 shrink-0"
+                >
+                  <span className="text-[#00F0FF]">◆</span>
+                  <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
+                </span>
+              ))}
+            </div>
+            <style>{`
+              @keyframes marquee {
+                0% { transform: translateX(0%); }
+                100% { transform: translateX(-50%); }
+              }
+            `}</style>
           </div>
         )}
 
@@ -1128,7 +1159,10 @@ export default function WorkoutTimer({
                       ? "text-[#00F0FF]"
                       : "text-neutral-300"
               }`}
-              style={{ textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.2)' }}
+              style={{ 
+                textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.2)',
+                WebkitTextStroke: '1px rgba(255,255,255,0.12)',
+              }}
             >
               {formatTime(timeLeft)}
             </div>
