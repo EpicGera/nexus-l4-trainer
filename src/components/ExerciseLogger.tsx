@@ -126,7 +126,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
     };
   });
 
-  // Sync athlete fixes to localstorage asynchronously
+  // Sync athlete state to localstorage asynchronously
   useEffect(() => {
     try {
       const saved = localStorage.getItem('nexus_athlete_state');
