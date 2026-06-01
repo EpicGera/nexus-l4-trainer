@@ -6,6 +6,7 @@ import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { isCardio as classifyIsCardio, isBodyweightOnly as classifyIsBodyweightOnly } from '../lib/workoutClassifier';
 import { getSuggestedRpe, getBiomechanicalTips } from '../lib/biomechanicsAdvisor';
+import DOMPurify from 'dompurify';
 
 interface ExerciseLog {
   id: string;
@@ -315,7 +316,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
     }
 
     const newLog: ExerciseLog = {
-      id: Math.random().toString(36).substring(2, 9),
+      id: crypto.randomUUID(),
       weight: isCardio 
         ? (weight.trim() ? weight.trim() : '00:00')
         : (weight.trim() ? `${weight.trim()} kg` : 'P. Corporal'),

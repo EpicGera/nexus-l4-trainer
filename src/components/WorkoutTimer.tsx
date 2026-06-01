@@ -388,9 +388,7 @@ export default function WorkoutTimer({
     setCustomIntervalConfigured(false);
     setShowAutoSetup(false);
     initializeSmartTimer();
-    setIsStopwatchPlaying(false); // <--- Reset and stop global stopwatch too on "REINICIAR TODOS"
-    setStopwatchTime(0);
-    playChimeNote(330.0, 0.2, "sine");
+    stopStopwatch(); // Reset and stop global stopwatch too on "REINICIAR AMBOS"
   };
 
   const detenerReloj = () => {
@@ -962,7 +960,7 @@ export default function WorkoutTimer({
             className="px-4 py-3 rounded-full bg-neutral-900 border border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
           >
             <RotateCcw size={12} />
-            <span>REINICIAR TODOS</span>
+            <span>REINICIAR AMBOS</span>
           </button>
 
           <button

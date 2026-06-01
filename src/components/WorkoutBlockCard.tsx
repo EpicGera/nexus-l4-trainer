@@ -1,3 +1,4 @@
+import DOMPurify from "isomorphic-dompurify";
 import React from "react";
 import DOMPurify from "dompurify";
 import { DayWorkout, DayVariation } from "../types/workout";
@@ -6,6 +7,7 @@ import BrandInspirationAccordion from "./BrandInspirationAccordion";
 import ExerciseLogger from "./ExerciseLogger";
 import WorkoutHistoryControl from "./WorkoutHistoryControl";
 import { getCleanExerciseName } from "../lib/historyUtils";
+import DOMPurify from 'dompurify';
 
 interface WorkoutBlockCardProps {
   blockType: "warmup" | "strength" | "metcon" | "accessories";
