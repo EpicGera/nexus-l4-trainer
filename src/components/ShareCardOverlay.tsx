@@ -405,17 +405,14 @@ export default function ShareCardOverlay({
                     >
                       {cleanedWarmup.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2.5 text-left leading-tight">
-                          <svg
-                            className="shrink-0 mt-1.5 w-3 h-3"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
+                          <img
+                            src="/logo.svg"
+                            className="shrink-0 mt-1.5 w-3 h-3 object-contain"
                             style={{
-                              color: activeColorSet.color,
                               filter: `drop-shadow(0 0 5px ${activeColorSet.color})`,
                             }}
-                          >
-                            <path d="M12 2L2 12L12 22L22 12L12 2Z" />
-                          </svg>
+                            alt="Logo"
+                          />
                           <span
                             className="break-words min-w-0 text-left normal-case flex-1"
                             dangerouslySetInnerHTML={{ __html: item }}
@@ -480,17 +477,14 @@ export default function ShareCardOverlay({
                     >
                       {cleanedStrength.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2.5 text-left leading-tight">
-                          <svg
-                            className="shrink-0 mt-1.5 w-3 h-3"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
+                          <img
+                            src="/logo.svg"
+                            className="shrink-0 mt-1.5 w-3 h-3 object-contain"
                             style={{
-                              color: activeColorSet.color,
                               filter: `drop-shadow(0 0 5px ${activeColorSet.color})`,
                             }}
-                          >
-                            <path d="M12 2L2 12L12 22L22 12L12 2Z" />
-                          </svg>
+                            alt="Logo"
+                          />
                           <span
                             className="break-words min-w-0 text-left normal-case flex-1"
                             dangerouslySetInnerHTML={{ __html: item }}
@@ -557,17 +551,14 @@ export default function ShareCardOverlay({
                         const formattedItem = formatItemWithTeamVolume(item, teamSize);
                         return (
                           <li key={idx} className="flex items-start gap-2.5 text-left leading-tight">
-                            <svg
-                              className="shrink-0 mt-1.5 w-3 h-3"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
+                            <img
+                              src="/logo.svg"
+                              className="shrink-0 mt-1.5 w-3 h-3 object-contain"
                               style={{
-                                color: activeColorSet.color,
                                 filter: `drop-shadow(0 0 5px ${activeColorSet.color})`,
                               }}
-                            >
-                              <path d="M12 2L2 12L12 22L22 12L12 2Z" />
-                            </svg>
+                              alt="Logo"
+                            />
                             <span
                               className="break-words min-w-0 text-left normal-case flex-1"
                               dangerouslySetInnerHTML={{ __html: formattedItem }}
@@ -635,17 +626,14 @@ export default function ShareCardOverlay({
                         const formattedItem = formatItemWithTeamVolume(item, teamSize);
                         return (
                           <li key={idx} className="flex items-start gap-2.5 text-left leading-tight">
-                            <svg
-                              className="shrink-0 mt-1.5 w-3 h-3"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
+                            <img
+                              src="/logo.svg"
+                              className="shrink-0 mt-1.5 w-3 h-3 object-contain"
                               style={{
-                                color: activeColorSet.color,
                                 filter: `drop-shadow(0 0 5px ${activeColorSet.color})`,
                               }}
-                            >
-                              <path d="M12 2L2 12L12 22L22 12L12 2Z" />
-                            </svg>
+                              alt="Logo"
+                            />
                             <span
                               className="break-words min-w-0 text-left normal-case flex-1"
                               dangerouslySetInnerHTML={{ __html: formattedItem }}

@@ -868,7 +868,7 @@ export default function WorkoutTimer({
                   key={idx}
                   className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono text-neutral-400 uppercase tracking-wider mr-8 shrink-0"
                 >
-                  <span className="text-[#00F0FF]">◆</span>
+                  <img src="/logo.svg" className="w-3.5 h-3.5 shrink-0 object-contain" alt="Logo" />
                   <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
                 </span>
               ))}
@@ -1270,7 +1270,7 @@ export default function WorkoutTimer({
                       key={idx}
                       className="inline-flex items-center gap-1.5 text-[10px] font-mono text-neutral-400 uppercase tracking-wider mr-6 shrink-0"
                     >
-                      <span className="text-[#00F0FF]">◆</span>
+                      <img src="/logo.svg" className="w-3 h-3 shrink-0 object-contain" alt="Logo" />
                       <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
                     </span>
                   ))}
