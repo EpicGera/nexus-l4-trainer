@@ -668,7 +668,7 @@ export const handleExportDayJPG = (
               return;
             }
           } catch (error) {
-            console.log("Web Share API error, falling back to download:", error);
+            // Web Share API error, falling back to download
           }
         }
 

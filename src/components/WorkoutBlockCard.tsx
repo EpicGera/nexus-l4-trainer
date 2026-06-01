@@ -1,3 +1,4 @@
+import DOMPurify from "isomorphic-dompurify";
 import React from "react";
 import { DayWorkout, DayVariation } from "../types/workout";
 import WorkoutTimer from "./WorkoutTimer";
