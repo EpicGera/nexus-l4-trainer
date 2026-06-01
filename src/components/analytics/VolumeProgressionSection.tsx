@@ -5,7 +5,14 @@ import { ACCENT_COLORS_MAP } from "../../lib/constants";
 interface VolumeProgressionSectionProps {
   currentWeek: string;
   handleGenerateMonthlyReportPDF: () => void;
-  getMonthlyVolumeStats: () => { totalLogsCount: number; totalVolume: number };
+  getMonthlyVolumeStats: () => {
+    weeklyVolume: Record<string, number>;
+    weeklyCount: Record<string, number>;
+    weeklyRpeSum: Record<string, number>;
+    weeklyRpeCount: Record<string, number>;
+    totalVolume: number;
+    totalLogsCount: number;
+  };
 }
 
 export default function VolumeProgressionSection({
@@ -21,40 +28,14 @@ export default function VolumeProgressionSection({
   };
 
   // Obtain real volume loaded per week
-  const getWeeklyRealVolumes = () => {
-    const realVolume = { w1: 0, w2: 0, w3: 0, w4: 0 };
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("nexus_logs_")) {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              const parts = key.split("_");
-              const dayId = parts[2] || "";
-              const wkKey = dayId.substring(0, 2);
-              if (
-                wkKey &&
-                realVolume[wkKey as keyof typeof realVolume] !== undefined
-              ) {
-                parsed.forEach((log) => {
-                  const wt = parseFloat(log.weight) || 0;
-                  const rp = parseFloat(log.reps) || 0;
-                  realVolume[wkKey as keyof typeof realVolume] += wt * rp;
-                });
-              }
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Error reading volume for total progression chart:", err);
-    }
-    return realVolume;
-  };
+  const stats = getMonthlyVolumeStats();
 
-  const realVolume = getWeeklyRealVolumes();
+  const realVolume = {
+    w1: stats.weeklyVolume.w1 || 0,
+    w2: stats.weeklyVolume.w2 || 0,
+    w3: stats.weeklyVolume.w3 || 0,
+    w4: stats.weeklyVolume.w4 || 0,
+  };
 
   const chartData = [
     {
@@ -117,8 +98,6 @@ export default function VolumeProgressionSection({
             ? "DESCARGA (DELOAD)"
             : "RUTINA FUERA DE CICLO";
 
-  const stats = getMonthlyVolumeStats();
-
   let activeColor = "#1F51FF";
   const savedColorId = localStorage.getItem("nexus_custom_accent_color");
   if (savedColorId && ACCENT_COLORS_MAP[savedColorId]) {
@@ -126,84 +105,35 @@ export default function VolumeProgressionSection({
   }
 
   // Calculate accumulated histories for diagnostic info
-  const getWeeklyL4AuditStats = () => {
-    const realWVolumes = [0, 0, 0, 0];
-    const realWRpeSum = [0, 0, 0, 0];
-    const realWRpeCount = [0, 0, 0, 0];
+  // Reuse stats from getMonthlyVolumeStats
+  const realWVolumes = [
+    stats.weeklyVolume.w1 || 0,
+    stats.weeklyVolume.w2 || 0,
+    stats.weeklyVolume.w3 || 0,
+    stats.weeklyVolume.w4 || 0,
+  ];
 
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("nexus_logs_")) {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              parsed.forEach((log: any) => {
-                const wt =
-                  parseFloat(
-                    log.weight
-                      ? log.weight.toString().replace(/[^0-9.]/g, "")
-                      : "0"
-                  ) || 0;
-                const rp =
-                  parseFloat(
-                    log.reps
-                      ? log.reps.toString().replace(/[^0-9.]/g, "")
-                      : "0"
-                  ) || 0;
-                const rpe = parseFloat(log.rpe) || 0;
+  const w1RpeAvg = stats.weeklyRpeCount.w1 > 0 ? stats.weeklyRpeSum.w1 / stats.weeklyRpeCount.w1 : 0;
+  const w2RpeAvg = stats.weeklyRpeCount.w2 > 0 ? stats.weeklyRpeSum.w2 / stats.weeklyRpeCount.w2 : 0;
+  const w3RpeAvg = stats.weeklyRpeCount.w3 > 0 ? stats.weeklyRpeSum.w3 / stats.weeklyRpeCount.w3 : 0;
+  const w4RpeAvg = stats.weeklyRpeCount.w4 > 0 ? stats.weeklyRpeSum.w4 / stats.weeklyRpeCount.w4 : 0;
 
-                const parts = key.split("_");
-                const dayId = parts[2] || "";
-                const wkKey = dayId.substring(0, 2);
+  let totalVolumeStr = (
+    realWVolumes[0] +
+    realWVolumes[1] +
+    realWVolumes[2] +
+    realWVolumes[3]
+  ).toLocaleString("es-ES") + " kg";
 
-                let idx = -1;
-                if (wkKey === "w1") idx = 0;
-                else if (wkKey === "w2") idx = 1;
-                else if (wkKey === "w3") idx = 2;
-                else if (wkKey === "w4") idx = 3;
+  let stateFeedback = "PERFIL BIOMECÁNICO BALANCEADO SANO";
+  let messageBody =
+    "Tus datos volumétricos reflejan un incremento paulatino en la carga de trabajo. Te encuentras en un estado de supercompensación óptima.";
 
-                if (idx !== -1) {
-                  realWVolumes[idx] += wt * rp;
-                  if (rpe > 0) {
-                    realWRpeSum[idx] += rpe;
-                    realWRpeCount[idx]++;
-                  }
-                }
-              });
-            }
-          }
-        }
-      }
-    } catch {}
-
-    const w1RpeAvg = realWRpeCount[0] > 0 ? realWRpeSum[0] / realWRpeCount[0] : 0;
-    const w2RpeAvg = realWRpeCount[1] > 0 ? realWRpeSum[1] / realWRpeCount[1] : 0;
-    const w3RpeAvg = realWRpeCount[2] > 0 ? realWRpeSum[2] / realWRpeCount[2] : 0;
-    const w4RpeAvg = realWRpeCount[3] > 0 ? realWRpeSum[3] / realWRpeCount[3] : 0;
-
-    let totalVolumeStr = (
-      realWVolumes[0] +
-      realWVolumes[1] +
-      realWVolumes[2] +
-      realWVolumes[3]
-    ).toLocaleString("es-ES") + " kg";
-
-    let stateFeedback = "PERFIL BIOMECÁNICO BALANCEADO SANO";
-    let messageBody =
-      "Tus datos volumétricos reflejan un incremento paulatino en la carga de trabajo. Te encuentras en un estado de supercompensación óptima.";
-
-    if (w3RpeAvg > 8.5 && realWVolumes[2] > 11000) {
-      stateFeedback = "ALERTA: VOLUMEN CRÍTICO REDUNDANTE";
-      messageBody =
-        "Tu tonelaje acumulado en la Semana 3 supera los límites biomecánicos recomendados por encima del 15% de desvío. Tus lumbares corren riesgo severo de torques nocivos.";
-    }
-
-    return { realWVolumes, w1RpeAvg, w2RpeAvg, w3RpeAvg, w4RpeAvg, totalVolumeStr, messageBody };
-  };
-
-  const { realWVolumes, w1RpeAvg, w2RpeAvg, w3RpeAvg, w4RpeAvg, totalVolumeStr, messageBody } = getWeeklyL4AuditStats();
+  if (w3RpeAvg > 8.5 && realWVolumes[2] > 11000) {
+    stateFeedback = "ALERTA: VOLUMEN CRÍTICO REDUNDANTE";
+    messageBody =
+      "Tu tonelaje acumulado en la Semana 3 supera los límites biomecánicos recomendados por encima del 15% de desvío. Tus lumbares corren riesgo severo de torques nocivos.";
+  }
 
   return (
     <div className="space-y-6">
