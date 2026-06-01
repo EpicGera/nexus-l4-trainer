@@ -216,9 +216,7 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
 
   // 6. "N Minutos Continuos/Zona 2/Alternados/Aeróbico" — Pure countdown timers
   //    e.g. "35 Minutos Continuos", "30 Minutos Zona 2", "35 Minutos Alternados"
-  const minutesContinuousMatch = schemeUpper.match(
-    /(\d+)\s*(?:MINUTOS|MIN)\s*(?:CONTINUOS|CONTINUO|ZONA\s*\d|ALTERNADOS?|AER[OÓ]BICO|FLUSH)?/i,
-  );
+  const minutesContinuousMatch = schemeUpper.match(/(?<!REST\s*)(?<!REST\s*\d+\s*[Xx]\s*\d+\s*)(\d+)\s*(?:MINUTOS|MIN)\s*(?:CONTINUOS|CONTINUO|ZONA\s*\d|ALTERNADOS?|AER[OÓ]BICO|FLUSH)?/i);
   if (minutesContinuousMatch) {
     const mins = parseInt(minutesContinuousMatch[1], 10);
     // Check if there's also a round count with pipe separator: "10 Minutos | 2 Rondas"

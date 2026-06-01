@@ -6,7 +6,6 @@ import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { isCardio as classifyIsCardio, isBodyweightOnly as classifyIsBodyweightOnly } from '../lib/workoutClassifier';
 import { getSuggestedRpe, getBiomechanicalTips } from '../lib/biomechanicsAdvisor';
-import DOMPurify from 'dompurify';
 
 interface ExerciseLog {
   id: string;
