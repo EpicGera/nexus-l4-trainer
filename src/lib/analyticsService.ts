@@ -27,36 +27,68 @@ export interface RpeComparisonResult {
   hasCurrentReal: boolean;
 }
 
+// Global cache to avoid redundant localStorage scanning and JSON parsing
+let globalLogsCache: Record<string, any[]> | null = null;
+let lastLogsVersion = -1;
+
+/**
+ * Retrieves and parses all nexus_logs from localStorage.
+ * Uses logsVersion for cache invalidation.
+ */
+function getParsedNexusLogs(logsVersion: number): Record<string, any[]> {
+  if (globalLogsCache !== null && logsVersion === lastLogsVersion) {
+    return globalLogsCache;
+  }
+
+  const cache: Record<string, any[]> = {};
+
+  // Using Object.keys is significantly faster than localStorage.key(i) loops
+  const keys = Object.keys(localStorage);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (key.startsWith("nexus_logs_")) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const logs = JSON.parse(raw);
+          if (Array.isArray(logs)) {
+            cache[key] = logs;
+          }
+        }
+      } catch {
+        // ignore malformed JSON
+      }
+    }
+  }
+
+  globalLogsCache = cache;
+  lastLogsVersion = logsVersion;
+  return cache;
+}
+
 /**
  * Computes the 7-day RPE averages for the trend line chart.
  */
-export function computeChartData(currentWeek: string, _logsVersion: number): ChartDayData[] {
+export function computeChartData(currentWeek: string, logsVersion: number): ChartDayData[] {
   const days = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
+  const logsCache = getParsedNexusLogs(logsVersion);
+
   return days.map((dayName, idx) => {
     const dayId = `${currentWeek}d${idx + 1}`;
+    const dayPrefix = `nexus_logs_${dayId}_`;
     let rpeSum = 0;
     let rpeCount = 0;
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(`nexus_logs_${dayId}_`)) {
-        try {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const logs = JSON.parse(raw);
-            if (Array.isArray(logs)) {
-              logs.forEach((item: any) => {
-                const val = parseFloat(item.rpe);
-                if (!isNaN(val) && val > 0) {
-                  rpeSum += val;
-                  rpeCount++;
-                }
-              });
-            }
+    for (const key in logsCache) {
+      if (key.startsWith(dayPrefix)) {
+        const logs = logsCache[key];
+        logs.forEach((item: any) => {
+          const val = parseFloat(item.rpe);
+          if (!isNaN(val) && val > 0) {
+            rpeSum += val;
+            rpeCount++;
           }
-        } catch {
-          // ignore
-        }
+        });
       }
     }
 
@@ -84,38 +116,31 @@ export function computeChartData(currentWeek: string, _logsVersion: number): Cha
 /**
  * Computes the RPE distribution frequency histogram data.
  */
-export function computeRpeDistributionData(currentWeek: string, _logsVersion: number): RpeDistributionItem[] {
+export function computeRpeDistributionData(currentWeek: string, logsVersion: number): RpeDistributionItem[] {
   const distribution: Record<number, number> = {};
   for (let r = 1; r <= 10; r++) {
     distribution[r] = 0;
   }
 
   let totalRealLogs = 0;
+  const logsCache = getParsedNexusLogs(logsVersion);
 
   // Scan all days of the current week (from 1 to 7)
   for (let dayIdx = 1; dayIdx <= 7; dayIdx++) {
     const dayId = `${currentWeek}d${dayIdx}`;
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(`nexus_logs_${dayId}_`)) {
-        try {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const logs = JSON.parse(raw);
-            if (Array.isArray(logs)) {
-              logs.forEach((item: any) => {
-                const val = parseFloat(item.rpe);
-                if (!isNaN(val) && val >= 1 && val <= 10) {
-                  const rounded = Math.round(val);
-                  distribution[rounded] = (distribution[rounded] || 0) + 1;
-                  totalRealLogs++;
-                }
-              });
-            }
+    const dayPrefix = `nexus_logs_${dayId}_`;
+
+    for (const key in logsCache) {
+      if (key.startsWith(dayPrefix)) {
+        const logs = logsCache[key];
+        logs.forEach((item: any) => {
+          const val = parseFloat(item.rpe);
+          if (!isNaN(val) && val >= 1 && val <= 10) {
+            const rounded = Math.round(val);
+            distribution[rounded] = (distribution[rounded] || 0) + 1;
+            totalRealLogs++;
           }
-        } catch {
-          // ignore
-        }
+        });
       }
     }
   }
@@ -152,31 +177,24 @@ export function computeRpeDistributionData(currentWeek: string, _logsVersion: nu
 export function computeRpeComparisonInfo(
   currentWeek: string,
   activeDayId: string,
-  _logsVersion: number,
+  logsVersion: number,
 ): RpeComparisonResult {
   let currentSessionSum = 0;
   let currentSessionCount = 0;
 
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith(`nexus_logs_${activeDayId}_`)) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (raw) {
-          const logs = JSON.parse(raw);
-          if (Array.isArray(logs)) {
-            logs.forEach((item: any) => {
-              const val = parseFloat(item.rpe);
-              if (!isNaN(val) && val > 0) {
-                currentSessionSum += val;
-                currentSessionCount++;
-              }
-            });
-          }
+  const logsCache = getParsedNexusLogs(logsVersion);
+  const activeDayPrefix = `nexus_logs_${activeDayId}_`;
+
+  for (const key in logsCache) {
+    if (key.startsWith(activeDayPrefix)) {
+      const logs = logsCache[key];
+      logs.forEach((item: any) => {
+        const val = parseFloat(item.rpe);
+        if (!isNaN(val) && val > 0) {
+          currentSessionSum += val;
+          currentSessionCount++;
         }
-      } catch {
-        // ignore
-      }
+      });
     }
   }
 
@@ -196,29 +214,20 @@ export function computeRpeComparisonInfo(
 
   otherWeekKeys.forEach((wk) => {
     const targetDayId = `${wk}d${activeDayNum}`;
+    const targetDayPrefix = `nexus_logs_${targetDayId}_`;
     let wkDaySum = 0;
     let wkDayCount = 0;
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(`nexus_logs_${targetDayId}_`)) {
-        try {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const logs = JSON.parse(raw);
-            if (Array.isArray(logs)) {
-              logs.forEach((item: any) => {
-                const val = parseFloat(item.rpe);
-                if (!isNaN(val) && val > 0) {
-                  wkDaySum += val;
-                  wkDayCount++;
-                }
-              });
-            }
+    for (const key in logsCache) {
+      if (key.startsWith(targetDayPrefix)) {
+        const logs = logsCache[key];
+        logs.forEach((item: any) => {
+          const val = parseFloat(item.rpe);
+          if (!isNaN(val) && val > 0) {
+            wkDaySum += val;
+            wkDayCount++;
           }
-        } catch {
-          // ignore
-        }
+        });
       }
     }
 
