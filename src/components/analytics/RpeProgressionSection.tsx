@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ShieldAlert, Zap } from "lucide-react";
 
 interface RpeProgressionSectionProps {
@@ -8,39 +8,52 @@ interface RpeProgressionSectionProps {
 export default function RpeProgressionSection({
   currentWeek,
 }: RpeProgressionSectionProps) {
-  // --- COMPARATIVE RPE TABLE (Current Week vs Last 30 Days) ---
-  const getWeeklyVsMonthlyStats = () => {
-    let weekRpes: number[] = [];
-    let monthRpes: number[] = [];
+  const [storageUpdate, setStorageUpdate] = useState(0);
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("nexus_logs_")) {
+  useEffect(() => {
+    const handleStorage = () => setStorageUpdate((prev) => prev + 1);
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  // --- COMPARATIVE RPE TABLE (Current Week vs Last 30 Days) ---
+  const { currentWeekAvg, monthAvg, diffPercent, isDanger } = useMemo(() => {
+    let weekRpesCount = 0;
+    let weekRpesSum = 0;
+    let monthRpesCount = 0;
+    let monthRpesSum = 0;
+
+    const keys = Object.keys(localStorage);
+    const weekSuffix = `_${currentWeek}d`;
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (key.startsWith("nexus_logs_")) {
         const raw = localStorage.getItem(key);
         if (raw) {
           try {
             const parsed = JSON.parse(raw);
-            const isCurrentWeek = key.includes(`_${currentWeek}d`);
-            parsed.forEach((log: any) => {
-              const rpe = parseFloat(log.rpe);
-              if (!isNaN(rpe)) {
-                monthRpes.push(rpe);
-                if (isCurrentWeek) weekRpes.push(rpe);
+            if (Array.isArray(parsed)) {
+              const isCurrentWeek = key.includes(weekSuffix);
+              for (let j = 0; j < parsed.length; j++) {
+                const rpe = parseFloat(parsed[j].rpe);
+                if (!isNaN(rpe)) {
+                  monthRpesSum += rpe;
+                  monthRpesCount++;
+                  if (isCurrentWeek) {
+                    weekRpesSum += rpe;
+                    weekRpesCount++;
+                  }
+                }
               }
-            });
+            }
           } catch {}
         }
       }
     }
 
-    const currentWeekAvg =
-      weekRpes.length > 0
-        ? weekRpes.reduce((a, b) => a + b, 0) / weekRpes.length
-        : 0;
-    const monthAvg =
-      monthRpes.length > 0
-        ? monthRpes.reduce((a, b) => a + b, 0) / monthRpes.length
-        : 0;
+    const currentWeekAvg = weekRpesCount > 0 ? weekRpesSum / weekRpesCount : 0;
+    const monthAvg = monthRpesCount > 0 ? monthRpesSum / monthRpesCount : 0;
 
     let isDanger = false;
     let diffPercent = 0;
@@ -50,9 +63,7 @@ export default function RpeProgressionSection({
     }
 
     return { currentWeekAvg, monthAvg, diffPercent, isDanger };
-  };
-
-  const { currentWeekAvg, monthAvg, diffPercent, isDanger } = getWeeklyVsMonthlyStats();
+  }, [currentWeek, storageUpdate]);
 
   const weeksProgression = [
     {
@@ -193,7 +204,9 @@ export default function RpeProgressionSection({
                 <div className="text-sm font-brutalist text-white tracking-wide uppercase mt-0.5">
                   {wk.phase}
                 </div>
-                <div className={`text-xl font-black font-brutalist mt-2 ${wk.color}`}>
+                <div
+                  className={`text-xl font-black font-brutalist mt-2 ${wk.color}`}
+                >
                   {wk.target}
                 </div>
                 <p className="text-[9.5px] font-mono text-neutral-400 mt-2 leading-relaxed">
@@ -231,7 +244,13 @@ export default function RpeProgressionSection({
             <p className="text-neutral-500 mb-1 tracking-wider uppercase">
               Promedio W{currentWeek.replace("w", "")}
             </p>
-            <p className={isDanger ? "text-rose-400 text-lg font-black" : "text-emerald-400 text-lg font-black"}>
+            <p
+              className={
+                isDanger
+                  ? "text-rose-400 text-lg font-black"
+                  : "text-emerald-400 text-lg font-black"
+              }
+            >
               {currentWeekAvg > 0 ? currentWeekAvg.toFixed(1) : "N/A"}
             </p>
           </div>
@@ -239,8 +258,12 @@ export default function RpeProgressionSection({
             <p className="text-neutral-500 mb-1 tracking-wider uppercase">
               Desviación %
             </p>
-            <p className={`text-lg font-bold ${isDanger ? "text-rose-500" : "text-emerald-500"}`}>
-              {monthAvg > 0 ? `${diffPercent > 0 ? "+" : ""}${diffPercent.toFixed(0)}%` : "N/A"}
+            <p
+              className={`text-lg font-bold ${isDanger ? "text-rose-500" : "text-emerald-500"}`}
+            >
+              {monthAvg > 0
+                ? `${diffPercent > 0 ? "+" : ""}${diffPercent.toFixed(0)}%`
+                : "N/A"}
             </p>
           </div>
         </div>
@@ -255,10 +278,12 @@ export default function RpeProgressionSection({
           <div className="space-y-1">
             <h3 className="text-xl lg:text-2xl font-brutalist tracking-wider text-pure-white flex items-center gap-2 uppercase text-left">
               <Zap size={18} className="text-[#39ff14] fill-[#39ff14]/30" />
-              PROGRESIÓN SEMANAL RPE 1-10: CONTROL SIN SOBREENTRENAMIENTO (CF-L4)
+              PROGRESIÓN SEMANAL RPE 1-10: CONTROL SIN SOBREENTRENAMIENTO
+              (CF-L4)
             </h3>
             <p className="font-mono text-[9px] uppercase tracking-widest text-emerald-400 text-left">
-              // EVOLUCIÓN MANDATORIA DE LA CARGA NEUROMUSCULAR PARA EVITAR LESIONES Y ESTANCAMIENTOS
+              // EVOLUCIÓN MANDATORIA DE LA CARGA NEUROMUSCULAR PARA EVITAR
+              LESIONES Y ESTANCAMIENTOS
             </p>
           </div>
           <div className="bg-zinc-950/80 border border-white/10 px-3 py-1.5 rounded-sm shrink-0 flex items-center gap-2 self-start lg:self-auto">
@@ -288,7 +313,9 @@ export default function RpeProgressionSection({
                       <div className="text-[10px] font-brutalist text-white tracking-widest">
                         {weekData.title}
                       </div>
-                      <div className={`text-[7.5px] font-mono font-black uppercase tracking-wider truncate block ${weekData.textColor}`}>
+                      <div
+                        className={`text-[7.5px] font-mono font-black uppercase tracking-wider truncate block ${weekData.textColor}`}
+                      >
                         {weekData.label}
                       </div>
                     </div>
@@ -320,7 +347,9 @@ export default function RpeProgressionSection({
                     </div>
 
                     <div className="bg-white/5 px-1.5 py-0.5 border border-white/5 rounded-sm">
-                      <div className={`text-[8px] font-mono font-bold leading-none ${weekData.textColor}`}>
+                      <div
+                        className={`text-[8px] font-mono font-bold leading-none ${weekData.textColor}`}
+                      >
                         RPE {weekData.minTarget} - {weekData.maxTarget}
                       </div>
                     </div>
@@ -330,12 +359,19 @@ export default function RpeProgressionSection({
             </div>
 
             <div className="mt-4 pt-3 border-t border-white/5 flex gap-2.5 items-start bg-emerald-950/10 p-2.5 border border-emerald-900/20 rounded-xs">
-              <ShieldAlert size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+              <ShieldAlert
+                size={14}
+                className="text-emerald-400 shrink-0 mt-0.5"
+              />
               <p className="text-[9px] font-mono text-neutral-300 text-left leading-relaxed">
                 <strong className="text-emerald-400 uppercase font-black">
                   LA REGLA DE LA FATIGA CF-L4:
                 </strong>{" "}
-                El RPE indica el porcentaje de fuerza/estimulación neuromuscular. Intentar operar en RPE 9-10 desde la Semana 1 resulta en una destrucción temprana del SNC, provocando estancamiento neuromuscular e inflamación en la unión del tendón. Respeta este ciclo de autorregulación.
+                El RPE indica el porcentaje de fuerza/estimulación
+                neuromuscular. Intentar operar en RPE 9-10 desde la Semana 1
+                resulta en una destrucción temprana del SNC, provocando
+                estancamiento neuromuscular e inflamación en la unión del
+                tendón. Respeta este ciclo de autorregulación.
               </p>
             </div>
           </div>
@@ -351,7 +387,9 @@ export default function RpeProgressionSection({
                     <span className="text-[11px] font-black font-brutalist tracking-wider text-pure-white leading-none">
                       {weekData.title}: {weekData.label}
                     </span>
-                    <span className={`text-[8.5px] font-mono font-black ${weekData.textColor} tracking-widest`}>
+                    <span
+                      className={`text-[8.5px] font-mono font-black ${weekData.textColor} tracking-widest`}
+                    >
                       OBJETIVO: RPE {weekData.minTarget}-{weekData.maxTarget}
                     </span>
                   </div>
@@ -373,7 +411,11 @@ export default function RpeProgressionSection({
                 REGLA DE VIDA DE ATLETA EN NEXUS L4
               </span>
               <p className="text-[9.5px] font-mono text-neutral-300 leading-relaxed italic">
-                "El sobreentrenamiento no es el resultado de un solo día pesado de testing, sino de no entender la obligatoriedad de la descarga. La hipertrofia estructural y la remodelación del colágeno solo se activan cuando descargas el psoas lumbar en la Semana 4 para reiniciar el ciclo en el próximo macrociclo."
+                "El sobreentrenamiento no es el resultado de un solo día pesado
+                de testing, sino de no entender la obligatoriedad de la
+                descarga. La hipertrofia estructural y la remodelación del
+                colágeno solo se activan cuando descargas el psoas lumbar en la
+                Semana 4 para reiniciar el ciclo en el próximo macrociclo."
               </p>
               <div className="text-[7.5px] font-mono text-neutral-500 text-right uppercase">
                 — Nexus Coach CF-L4 Master Edition
