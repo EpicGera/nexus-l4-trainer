@@ -89,16 +89,37 @@ export const handleExportGoogleSheets = async (
       }
     }
 
-    const telemetryRows = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("log_")) {
-        try {
-          const rowLogs = JSON.parse(localStorage.getItem(key) || "[]");
-          if (Array.isArray(rowLogs)) telemetryRows.push(...rowLogs);
-        } catch {
-          // ignore
+    const telemetryRows: any[] = [];
+
+    // Performance optimization:
+    // 1. Using Object.keys(localStorage) to prevent O(N^2) complexity with localStorage.key(i)
+    // 2. Extracting raw array strings and parsing as a single batch JSON string to avoid excessive GC thrashing and synchronous parsing bottlenecks
+    const lsKeys = Object.keys(localStorage);
+    const rawStrings: string[] = [];
+    for (let i = 0; i < lsKeys.length; i++) {
+      const key = lsKeys[i];
+      if (key.startsWith("log_")) {
+        const val = localStorage.getItem(key);
+        if (val && val !== "[]") {
+          const trimmed = val.trim();
+          if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+            rawStrings.push(trimmed.slice(1, -1));
+          }
         }
+      }
+    }
+
+    if (rawStrings.length > 0) {
+      try {
+        const combinedStr = "[" + rawStrings.filter(Boolean).join(",") + "]";
+        const parsed = JSON.parse(combinedStr);
+        if (Array.isArray(parsed)) {
+          for (let i = 0; i < parsed.length; i++) {
+            telemetryRows.push(parsed[i]);
+          }
+        }
+      } catch {
+        // ignore fallback
       }
     }
 
