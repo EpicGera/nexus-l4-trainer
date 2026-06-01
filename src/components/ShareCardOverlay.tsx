@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 // FILE_PATH: src/components/ShareCardOverlay.tsx
 // ACTION: OVERWRITE
 // DESCRIPTION: Implement dark black backgrounds for block headers, always render them in white text, use premium vector-based SVG diamond symbols representing the Google Material Design diamond icon, and ensure block headers are correctly labeled.
@@ -415,7 +416,7 @@ export default function ShareCardOverlay({
                           />
                           <span
                             className="break-words min-w-0 text-left normal-case flex-1"
-                            dangerouslySetInnerHTML={{ __html: item }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item) }}
                           />
                         </li>
                       ))}
@@ -487,7 +488,7 @@ export default function ShareCardOverlay({
                           />
                           <span
                             className="break-words min-w-0 text-left normal-case flex-1"
-                            dangerouslySetInnerHTML={{ __html: item }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item) }}
                           />
                         </li>
                       ))}
@@ -561,7 +562,7 @@ export default function ShareCardOverlay({
                             />
                             <span
                               className="break-words min-w-0 text-left normal-case flex-1"
-                              dangerouslySetInnerHTML={{ __html: formattedItem }}
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
                             />
                           </li>
                         );
@@ -636,7 +637,7 @@ export default function ShareCardOverlay({
                             />
                             <span
                               className="break-words min-w-0 text-left normal-case flex-1"
-                              dangerouslySetInnerHTML={{ __html: formattedItem }}
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
                             />
                           </li>
                         );

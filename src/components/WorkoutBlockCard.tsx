@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "dompurify";
 import { DayWorkout, DayVariation } from "../types/workout";
 import WorkoutTimer from "./WorkoutTimer";
 import BrandInspirationAccordion from "./BrandInspirationAccordion";
@@ -126,7 +127,7 @@ export default function WorkoutBlockCard({
                       ✦
                     </span>
                     <div
-                      dangerouslySetInnerHTML={{ __html: formattedItem }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
                       className="flex-1 min-w-0"
                     />
                   </li>
