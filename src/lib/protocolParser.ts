@@ -37,7 +37,7 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     }
   }
 
-  // 0. Warmup fixed protocol: default 10 minutes max completion, 1:30 min rest. Can be overridden by cap.
+  // 0. Warmup standard protocol: default 10 minutes max completion, 1:30 min rest. Can be overridden by cap.
   if (
     combinedStr.includes("WARM-UP") ||
     combinedStr.includes("WARMUP") ||
