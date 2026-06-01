@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { parseProtocol } from "../lib/protocolParser";
@@ -387,9 +388,7 @@ export default function WorkoutTimer({
     setCustomIntervalConfigured(false);
     setShowAutoSetup(false);
     initializeSmartTimer();
-    setIsStopwatchPlaying(false); // <--- Reset and stop global stopwatch too on "REINICIAR TODOS"
-    setStopwatchTime(0);
-    playChimeNote(330.0, 0.2, "sine");
+    stopStopwatch(); // Reset and stop global stopwatch too on "REINICIAR AMBOS"
   };
 
   const detenerReloj = () => {
@@ -869,7 +868,7 @@ export default function WorkoutTimer({
                   className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono text-neutral-400 uppercase tracking-wider mr-8 shrink-0"
                 >
                   <img src="/logo.svg" className="w-3.5 h-3.5 shrink-0 object-contain" alt="Logo" />
-                  <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
+                  <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.replace(/<span[^>]*>.*?<\/span>/gi, '')) }} />
                 </span>
               ))}
             </div>
@@ -961,7 +960,7 @@ export default function WorkoutTimer({
             className="px-4 py-3 rounded-full bg-neutral-900 border border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
           >
             <RotateCcw size={12} />
-            <span>REINICIAR TODOS</span>
+            <span>REINICIAR AMBOS</span>
           </button>
 
           <button
@@ -1271,7 +1270,7 @@ export default function WorkoutTimer({
                       className="inline-flex items-center gap-1.5 text-[10px] font-mono text-neutral-400 uppercase tracking-wider mr-6 shrink-0"
                     >
                       <img src="/logo.svg" className="w-3 h-3 shrink-0 object-contain" alt="Logo" />
-                      <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
+                      <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.replace(/<span[^>]*>.*?<\/span>/gi, '')) }} />
                     </span>
                   ))}
                 </div>

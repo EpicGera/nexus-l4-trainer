@@ -37,7 +37,7 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     }
   }
 
-  // 0. Warmup fixed protocol: default 10 minutes max completion, 1:30 min rest. Can be overridden by cap.
+  // 0. Warmup standard protocol: default 10 minutes max completion, 1:30 min rest. Can be overridden by cap.
   if (
     combinedStr.includes("WARM-UP") ||
     combinedStr.includes("WARMUP") ||
@@ -216,9 +216,18 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
 
   // 6. "N Minutos Continuos/Zona 2/Alternados/Aeróbico" — Pure countdown timers
   //    e.g. "35 Minutos Continuos", "30 Minutos Zona 2", "35 Minutos Alternados"
-  const minutesContinuousMatch = schemeUpper.match(
-    /(\d+)\s*(?:MINUTOS|MIN)\s*(?:CONTINUOS|CONTINUO|ZONA\s*\d|ALTERNADOS?|AER[OÓ]BICO|FLUSH)?/i,
-  );
+  //    Avoid matching "REST 2 MIN" as a continuous countdown block.
+  let minutesContinuousMatch = null;
+  const regex = /(\d+)\s*(?:MINUTOS|MIN)\s*(?:CONTINUOS|CONTINUO|ZONA\s*\d|ALTERNADOS?|AER[OÓ]BICO|FLUSH)?/gi;
+  let match;
+  while ((match = regex.exec(schemeUpper)) !== null) {
+    const precedingText = schemeUpper.substring(0, match.index);
+    if (!precedingText.match(/REST\s*$/i)) {
+      minutesContinuousMatch = match;
+      break;
+    }
+  }
+
   if (minutesContinuousMatch) {
     const mins = parseInt(minutesContinuousMatch[1], 10);
     // Check if there's also a round count with pipe separator: "10 Minutos | 2 Rondas"
@@ -247,8 +256,7 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
 
   // 7. Explicit strength rest tags: REST 90S, REST 2MIN, REST 2:30
   const restMatch =
-    combinedStr.match(/REST\s*(\d+)\s*S/i) ||
-    combinedStr.match(/REST\s*(\d+)\s*(?:SEGUNDOS|SEG)?/i);
+    combinedStr.match(/REST\s*(\d+)\s*S(?:EG|EGUNDOS)?\b/i);
   if (restMatch) {
     // Extract series count from NxM pattern or explicit rounds
     const nxmMatch = combinedStr.match(/(\d+)\s*[Xx]\s*\d+/);
@@ -290,7 +298,7 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
       type: "STRENGTH",
       name: "TRABAJO Y DESCANSO",
       work: 120, // 2:00 minutes of execution window per set
-      rest: mins * 60 + secs,
+      rest: restMinMatch[0].match(/MIN|MINUTOS|:/i) ? mins * 60 + secs : mins + secs,
       rounds: r,
     };
   }
