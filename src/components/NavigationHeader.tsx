@@ -96,7 +96,9 @@ export default function NavigationHeader({
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer"
             onClick={() => setShowProfileModal(true)}
           >
-            <img src="/emblema.jpg" alt="Nexus L4 Emblem" className="h-6 w-6 sm:h-8 sm:w-8 object-cover rounded-full border border-white/10" style={{ mixBlendMode: 'screen' }} />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full overflow-hidden bg-black shrink-0" style={{ mixBlendMode: 'screen' }}>
+              <img src="/emblema.jpg" alt="Nexus L4 Emblem" className="w-full h-full object-cover" />
+            </div>
             <div className="bg-gradient-to-r from-blue-950/40 to-indigo-950/40 px-1 sm:px-3 py-0.5 sm:py-1 rounded-sm shadow-sm transition-colors">
               <span className="text-electric-blue font-brutalist text-[5.5px] min-[320px]:text-[6.5px] min-[350px]:text-[7.5px] min-[375px]:text-[10px] sm:text-xs md:text-sm tracking-widest font-extrabold uppercase ">
                 NEXUS L4 MASTER
