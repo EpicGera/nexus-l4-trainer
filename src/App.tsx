@@ -1721,12 +1721,25 @@ export default function App() {
                 className="mb-2 text-center flex flex-col justify-center items-center relative"
                 data-purpose="page-title"
               >
-                <div className="mb-2 md:mb-4 z-10">
-                   <img src="/logo.svg" alt="Emblema PRVN L4" className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.25)] transition-all hover:scale-105" />
+                <div className="mb-2 md:mb-4 z-10 flex gap-3 text-3xl select-none text-electric-blue">
+                  <span className="animate-pulse">✦</span>
+                  <span className="animate-pulse" style={{ animationDelay: "150ms" }}>✦</span>
+                  <span className="animate-pulse" style={{ animationDelay: "300ms" }}>✦</span>
                 </div>
                 <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] 2xl:text-[11rem] font-black tracking-tighter leading-none uppercase flex flex-wrap justify-center items-center gap-x-4 transition-all duration-300 min-h-[5.5rem] md:min-h-[7rem] z-10">
                   <span>{activeDay.name}</span>
-                  <span className="align-middle text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-electric-blue">
+                  <span 
+                    className="align-middle text-4xl sm:text-5xl md:text-6xl lg:text-7xl cursor-pointer transition-all duration-300 hover:scale-110"
+                    style={{
+                      color: "var(--color-electric-blue)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.textShadow = `0 0 20px var(--color-electric-blue), 0 0 35px var(--color-electric-blue)`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.textShadow = "none";
+                    }}
+                  >
                     ✦
                   </span>
                   {isEditingName ? (
