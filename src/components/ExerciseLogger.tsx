@@ -314,7 +314,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
     }
 
     const newLog: ExerciseLog = {
-      id: Math.random().toString(36).substring(2, 9),
+      id: crypto.randomUUID(),
       weight: isCardio 
         ? (weight.trim() ? weight.trim() : '00:00')
         : (weight.trim() ? `${weight.trim()} kg` : 'P. Corporal'),
