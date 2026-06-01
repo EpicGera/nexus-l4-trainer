@@ -9,7 +9,14 @@ interface RpeAnalyticsPanelProps {
   currentVariationIndex: number;
   logsVersion: number;
   handleGenerateMonthlyReportPDF: () => void;
-  getMonthlyVolumeStats: () => { totalLogsCount: number; totalVolume: number };
+  getMonthlyVolumeStats: () => {
+    weeklyVolume: Record<string, number>;
+    weeklyCount: Record<string, number>;
+    weeklyRpeSum: Record<string, number>;
+    weeklyRpeCount: Record<string, number>;
+    totalVolume: number;
+    totalLogsCount: number;
+  };
 }
 
 export default function RpeAnalyticsPanel({
