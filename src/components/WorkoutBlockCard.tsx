@@ -99,6 +99,7 @@ export default function WorkoutBlockCard({
             dayId={`${activeDay?.id || "default"}-var${currentVariationIndex}-${blockType}`}
             title={blockData.title}
             scheme={blockData.scheme}
+            items={blockData.items}
             blockName={capitalizedBlockName}
             highRpeDetected={globalRpeAvg >= 9}
           />

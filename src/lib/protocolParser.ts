@@ -13,6 +13,7 @@
 export function parseProtocol(title: string, scheme: string, blockName: string = "") {
   const combinedStr = `${blockName} ${title} ${scheme}`.toUpperCase();
   const schemeUpper = scheme.toUpperCase().trim();
+  const blockUpper = blockName.toUpperCase().trim();
 
   // Attempt to parse Time Caps first to use globally where relevant
   let capWorkSeconds = 0;
@@ -312,11 +313,40 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
   }
 
   // 9. Generic Rounds match (e.g., 3 RONDAS, 4 SERIES, "4 Series alternadas", "4 Series (Por turnos)")
+  //    BLOCK-TYPE AWARE: metcon blocks with "N Rondas" → FOR_TIME with 15 min cap
+  //    accessories blocks with "N Series" → STRENGTH with 12 min cap
+  //    strength blocks → STRENGTH with 2:00 work / 1:30 rest intervals
   const generalRoundsMatch = combinedStr.match(
     /(\d+)\s*(?:RONDAS|SERIES|SETS|VUELTAS)/i,
   );
   if (generalRoundsMatch) {
     const r = parseInt(generalRoundsMatch[1], 10);
+
+    // METCON blocks: "5 Rondas" = FOR TIME with countdown cap
+    if (blockUpper === "METCON") {
+      const metconCap = capWorkSeconds > 0 ? capWorkSeconds : 15 * 60; // Default 15 min cap
+      return {
+        type: "FOR_TIME",
+        name: "FOR TIME",
+        work: metconCap,
+        rest: 0,
+        rounds: r,
+      };
+    }
+
+    // ACCESSORIES blocks: "3 Series" = STRENGTH with 12 min cap as total work window
+    if (blockUpper === "ACCESSORIES" || blockUpper === "ACCESORIOS") {
+      const accCap = capWorkSeconds > 0 ? capWorkSeconds : 12 * 60; // Default 12 min cap
+      return {
+        type: "STRENGTH",
+        name: "ACCESORIOS",
+        work: Math.floor(accCap / r), // Distribute cap across rounds
+        rest: 60,
+        rounds: r,
+      };
+    }
+
+    // Default STRENGTH behavior for strength blocks and others
     return {
       type: "STRENGTH",
       name: "FUERZA RECOMENDADA",

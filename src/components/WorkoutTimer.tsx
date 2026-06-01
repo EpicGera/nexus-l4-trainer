@@ -661,6 +661,7 @@ export default function WorkoutTimer({
                         ? "text-[#00F0FF]"
                         : "text-neutral-300"
                 }`}
+                style={{ textShadow: '0 0 30px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.15), 0 0 100px rgba(255,255,255,0.08)' }}
               >
                 {formatTime(timeLeft)}
               </div>
@@ -1127,9 +1128,127 @@ export default function WorkoutTimer({
                       ? "text-[#00F0FF]"
                       : "text-neutral-300"
               }`}
+              style={{ textShadow: '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.2)' }}
             >
               {formatTime(timeLeft)}
             </div>
+
+            {/* INLINE MANUAL ADJUSTERS (Work, Rest, Rounds) */}
+            <div className="grid grid-cols-3 gap-2 w-full bg-black/40 border border-white/5 rounded-lg p-2.5 mt-2">
+              {/* Work Adjuster */}
+              <div className="flex flex-col items-center border-r border-white/10 pr-1">
+                <span className="text-[8px] font-mono tracking-widest text-neutral-500 uppercase font-bold">TRABAJO</span>
+                <span className="text-xs font-condensed font-bold text-white mt-0.5">
+                  {activeWork ? formatTime(activeWork) : "S/D"}
+                </span>
+                <div className="flex items-center gap-0.5 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWorkOverride((prev) => {
+                        const currentVal = prev !== null ? prev : smartConfig.work || 0;
+                        const updatedVal = Math.max(0, currentVal - 10);
+                        if (smartState === "WORK" || smartState === "IDLE") setTimeLeft((t) => Math.max(0, t - 10));
+                        return updatedVal;
+                      });
+                    }}
+                    className="p-0.5 px-1.5 bg-neutral-950 border border-white/10 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                  >-10</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWorkOverride((prev) => {
+                        const currentVal = prev !== null ? prev : smartConfig.work || 0;
+                        const updatedVal = currentVal + 10;
+                        if (smartState === "WORK" || smartState === "IDLE") setTimeLeft((t) => t + 10);
+                        return updatedVal;
+                      });
+                    }}
+                    className="p-0.5 px-1.5 bg-neutral-950 border border-white/10 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                  >+10</button>
+                </div>
+              </div>
+              {/* Rest Adjuster */}
+              <div className="flex flex-col items-center border-r border-white/10 px-1">
+                <span className="text-[8px] font-mono tracking-widest text-neutral-500 uppercase font-bold">DESCANSO</span>
+                <span className="text-xs font-condensed font-bold text-emerald-400 mt-0.5">
+                  {formatTime(activeRest)}
+                </span>
+                <div className="flex items-center gap-0.5 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRestOverride((prev) => {
+                        const currentVal = prev !== null ? prev : smartConfig.rest || 0;
+                        const updatedVal = Math.max(0, currentVal - 5);
+                        if (smartState === "REST" || (smartState === "IDLE" && activeWork === 0)) setTimeLeft((t) => Math.max(0, t - 5));
+                        return updatedVal;
+                      });
+                    }}
+                    className="p-0.5 px-1.5 bg-neutral-950 border border-white/10 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                  >-5</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRestOverride((prev) => {
+                        const currentVal = prev !== null ? prev : smartConfig.rest || 0;
+                        const updatedVal = currentVal + 5;
+                        if (smartState === "REST" || (smartState === "IDLE" && activeWork === 0)) setTimeLeft((t) => t + 5);
+                        return updatedVal;
+                      });
+                    }}
+                    className="p-0.5 px-1.5 bg-neutral-950 border border-white/10 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                  >+5</button>
+                </div>
+              </div>
+              {/* Rounds Adjuster */}
+              <div className="flex flex-col items-center pl-1">
+                <span className="text-[8px] font-mono tracking-widest text-neutral-500 uppercase font-bold">RONDA</span>
+                <span className="text-xs font-condensed font-bold text-[#00F0FF] mt-0.5">
+                  {smartRound}/{activeRounds}
+                </span>
+                <div className="flex items-center gap-0.5 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setRoundsOverride((prev) => Math.max(1, (prev !== null ? prev : smartConfig.rounds || 1) - 1))}
+                    className="p-0.5 px-1.5 bg-neutral-950 border border-white/10 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                  >-1</button>
+                  <button
+                    type="button"
+                    onClick={() => setRoundsOverride((prev) => (prev !== null ? prev : smartConfig.rounds || 1) + 1)}
+                    className="p-0.5 px-1.5 bg-neutral-950 border border-white/10 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                  >+1</button>
+                </div>
+              </div>
+            </div>
+
+            {/* MARQUEE EXERCISE LIST */}
+            {items && items.length > 0 && (
+              <div className="w-full overflow-hidden mt-2.5 border-t border-white/5 pt-2">
+                <div
+                  className="flex whitespace-nowrap animate-marquee"
+                  style={{
+                    animation: `marquee ${Math.max(15, items.length * 5)}s linear infinite`,
+                  }}
+                >
+                  {[...items, ...items].map((item, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1.5 text-[10px] font-mono text-neutral-400 uppercase tracking-wider mr-6 shrink-0"
+                    >
+                      <span className="text-[#00F0FF]">◆</span>
+                      <span dangerouslySetInnerHTML={{ __html: item.replace(/<span[^>]*>.*?<\/span>/gi, '') }} />
+                    </span>
+                  ))}
+                </div>
+                <style>{`
+                  @keyframes marquee {
+                    0% { transform: translateX(0%); }
+                    100% { transform: translateX(-50%); }
+                  }
+                `}</style>
+              </div>
+            )}
 
             {/* DYNAMIC REST PHASING IN-CARD BUTTONS */}
             {smartState === "WORK" && activeRest > 0 && (
