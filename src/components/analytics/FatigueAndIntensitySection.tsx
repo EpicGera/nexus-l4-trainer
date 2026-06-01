@@ -1,5 +1,16 @@
-import { useState } from "react";
-import { ResponsiveContainer, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, ComposedChart, Bar, Line } from "recharts";
+import { useState, useMemo } from "react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Area,
+  ComposedChart,
+  Bar,
+  Line,
+} from "recharts";
 import { TrendingUp, Zap, ShieldAlert } from "lucide-react";
 
 interface FatigueAndIntensitySectionProps {
@@ -11,15 +22,10 @@ export default function FatigueAndIntensitySection({
 }: FatigueAndIntensitySectionProps) {
   const [rpeTrendRange, setRpeTrendRange] = useState<number>(14);
 
-  // --- RENDERING INTENSITY TRENDS (AreaChart) ---
-  const getIntensityTrendData = () => {
-    let rpeDataPoints = [];
+  // --- SINGLE PASS DATA PARSING ---
+  const parsedLogs = useMemo(() => {
+    const logs = [];
     const now = Date.now();
-
-    let totalRpeSum = 0;
-    let rpeCount = 0;
-    let relativeTotalLoad = 0;
-
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -34,43 +40,58 @@ export default function FatigueAndIntensitySection({
                 maybeTs && maybeTs > 1000000
                   ? maybeTs
                   : now - Math.random() * (7 * 24 * 60 * 60 * 1000);
-
-              const daysAgo = Math.floor(
-                (now - timestamp) / (24 * 60 * 60 * 1000)
-              );
-
-              if (daysAgo <= rpeTrendRange) {
-                let dayRpeSum = 0;
-                let dayRpeCount = 0;
-
-                if (Array.isArray(parsed)) {
-                  parsed.forEach((log) => {
-                    const r = parseFloat(log.rpe);
-                    if (!isNaN(r)) {
-                      dayRpeSum += r;
-                      dayRpeCount++;
-                      totalRpeSum += r;
-                      rpeCount++;
-                    }
-                    relativeTotalLoad +=
-                      (parseFloat(log.weight) || 0) *
-                      (parseFloat(log.reps) || 0);
-                  });
-                }
-
-                if (dayRpeCount > 0) {
-                  rpeDataPoints.push({
-                    dayOffset: daysAgo,
-                    rpeAvg: dayRpeSum / dayRpeCount,
-                  });
-                }
-              }
+              logs.push({
+                key,
+                timestamp,
+                parsed: Array.isArray(parsed) ? parsed : [],
+              });
             } catch (e) {}
           }
         }
       }
     } catch (e) {
       console.error(e);
+    }
+    return logs;
+  }, [currentWeek]); // Reparse when currentWeek changes
+
+  // --- RENDERING INTENSITY TRENDS (AreaChart) ---
+  const getIntensityTrendData = () => {
+    let rpeDataPoints = [];
+    const now = Date.now();
+
+    let totalRpeSum = 0;
+    let rpeCount = 0;
+    let relativeTotalLoad = 0;
+
+    for (const logEntry of parsedLogs) {
+      const daysAgo = Math.floor(
+        (now - logEntry.timestamp) / (24 * 60 * 60 * 1000),
+      );
+
+      if (daysAgo <= rpeTrendRange) {
+        let dayRpeSum = 0;
+        let dayRpeCount = 0;
+
+        logEntry.parsed.forEach((log) => {
+          const r = parseFloat(log.rpe);
+          if (!isNaN(r)) {
+            dayRpeSum += r;
+            dayRpeCount++;
+            totalRpeSum += r;
+            rpeCount++;
+          }
+          relativeTotalLoad +=
+            (parseFloat(log.weight) || 0) * (parseFloat(log.reps) || 0);
+        });
+
+        if (dayRpeCount > 0) {
+          rpeDataPoints.push({
+            dayOffset: daysAgo,
+            rpeAvg: dayRpeSum / dayRpeCount,
+          });
+        }
+      }
     }
 
     let fatigueTrendData = [];
@@ -98,14 +119,27 @@ export default function FatigueAndIntensitySection({
 
     const currentAvg =
       rpeCount > 0 ? parseFloat((totalRpeSum / rpeCount).toFixed(1)) : 6.2;
+
     const isOverL4Threshold = currentAvg > 8 || relativeTotalLoad > 10000;
     const trendLineColor = isOverL4Threshold ? "#f43f5e" : "#00f0ff";
     const isHighFatigue = isOverL4Threshold;
 
-    return { fatigueTrendData, currentAvg, isOverL4Threshold, trendLineColor, isHighFatigue };
+    return {
+      fatigueTrendData,
+      currentAvg,
+      isOverL4Threshold,
+      trendLineColor,
+      isHighFatigue,
+    };
   };
 
-  const { fatigueTrendData, currentAvg, isOverL4Threshold, trendLineColor, isHighFatigue } = getIntensityTrendData();
+  const {
+    fatigueTrendData,
+    currentAvg,
+    isOverL4Threshold,
+    trendLineColor,
+    isHighFatigue,
+  } = getIntensityTrendData();
 
   // --- 8. CNS FATIGUE DATA LOGIC ---
   const getCnsFatigueData = () => {
@@ -113,30 +147,12 @@ export default function FatigueAndIntensitySection({
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("nexus_logs_")) {
-        const raw = localStorage.getItem(key);
-        if (raw) {
-          try {
-            const parsed = JSON.parse(raw);
-
-            const storedTimestampMatch = key.split("_");
-            const maybeTs = parseInt(
-              storedTimestampMatch[storedTimestampMatch.length - 1]
-            );
-            const timestamp = maybeTs && maybeTs > 1000000 ? maybeTs : now;
-
-            if (now - timestamp <= 14 * dayMs) {
-              if (Array.isArray(parsed)) {
-                parsed.forEach((p) => {
-                  const r = parseFloat(p.rpe);
-                  if (!isNaN(r)) recentRpes.push(r);
-                });
-              }
-            }
-          } catch (e) {}
-        }
+    for (const logEntry of parsedLogs) {
+      if (now - logEntry.timestamp <= 14 * dayMs) {
+        logEntry.parsed.forEach((p) => {
+          const r = parseFloat(p.rpe);
+          if (!isNaN(r)) recentRpes.push(r);
+        });
       }
     }
 
@@ -167,10 +183,24 @@ export default function FatigueAndIntensitySection({
         "Carga acumulativa normal de media fase. Evita añadir accesorios extenuantes.";
     }
 
-    return { cnsLoadAvg, scalePercent, stateLabel, stateColor, progressBg, detailAdvice };
+    return {
+      cnsLoadAvg,
+      scalePercent,
+      stateLabel,
+      stateColor,
+      progressBg,
+      detailAdvice,
+    };
   };
 
-  const { cnsLoadAvg, scalePercent, stateLabel, stateColor, progressBg, detailAdvice } = getCnsFatigueData();
+  const {
+    cnsLoadAvg,
+    scalePercent,
+    stateLabel,
+    stateColor,
+    progressBg,
+    detailAdvice,
+  } = getCnsFatigueData();
 
   // --- 9. RELATION DE CARGA DATA (ComposedChart Volume vs RPE) ---
   const getRelationCargaData = () => {
@@ -181,43 +211,27 @@ export default function FatigueAndIntensitySection({
       w4: { volume: 0, rpeSum: 0, rpeCount: 0 },
     };
 
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("nexus_logs_")) {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              const parts = key.split("_");
-              const dayId = parts[2] || "";
-              const wkKey = dayId.substring(0, 2);
-              if (
-                wkKey &&
-                weeklyMetrics[wkKey as keyof typeof weeklyMetrics] !== undefined
-              ) {
-                parsed.forEach((log) => {
-                  const wt = parseFloat(log.weight) || 0;
-                  const rp = parseFloat(log.reps) || 0;
-                  const rpeVal = parseFloat(log.rpe) || 0;
+    for (const logEntry of parsedLogs) {
+      const parts = logEntry.key.split("_");
+      const dayId = parts[2] || "";
+      const wkKey = dayId.substring(0, 2).toLowerCase();
 
-                  weeklyMetrics[wkKey as keyof typeof weeklyMetrics].volume +=
-                    wt * rp;
-                  if (rpeVal > 0) {
-                    weeklyMetrics[wkKey as keyof typeof weeklyMetrics].rpeSum +=
-                      rpeVal;
-                    weeklyMetrics[
-                      wkKey as keyof typeof weeklyMetrics
-                    ].rpeCount++;
-                  }
-                });
-              }
-            }
+      if (
+        wkKey &&
+        weeklyMetrics[wkKey as keyof typeof weeklyMetrics] !== undefined
+      ) {
+        logEntry.parsed.forEach((log) => {
+          const wt = parseFloat(log.weight) || 0;
+          const rp = parseFloat(log.reps) || 0;
+          const rpeVal = parseFloat(log.rpe) || 0;
+
+          weeklyMetrics[wkKey as keyof typeof weeklyMetrics].volume += wt * rp;
+          if (rpeVal > 0) {
+            weeklyMetrics[wkKey as keyof typeof weeklyMetrics].rpeSum += rpeVal;
+            weeklyMetrics[wkKey as keyof typeof weeklyMetrics].rpeCount++;
           }
-        }
+        });
       }
-    } catch (e) {
-      console.error(e);
     }
 
     const compiledData = Object.keys(weeklyMetrics).map((wk) => {
@@ -226,7 +240,9 @@ export default function FatigueAndIntensitySection({
         week: wk.toUpperCase(),
         volume: Math.round(entry.volume),
         rpe:
-          entry.rpeCount > 0 ? Number((entry.rpeSum / entry.rpeCount).toFixed(1)) : 0,
+          entry.rpeCount > 0
+            ? Number((entry.rpeSum / entry.rpeCount).toFixed(1))
+            : 0,
       };
     });
 
@@ -234,7 +250,6 @@ export default function FatigueAndIntensitySection({
   };
 
   const relationCargaCompiledData = getRelationCargaData();
-
   return (
     <div className="space-y-6">
       {/* RPE & RECURRENT FATIGUE DISTRIBUTION AREA CHART */}
@@ -285,10 +300,12 @@ export default function FatigueAndIntensitySection({
                       ⚠️ ALERTA: SOBREVOLUMEN / FATIGA CRÍTICA
                     </span>
                     <p className="text-[9px]">
-                      Carga detectada en límite. Superaste el umbral RPE recomendado continuo.
+                      Carga detectada en límite. Superaste el umbral RPE
+                      recomendado continuo.
                     </p>
                     <p className="text-[8.5px] text-rose-300 italic pt-0.5 border-t border-rose-500/10">
-                      "Baja las cargas un 10-15%, cuida el psoas y prioriza el ROM."
+                      "Baja las cargas un 10-15%, cuida el psoas y prioriza el
+                      ROM."
                     </p>
                   </div>
                 ) : (
@@ -409,11 +426,14 @@ export default function FatigueAndIntensitySection({
               SISTEMA DE AUDITORÍA CENTRAL DE FATIGA NEURAL (SNC)
             </h4>
             <p className="text-[9.5px] font-mono text-zinc-500 uppercase tracking-wider">
-              Métricas e interferencia hormonal calculadas en base a registros recientes (14 días).
+              Métricas e interferencia hormonal calculadas en base a registros
+              recientes (14 días).
             </p>
           </div>
           <div className="bg-black/60 border border-white/5 py-1 px-3 self-start md:self-auto rounded">
-            <span className={`text-[10px] font-mono font-black uppercase ${stateColor}`}>
+            <span
+              className={`text-[10px] font-mono font-black uppercase ${stateColor}`}
+            >
               ● {stateLabel}
             </span>
           </div>
@@ -439,11 +459,16 @@ export default function FatigueAndIntensitySection({
           </div>
           <div className="md:col-span-2 font-mono text-[9.5px] text-zinc-400 leading-relaxed border-l border-white/10 pl-0 md:pl-6 space-y-2">
             <p>
-              <strong className="text-white uppercase font-black">PRESCRIPCIÓN CF-L4:</strong>{" "}
+              <strong className="text-white uppercase font-black">
+                PRESCRIPCIÓN CF-L4:
+              </strong>{" "}
               {detailAdvice}
             </p>
             <p className="text-[8.5px] text-zinc-600">
-              *Nota L4: El magnesio directo, las calleras de carbono con pliegue táctico y el mantenimiento del ROM completo ayudan a descargar tensión de los antebrazos, reduciendo la inhibición motora refleja.
+              *Nota L4: El magnesio directo, las calleras de carbono con pliegue
+              táctico y el mantenimiento del ROM completo ayudan a descargar
+              tensión de los antebrazos, reduciendo la inhibición motora
+              refleja.
             </p>
           </div>
         </div>
@@ -458,10 +483,18 @@ export default function FatigueAndIntensitySection({
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-center">
           <div className="lg:col-span-3 h-[220px] bg-black/40 border border-white/5 rounded p-3 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={relationCargaCompiledData} margin={{ left: -10, right: 10 }}>
+              <ComposedChart
+                data={relationCargaCompiledData}
+                margin={{ left: -10, right: 10 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" />
                 <XAxis dataKey="week" stroke="#555" fontSize={9} />
-                <YAxis yAxisId="left" stroke="#888" fontSize={9} name="Volume" />
+                <YAxis
+                  yAxisId="left"
+                  stroke="#888"
+                  fontSize={9}
+                  name="Volume"
+                />
                 <YAxis
                   yAxisId="right"
                   orientation="right"
@@ -502,10 +535,19 @@ export default function FatigueAndIntensitySection({
           <div className="lg:col-span-1 space-y-3 font-mono text-[9.5px]">
             <div className="bg-zinc-900 border border-white/5 p-3 rounded space-y-2">
               <span className="text-[10px] font-black tracking-widest text-[#00f0ff] uppercase block">
-                <img src="/logo.svg" className="w-3 h-3 object-contain inline-block align-middle mr-1" alt="" /> INTERPRETACIÓN DE CURVAS
+                <img
+                  src="/logo.svg"
+                  className="w-3 h-3 object-contain inline-block align-middle mr-1"
+                  alt=""
+                />{" "}
+                INTERPRETACIÓN DE CURVAS
               </span>
               <p className="text-neutral-400 leading-normal">
-                Si el volumen sube pero el RPE se mantiene estable dentro del rango recomendado (Fase 1: 6-7, Fase 2: 7-8), tu acondicionamiento motor progresa de forma idónea. Si el volumen decrece pero el RPE se dispara hacia 9 o 10, se confirma un cuadro de inflamación sistémica profunda. ¡Presta atención!
+                Si el volumen sube pero el RPE se mantiene estable dentro del
+                rango recomendado (Fase 1: 6-7, Fase 2: 7-8), tu
+                acondicionamiento motor progresa de forma idónea. Si el volumen
+                decrece pero el RPE se dispara hacia 9 o 10, se confirma un
+                cuadro de inflamación sistémica profunda. ¡Presta atención!
               </p>
             </div>
           </div>
