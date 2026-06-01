@@ -1722,9 +1722,7 @@ export default function App() {
                 data-purpose="page-title"
               >
                 <div className="mb-2 md:mb-4 z-10">
-                   <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden bg-black transition-all hover:scale-105" style={{ mixBlendMode: 'screen' }}>
-                     <img src="/emblema.jpg" alt="Emblema PRVN L4" className="w-full h-full object-cover" />
-                   </div>
+                   <img src="/logo.svg" alt="Emblema PRVN L4" className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.25)] transition-all hover:scale-105" />
                 </div>
                 <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] 2xl:text-[11rem] font-black tracking-tighter leading-none uppercase flex flex-wrap justify-center items-center gap-x-4 transition-all duration-300 min-h-[5.5rem] md:min-h-[7rem] z-10">
                   <span>{activeDay.name}</span>

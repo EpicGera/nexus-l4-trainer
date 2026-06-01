@@ -220,16 +220,12 @@ export default function ShareCardOverlay({
               </div>
 
               <div className="flex flex-col items-end justify-center flex-shrink-0 ml-8">
-                <div
-                  className="w-20 h-20 rounded-full overflow-hidden bg-black flex-shrink-0"
-                  style={{ mixBlendMode: "screen", opacity: 0.85 }}
-                >
-                  <img
-                    src="/emblema.jpg"
-                    alt="Nexus Logo"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <img
+                  src="/logo.svg"
+                  alt="Nexus Logo"
+                  className="w-20 h-20 object-contain flex-shrink-0 drop-shadow-[0_0_8px_rgba(255,255,255,0.25)]"
+                  style={{ opacity: 0.85 }}
+                />
                 {!exportAthleteName && (
                   <div
                     className="inline-block border rounded-none px-3 py-1 font-mono text-[8px] font-black tracking-widest uppercase mt-2"
