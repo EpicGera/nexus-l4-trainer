@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { User } from "firebase/auth";
 import { AthleteState, DayWorkout } from "../types/workout";
 import { pushAllLocalToCloud } from "../lib/syncEngine";

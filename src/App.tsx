@@ -31,7 +31,7 @@ import {
   handleExportLocalHistoryCSV as serviceExportLocalHistoryCSV,
   getMonthlyVolumeStats,
 } from "./lib/exportService";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ResponsiveContainer,
   LineChart,

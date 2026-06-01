@@ -412,7 +412,7 @@ export default function BrzyckiCalculator() {
                   </span>
                   
                   <motion.div 
-                    variants={containerVariants}
+                    variants={{} as any}
                     initial="hidden"
                     animate="show"
                     className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[145px] overflow-y-auto pr-1"
@@ -420,7 +420,7 @@ export default function BrzyckiCalculator() {
                     {percentageMatrix.map((zone) => (
                       <motion.div 
                         key={zone.percentage}
-                        variants={itemVariants}
+                        variants={{} as any}
                         className="py-1.5 px-2.5 border border-white/5 hover:border-[#00F0FF]/25 bg-[#08090d]/60 flex justify-between items-center rounded-sm transition-all text-[11px]"
                       >
                         <div className="flex flex-col gap-0.5 max-w-[70%]">
