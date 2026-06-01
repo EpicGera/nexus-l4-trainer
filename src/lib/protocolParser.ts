@@ -1,3 +1,10 @@
+// FILE_PATH: src/lib/protocolParser.ts
+// ACTION: OVERWRITE
+// DESCRIPTION: Complete rewrite to handle ALL workout scheme patterns intelligently.
+// Covers: AMRAP, EMOM, E2MOM, Tabata, ON/OFF intervals, Time Caps, NxM strength,
+// N Minutos countdown, pipe-separated configs, descriptive scheme fallback.
+// ---------------------------------------------------------
+
 /**
  * Advanced Protocol Parser for PRVN, Mayhem & HWPO schemes.
  * Converts natural-language workout schemes (e.g. "Every 2:30", "Tabata", "AMRAP")
@@ -5,6 +12,7 @@
  */
 export function parseProtocol(title: string, scheme: string, blockName: string = "") {
   const combinedStr = `${blockName} ${title} ${scheme}`.toUpperCase();
+  const schemeUpper = scheme.toUpperCase().trim();
 
   // Attempt to parse Time Caps first to use globally where relevant
   let capWorkSeconds = 0;
@@ -35,11 +43,30 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     combinedStr.includes("CALENTAMIENTO") ||
     combinedStr.includes("ENTRADITA")
   ) {
+    // Check if warmup has an explicit time (e.g., "15 Minutos" in the scheme)
+    const warmupMinMatch = schemeUpper.match(/(\d+)\s*(?:MINUTOS|MIN)/i);
+    const warmupTime = warmupMinMatch ? parseInt(warmupMinMatch[1], 10) * 60 : (capWorkSeconds > 0 ? capWorkSeconds : 600);
     return {
       type: "INTERVAL",
       name: "PUESTA A PUNTO L4",
-      work: capWorkSeconds > 0 ? capWorkSeconds : 600,
+      work: warmupTime,
       rest: 90, // 1:30 rest to set up the next block
+      rounds: 1,
+    };
+  }
+
+  // 0b. Mobility / Recovery sessions with explicit time
+  if (
+    combinedStr.includes("MOVILIDAD") ||
+    combinedStr.includes("REGENERATIV")
+  ) {
+    const mobilityMinMatch = schemeUpper.match(/(\d+)\s*(?:MINUTOS|MIN)/i);
+    const mobilityTime = mobilityMinMatch ? parseInt(mobilityMinMatch[1], 10) * 60 : 600;
+    return {
+      type: "INTERVAL",
+      name: "MOVILIDAD L4",
+      work: mobilityTime,
+      rest: 60,
       rounds: 1,
     };
   }
@@ -58,19 +85,19 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
   // 2. Work/Rest Intervals match: e.g. "4 MIN ON / 1 MIN OFF X 4 RONDAS" or "40" ON / 20" OFF x 8"
   // Supports minutes (MIN, M) and seconds (S, SEG, ")
   const onOffMatch = combinedStr.match(
-    /(\d+)\s*(MIN|M|S|SEG|'')?\s*ON\s*\/\s*(\d+)\s*(MIN|M|S|SEG|'')?\s*OFF/i,
+    /(\d+)\s*(MIN|M|S|SEG|''|")?\s*ON\s*\/\s*(\d+)\s*(MIN|M|S|SEG|''|")?\s*OFF/i,
   );
   if (onOffMatch) {
     const workVal = parseInt(onOffMatch[1], 10);
     const workUnit = onOffMatch[2] || "MIN";
-    const workIsSeconds = ["S", "SEG", "''"].some((u) =>
+    const workIsSeconds = ["S", "SEG", "''", '"'].some((u) =>
       workUnit.startsWith(u),
     );
     const workSeconds = workIsSeconds ? workVal : workVal * 60;
 
     const restVal = parseInt(onOffMatch[3], 10);
     const restUnit = onOffMatch[4] || "MIN";
-    const restIsSeconds = ["S", "SEG", "''"].some((u) =>
+    const restIsSeconds = ["S", "SEG", "''", '"'].some((u) =>
       restUnit.startsWith(u),
     );
     const restSeconds = restIsSeconds ? restVal : restVal * 60;
@@ -93,7 +120,7 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
   }
 
   // 3. EMOM / E2MOM matches (e.g., E2MOM x 6, EMOM 15 MIN, EVERY 1:30 X 10)
-  // Check special EOMOM/E2MOM
+  // Check special EOMOM/E2MOM/E4MOM
   const exmomMatch = combinedStr.match(/E(\d+)(MOM|S)\s*(?:X\s*(\d+))?/i);
   if (exmomMatch) {
     const value = parseInt(exmomMatch[1], 10);
@@ -171,9 +198,9 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     };
   }
 
+  // 5. AMRAP explicit (e.g. AMRAP 12 MIN, AMRAP 25)
   const amrapMatch =
     combinedStr.match(/AMRAP\s*(\d+)/i) ||
-    combinedStr.match(/(\d+)\s*MINUTOS/i) ||
     combinedStr.match(/(\d+)\s*MIN\s*AMRAP/i);
   if (amrapMatch) {
     const mins = parseInt(amrapMatch[1], 10);
@@ -186,16 +213,53 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     };
   }
 
-  // 5. Explicit strength rest tags: REST 90S, REST 2MIN, REST 2:30
+  // 6. "N Minutos Continuos/Zona 2/Alternados/Aeróbico" — Pure countdown timers
+  //    e.g. "35 Minutos Continuos", "30 Minutos Zona 2", "35 Minutos Alternados"
+  const minutesContinuousMatch = schemeUpper.match(
+    /(\d+)\s*(?:MINUTOS|MIN)\s*(?:CONTINUOS|CONTINUO|ZONA\s*\d|ALTERNADOS?|AER[OÓ]BICO|FLUSH)?/i,
+  );
+  if (minutesContinuousMatch) {
+    const mins = parseInt(minutesContinuousMatch[1], 10);
+    // Check if there's also a round count with pipe separator: "10 Minutos | 2 Rondas"
+    const pipeRoundMatch = schemeUpper.match(
+      /\|\s*(\d+)\s*(?:RONDAS|SERIES|VUELTAS|ROUNDS)/i,
+    );
+    if (pipeRoundMatch) {
+      const roundCount = parseInt(pipeRoundMatch[1], 10);
+      const perRoundWork = Math.floor((mins * 60) / roundCount);
+      return {
+        type: "INTERVAL",
+        name: "BLOQUES TEMPORIZADOS",
+        work: perRoundWork,
+        rest: 30, // Brief transition rest between rounds
+        rounds: roundCount,
+      };
+    }
+    return {
+      type: "AMRAP",
+      name: "COUNTDOWN",
+      work: mins * 60,
+      rest: 0,
+      rounds: 1,
+    };
+  }
+
+  // 7. Explicit strength rest tags: REST 90S, REST 2MIN, REST 2:30
   const restMatch =
     combinedStr.match(/REST\s*(\d+)\s*S/i) ||
     combinedStr.match(/REST\s*(\d+)\s*(?:SEGUNDOS|SEG)?/i);
   if (restMatch) {
+    // Extract series count from NxM pattern or explicit rounds
+    const nxmMatch = combinedStr.match(/(\d+)\s*[Xx]\s*\d+/);
     const roundMatch =
       combinedStr.match(
         /(\d+)\s*(?:RONDAS|SERIES|RNDS|SETS|ROUNDS|VUELTAS)/i,
       ) || combinedStr.match(/(?:X|\*)\s*(\d+)/i);
-    const r = roundMatch ? parseInt(roundMatch[1], 10) : 4;
+    const r = nxmMatch
+      ? parseInt(nxmMatch[1], 10)
+      : roundMatch
+        ? parseInt(roundMatch[1], 10)
+        : 4;
     return {
       type: "STRENGTH",
       name: "TRABAJO Y DESCANSO",
@@ -207,15 +271,20 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
 
   const restMinMatch =
     combinedStr.match(/REST\s*(\d+)\s*(?:MIN|MINUTOS)/i) ||
-    combinedStr.match(/REST\s*(\d+)[:.](\d+)/i);
+    combinedStr.match(/REST\s*(\d+)[:.:](\d+)/i);
   if (restMinMatch) {
     const mins = parseInt(restMinMatch[1], 10);
     const secs = restMinMatch[2] ? parseInt(restMinMatch[2], 10) : 0;
+    const nxmMatch = combinedStr.match(/(\d+)\s*[Xx]\s*\d+/);
     const roundMatch =
       combinedStr.match(
         /(\d+)\s*(?:RONDAS|SERIES|RNDS|SETS|ROUNDS|VUELTAS)/i,
       ) || combinedStr.match(/(?:X|\*)\s*(\d+)/i);
-    const r = roundMatch ? parseInt(roundMatch[1], 10) : 4;
+    const r = nxmMatch
+      ? parseInt(nxmMatch[1], 10)
+      : roundMatch
+        ? parseInt(roundMatch[1], 10)
+        : 4;
     return {
       type: "STRENGTH",
       name: "TRABAJO Y DESCANSO",
@@ -225,7 +294,24 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     };
   }
 
-  // 6. Generic Rounds match (e.g., 3 RONDAS, 4 SERIES - default rest indicator)
+  // 8. NxM strength pattern (e.g., "4x6 @ 65-70%", "4x3 @ 60%", "4x8 | Tempo 3021")
+  //    Extract N as number of sets/rounds explicitly
+  const nxmStrengthMatch = schemeUpper.match(/(\d+)\s*[Xx]\s*(\d+)/);
+  if (nxmStrengthMatch) {
+    const sets = parseInt(nxmStrengthMatch[1], 10);
+    // Check for explicit rest in the same scheme
+    const inlineRestMatch = schemeUpper.match(/REST\s*(\d+)/i);
+    const restTime = inlineRestMatch ? parseInt(inlineRestMatch[1], 10) : 90;
+    return {
+      type: "STRENGTH",
+      name: "FUERZA PROGRAMADA",
+      work: 120, // 2:00 minutes of execution window per set
+      rest: restTime,
+      rounds: sets,
+    };
+  }
+
+  // 9. Generic Rounds match (e.g., 3 RONDAS, 4 SERIES, "4 Series alternadas", "4 Series (Por turnos)")
   const generalRoundsMatch = combinedStr.match(
     /(\d+)\s*(?:RONDAS|SERIES|SETS|VUELTAS)/i,
   );
@@ -240,6 +326,7 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     };
   }
 
+  // 10. FOR TIME / POR TIEMPO (explicit, with no cap — stopwatch mode)
   if (combinedStr.includes("FOR TIME") || combinedStr.includes("POR TIEMPO")) {
     return {
       type: "FOR_TIME",
@@ -250,6 +337,19 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
     };
   }
 
+  // 11. Descending rep schemes (e.g., "21-15-9", "15-12-9") without explicit cap
+  const descendingMatch = schemeUpper.match(/^\d+(?:-\d+){1,}/);
+  if (descendingMatch) {
+    return {
+      type: "FOR_TIME",
+      name: "POR TIEMPO",
+      work: 0,
+      rest: 0,
+      rounds: 1,
+    };
+  }
+
+  // 12. FUERZA fallback (title contains FUERZA or %)
   if (combinedStr.includes("FUERZA") || combinedStr.includes("%")) {
     const roundMatch =
       combinedStr.match(
@@ -262,6 +362,26 @@ export function parseProtocol(title: string, scheme: string, blockName: string =
       work: 120, // 2:00 minutes of execution window per set
       rest: 90,
       rounds: r,
+    };
+  }
+
+  // 13. Descriptive/qualitative schemes with smart defaults
+  //     e.g., "Enfoque Core", "Isometric Focus", "Ligero"
+  //     These have no time data, so provide sensible L4 defaults
+  if (
+    combinedStr.includes("ENFOQUE") ||
+    combinedStr.includes("FOCUS") ||
+    combinedStr.includes("ISOMETRIC") ||
+    combinedStr.includes("LIGERO") ||
+    combinedStr.includes("LIGHT") ||
+    combinedStr.includes("ESTABILIZACI")
+  ) {
+    return {
+      type: "STRENGTH",
+      name: "ACTIVACIÓN L4",
+      work: 120,
+      rest: 60,
+      rounds: 3,
     };
   }
 
