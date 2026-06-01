@@ -6,6 +6,7 @@ import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { isCardio as classifyIsCardio, isBodyweightOnly as classifyIsBodyweightOnly } from '../lib/workoutClassifier';
 import { getSuggestedRpe, getBiomechanicalTips } from '../lib/biomechanicsAdvisor';
+import DOMPurify from 'dompurify';
 
 interface ExerciseLog {
   id: string;
@@ -783,8 +784,13 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
                       <span className="text-electric-blue shrink-0 font-bold">▶</span>
                       <p 
                         className="text-neutral-200"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(tip.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-electric-blue font-extrabold">$1</strong>')) }}
-                      />
+                      >
+                        {tip.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+                          part.startsWith('**') && part.endsWith('**')
+                            ? <strong key={i} className="text-electric-blue font-extrabold">{part.slice(2, -2)}</strong>
+                            : <React.Fragment key={i}>{part}</React.Fragment>
+                        )}
+                      </p>
                     </div>
                   ))}
                 </div>
