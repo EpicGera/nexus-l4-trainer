@@ -6,6 +6,7 @@ import BrandInspirationAccordion from "./BrandInspirationAccordion";
 import ExerciseLogger from "./ExerciseLogger";
 import WorkoutHistoryControl from "./WorkoutHistoryControl";
 import { getCleanExerciseName } from "../lib/historyUtils";
+
 interface WorkoutBlockCardProps {
   blockType: "warmup" | "strength" | "metcon" | "accessories";
   activeVariation: DayVariation;

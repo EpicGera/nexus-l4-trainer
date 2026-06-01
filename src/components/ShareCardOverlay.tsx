@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from "isomorphic-dompurify";
 // FILE_PATH: src/components/ShareCardOverlay.tsx
 // ACTION: OVERWRITE
 // DESCRIPTION: Implement dark black backgrounds for block headers, always render them in white text, use premium vector-based SVG diamond symbols representing the Google Material Design diamond icon, and ensure block headers are correctly labeled.
