@@ -1721,11 +1721,8 @@ export default function App() {
                 className="mb-2 text-center flex flex-col justify-center items-center relative"
                 data-purpose="page-title"
               >
-                <div className="absolute top-0 opacity-20 pointer-events-none w-full h-full flex justify-center items-center -z-10">
-                   <img src="/emblema.jpg" alt="Emblema de Halterofilia L4" className="w-64 h-64 md:w-96 md:h-96 object-cover rounded-full blur-sm" />
-                </div>
                 <div className="mb-2 md:mb-4 z-10">
-                   <img src="/emblema.jpg" alt="Emblema PRVN L4" className="w-20 h-20 md:w-28 md:h-28 object-cover rounded-full border-2 border-electric-blue/50 shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all hover:scale-105" />
+                   <img src="/emblema.jpg" alt="Emblema PRVN L4" className="w-20 h-20 md:w-28 md:h-28 object-cover rounded-full border border-white/10 transition-all hover:scale-105" style={{ mixBlendMode: 'screen' }} />
                 </div>
                 <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] 2xl:text-[11rem] font-black tracking-tighter leading-none uppercase flex flex-wrap justify-center items-center gap-x-4 transition-all duration-300 min-h-[5.5rem] md:min-h-[7rem] z-10">
                   <span>{activeDay.name}</span>
