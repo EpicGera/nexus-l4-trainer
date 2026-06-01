@@ -1,3 +1,4 @@
+import DOMPurify from "isomorphic-dompurify";
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, Dumbbell, Star, ChevronDown, Sparkles, Award, FileText, Flame, Share2, Download, X } from 'lucide-react';
 import { jsPDF } from 'jspdf';
@@ -452,7 +453,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
               <span className="absolute left-0 top-0 h-[1.25em] w-4 flex items-center justify-center select-none font-sans text-[14px] text-white">✦</span>
               <div className="flex-1 min-w-0 flex items-start justify-between w-full">
                 {rawItemHtml ? (
-                  <div dangerouslySetInnerHTML={{ __html: rawItemHtml }} className="shrink pr-2" />
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(rawItemHtml) }} className="shrink pr-2" />
                 ) : (
                   <span className="shrink pr-2">{exerciseName}</span>
                 )}
@@ -782,7 +783,7 @@ export default function ExerciseLogger({ dayId, exerciseName, rawItemHtml, onLog
                       <span className="text-electric-blue shrink-0 font-bold">▶</span>
                       <p 
                         className="text-neutral-200"
-                        dangerouslySetInnerHTML={{ __html: tip.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-electric-blue font-extrabold">$1</strong>') }} 
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(tip.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-electric-blue font-extrabold">$1</strong>')) }}
                       />
                     </div>
                   ))}

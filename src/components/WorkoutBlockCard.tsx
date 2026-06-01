@@ -1,3 +1,4 @@
+import DOMPurify from "isomorphic-dompurify";
 import React from "react";
 import { DayWorkout, DayVariation } from "../types/workout";
 import WorkoutTimer from "./WorkoutTimer";
@@ -126,7 +127,7 @@ export default function WorkoutBlockCard({
                       ✦
                     </span>
                     <div
-                      dangerouslySetInnerHTML={{ __html: formattedItem }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
                       className="flex-1 min-w-0"
                     />
                   </li>
