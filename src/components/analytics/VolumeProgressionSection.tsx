@@ -235,7 +235,7 @@ export default function VolumeProgressionSection({
           <div className="lg:col-span-1 flex flex-col space-y-4">
             <div className="bg-zinc-950 p-4 border border-white/5 space-y-3 rounded text-left">
               <span className="text-[10px] font-mono tracking-widest text-neutral-400 font-bold uppercase block pb-1 border-b border-white/5">
-                ✦ TONELAJE ADQUIRIDO
+                <img src="/logo.svg" className="w-3 h-3 object-contain inline-block align-middle mr-1" alt="" /> TONELAJE ADQUIRIDO
               </span>
               <div className="space-y-2">
                 <div>

@@ -502,7 +502,7 @@ export default function FatigueAndIntensitySection({
           <div className="lg:col-span-1 space-y-3 font-mono text-[9.5px]">
             <div className="bg-zinc-900 border border-white/5 p-3 rounded space-y-2">
               <span className="text-[10px] font-black tracking-widest text-[#00f0ff] uppercase block">
-                ✦ INTERPRETACIÓN DE CURVAS
+                <img src="/logo.svg" className="w-3 h-3 object-contain inline-block align-middle mr-1" alt="" /> INTERPRETACIÓN DE CURVAS
               </span>
               <p className="text-neutral-400 leading-normal">
                 Si el volumen sube pero el RPE se mantiene estable dentro del rango recomendado (Fase 1: 6-7, Fase 2: 7-8), tu acondicionamiento motor progresa de forma idónea. Si el volumen decrece pero el RPE se dispara hacia 9 o 10, se confirma un cuadro de inflamación sistémica profunda. ¡Presta atención!
