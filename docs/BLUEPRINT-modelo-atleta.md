@@ -10,7 +10,7 @@
 |---|---|---|
 | **1** | Default = plantilla limpia, no leer hoja salvo opt-in, roaming cross-device | ✅ desplegada |
 | **1.5** | Purga de fugas: `exportService`/`historyUtils` usan el programa vivo; `workouts.ts` ya no se bundlea | ✅ desplegada |
-| **2** | Sacar el scope `spreadsheets` del login → permiso on-demand | ⏳ siguiente |
+| **2** | Sacar el scope `spreadsheets` del login → permiso on-demand | ✅ desplegada |
 | **3** | Modelo de datos completo + input mínimo (CrossFit-específico) | ⏳ tras revisión de este doc |
 
 ---
@@ -330,8 +330,8 @@ el catálogo. Es **Fase 4**, posterior al motor (Paso 3) y las UIs de logueo. Pa
 resultados, genera igual un capítulo de evaluación (assessment-first).
 
 ## Notas
-- `useWorkoutState.ts` es código muerto (referencia `WORKOUT_DATABASE.weeks` inexistente; no lo importa
-  nadie). Candidato a eliminar.
+- `useWorkoutState.ts` eliminado (2026-07-01) junto a `useLayoutState.ts`/`useSyncState.ts` — eran
+  código muerto sin referencias.
 - `workouts.ts` queda como artefacto de codegen / backup, fuera del grafo de bundle.
 - El template `/copy` (`TEMPLATE_SHEET_ID`) aún apunta al workbook del dueño; reemplazar por uno limpio
   si se mantiene el flujo de Sheets.
