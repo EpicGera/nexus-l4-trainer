@@ -9,6 +9,7 @@ import { SYSTEM_VERSION, SYSTEM_NAME, SYSTEM_TAGLINE } from "./lib/version";
 import { getProgramTodayPosition } from "./lib/programStart";
 import { getDayReward } from "./lib/sideQuests";
 import { useSheetSwipe } from "./hooks/useSheetSwipe";
+import { useVariationSwipe } from "./hooks/useVariationSwipe";
 import {
   fetchWorkoutsFromSheet,
   loadCachedWorkouts,
@@ -192,7 +193,6 @@ export default function App() {
     return saved ? Math.max(0, Math.min(6, parseInt(saved, 10))) : 0;
   });
 
-  const [currentVariationIndex, setCurrentVariationIndex] = useState<number>(0);
   // Active chapter theme — drives the app-wide accent so each chapter has its own
   // emphasis color (Fase 2). Refreshed on chapter change / cloud sync.
   const [chapterTheme, setChapterTheme] = useState<ChapterTheme | null>(
@@ -514,6 +514,19 @@ export default function App() {
 
   const activeWeekPlan = database[currentWeek];
   const activeDay = activeWeekPlan?.days[currentDayIndex];
+
+  const {
+    currentVariationIndex,
+    setCurrentVariationIndex,
+    handleVariationTouchStart,
+    handleVariationTouchMove,
+    handleVariationTouchEnd,
+  } = useVariationSwipe(
+    currentWeek,
+    currentDayIndex,
+    activeDay?.variations.length || 0,
+  );
+
   const activeVariation =
     activeDay?.variations[currentVariationIndex] || activeDay?.variations[0];
 
@@ -818,66 +831,6 @@ export default function App() {
     handleTouchEnd,
   } = useSheetSwipe();
 
-  // Variation swipe states
-  const [variationTouchStartX, setVariationTouchStartX] = useState<
-    number | null
-  >(null);
-  const [variationTouchStartY, setVariationTouchStartY] = useState<
-    number | null
-  >(null);
-  const [variationTouchEndX, setVariationTouchEndX] = useState<number | null>(
-    null,
-  );
-  const [variationTouchEndY, setVariationTouchEndY] = useState<number | null>(
-    null,
-  );
-
-  const handleVariationTouchStart = (e: React.TouchEvent) => {
-    // Stop propagation to avoid driving sheet swipe on parent elements
-    e.stopPropagation();
-    setVariationTouchStartX(e.targetTouches[0].clientX);
-    setVariationTouchStartY(e.targetTouches[0].clientY);
-    setVariationTouchEndX(null);
-    setVariationTouchEndY(null);
-  };
-
-  const handleVariationTouchMove = (e: React.TouchEvent) => {
-    e.stopPropagation();
-    setVariationTouchEndX(e.targetTouches[0].clientX);
-    setVariationTouchEndY(e.targetTouches[0].clientY);
-  };
-
-  const handleVariationTouchEnd = (e: React.TouchEvent) => {
-    e.stopPropagation();
-    if (variationTouchStartX === null || variationTouchEndX === null) return;
-    const diffX = variationTouchStartX - variationTouchEndX;
-    const diffY =
-      variationTouchStartY !== null && variationTouchEndY !== null
-        ? variationTouchStartY - variationTouchEndY
-        : 0;
-
-    // Validate that the swipe is primarily horizontal
-    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-      const isSwipeLeft = diffX > 50; // Swipe left -> next variation
-      const isSwipeRight = diffX < -50; // Swipe right -> prev variation
-
-      const numVariations = activeDay?.variations.length || 0;
-      if (numVariations > 1) {
-        if (isSwipeLeft) {
-          setCurrentVariationIndex((prev) => (prev + 1) % numVariations);
-        } else if (isSwipeRight) {
-          setCurrentVariationIndex(
-            (prev) => (prev - 1 + numVariations) % numVariations,
-          );
-        }
-      }
-    }
-    setVariationTouchStartX(null);
-    setVariationTouchStartY(null);
-    setVariationTouchEndX(null);
-    setVariationTouchEndY(null);
-  };
-
   useEffect(() => {
     const handleLogsUpdate = () => {
       setLogsVersion((prev) => prev + 1);
@@ -962,11 +915,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("nexus_current_day_idx", String(currentDayIndex));
   }, [currentDayIndex]);
-
-  // Reset variation index on day or week change
-  useEffect(() => {
-    setCurrentVariationIndex(0);
-  }, [currentWeek, currentDayIndex]);
 
   // --- COLLAPSIBLE QUICK HISTORY FOR THE 4 TRAINING BLOCKS ---
   const [expandedBlockHistory, setExpandedBlockHistory] = useState<
