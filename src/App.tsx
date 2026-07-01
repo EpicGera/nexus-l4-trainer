@@ -9,6 +9,7 @@ import { SYSTEM_VERSION, SYSTEM_NAME, SYSTEM_TAGLINE } from "./lib/version";
 import { getProgramTodayPosition } from "./lib/programStart";
 import { getDayReward } from "./lib/sideQuests";
 import { useSideQuests } from "./hooks/useSideQuests";
+import { useCloudSync } from "./hooks/useCloudSync";
 import { useSheetSwipe } from "./hooks/useSheetSwipe";
 import { useVariationSwipe } from "./hooks/useVariationSwipe";
 import { useExportPanel } from "./hooks/useExportPanel";
@@ -100,9 +101,9 @@ import {
 } from "lucide-react";
 
 // Firebase core & sync integration
-import { auth, googleProvider, googleSignIn, getAccessToken, initAuth } from "./lib/firebase";
-import { signInWithPopup, signOut, User } from "firebase/auth";
-import { initializeSyncEngine, pushAllLocalToCloud } from "./lib/syncEngine";
+import { auth, googleProvider, googleSignIn, getAccessToken } from "./lib/firebase";
+import { signInWithPopup, signOut } from "firebase/auth";
+import { pushAllLocalToCloud } from "./lib/syncEngine";
 import { pushAthleteStats } from "./lib/athleteStats";
 import { exportToGoogleSheets } from "./lib/sheets";
 
@@ -151,20 +152,7 @@ const FULLVIEW_XL_COLS: Record<number, string> = {
 
 export default function App() {
   // --- STATE ---
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isCloudSyncing, setIsCloudSyncing] = useState<boolean>(false);
-  const [syncStatus, setSyncStatus] = useState({
-    hasPendingWrites: false,
-    fromCache: false,
-    isOnline: navigator.onLine,
-    lastSyncTime: Date.now()
-  });
-
   const [realTime, setRealTime] = useState(new Date());
-  const [syncWithRealTime, setSyncWithRealTime] = useState<boolean>(() => {
-    const saved = localStorage.getItem("nexus_sync_real_time");
-    return saved !== "false"; // Defaults to true
-  });
 
   const [currentWeek, setCurrentWeek] = useState<string>(() => {
     const savedSync = localStorage.getItem("nexus_sync_real_time") !== "false";
@@ -228,9 +216,18 @@ export default function App() {
   const [profileLens, setProfileLens] = useState<"perfil" | "datos" | "logros">(
     () => (localStorage.getItem("nexus_profile_lens") as "perfil" | "datos" | "logros") || "perfil",
   );
-  const [manualSyncState, setManualSyncState] = useState<
-    "idle" | "syncing" | "success" | "error"
-  >("idle");
+  const {
+    currentUser,
+    isCloudSyncing,
+    setIsCloudSyncing,
+    syncStatus,
+    syncWithRealTime,
+    setSyncWithRealTime,
+    manualSyncState,
+    setManualSyncState,
+    handleToggleSync,
+  } = useCloudSync(setCurrentWeek, setCurrentDayIndex);
+
   const [tempAthlete, setTempAthlete] = useState<AthleteState>(() => {
     const saved = localStorage.getItem("nexus_athlete_state");
     if (saved) {
@@ -579,32 +576,6 @@ export default function App() {
       setIsIntroGlitching(false);
     }, 850);
     return () => clearTimeout(timer);
-  }, []);
-
-  // --- CLOUD SYNC LIFE CYCLES ---
-  useEffect(() => {
-    const authCleanup = initAuth();
-    const cleanup = initializeSyncEngine((user, isSyncing) => {
-      setCurrentUser(user);
-      setIsCloudSyncing(isSyncing);
-    });
-    return () => {
-      authCleanup();
-      cleanup();
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleSyncStatus = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        setSyncStatus(customEvent.detail);
-      }
-    };
-    window.addEventListener("nexus_sync_status", handleSyncStatus);
-    return () => {
-      window.removeEventListener("nexus_sync_status", handleSyncStatus);
-    };
   }, []);
 
   useEffect(() => {
@@ -977,21 +948,6 @@ export default function App() {
         ...athlete,
         identity: tempName.trim().toUpperCase(),
       });
-    }
-  };
-
-  const handleToggleSync = () => {
-    const nextSync = !syncWithRealTime;
-    setSyncWithRealTime(nextSync);
-    localStorage.setItem("nexus_sync_real_time", String(nextSync));
-    if (nextSync) {
-      const now = new Date();
-      const autoWeek = getWeekOfProgram(now);
-      const jsDay = now.getDay();
-      const autoDayIndex = jsDay === 0 ? 6 : jsDay - 1;
-
-      setCurrentWeek(autoWeek);
-      setCurrentDayIndex(autoDayIndex);
     }
   };
 
