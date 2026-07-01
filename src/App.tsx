@@ -8,6 +8,7 @@ import { loadCustomFont } from "./lib/customFont";
 import { SYSTEM_VERSION, SYSTEM_NAME, SYSTEM_TAGLINE } from "./lib/version";
 import { getProgramTodayPosition } from "./lib/programStart";
 import { getDayReward } from "./lib/sideQuests";
+import { useSideQuests } from "./hooks/useSideQuests";
 import { useSheetSwipe } from "./hooks/useSheetSwipe";
 import { useVariationSwipe } from "./hooks/useVariationSwipe";
 import { useExportPanel } from "./hooks/useExportPanel";
@@ -420,51 +421,6 @@ export default function App() {
     return totalCount > 0 ? totalPoints / totalCount : 0;
   }, [stats]);
 
-  const [dailyGoals, setDailyGoals] = useState<Record<string, string>>(() => {
-    const saved = localStorage.getItem("nexus_daily_goals");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return {
-      // Semana 1 (Acumulación)
-      w1d1: "ESTABLECER VALORES BASE CON MOVIMIENTOS CONTROLADOS",
-      w1d2: "FLUSH CARDIOVASCULAR SUAVE PARA LIMPIAR LA CADENA POSTERIOR",
-      w1d3: "MANTENER RPE BAJO EN CADA COMPLEJO OLÍMPICO",
-      w1d4: "TRABAJO DE ACCESORIOS CON CONTRASTES EXCENTRÍCOS EXIGENTES",
-      w1d5: "ZONA AERÓBICA BAJA Y LIBERACIÓN MIOFASCIAL COMPLETA",
-      w1d6: "PARTNER FLOW CO-OP CON FOCO EN ACUMULACIÓN DE VOLUMEN SANO",
-      w1d7: "RECARGA EN EQUIPO: DIETA PRAGMÁTICA DE GLUCÓGENO Y APAGADO SNC",
-
-      // Semana 2 (Intensificación)
-      w2d1: "AUMENTAR INTENSIDAD CONTROLADA EN BACK SQUATS (RPE Máx 6)",
-      w2d2: "PRACTICAR TRANSICIONES FLUIDAS EN PULL-UPS CON AGARRE DE GANCHO",
-      w2d3: "COMPLEJO OLÍMPICO PESADO SIN PERDER EL NEUTRO LUMBAR",
-      w2d4: "POTENCIA: INTERVALOS CUBIERTOS EXACTOS SOBRE LA SOGA",
-      w2d5: "FLUSH REGENERATIVO PLANIFICADO DE 30 MINUTOS EN PAREJA",
-      w2d6: "SÁBADO DE EQUIPO: EJECUTAR SINERGIA SINCRO CON LUK",
-      w2d7: "SNC RESET TOTAL: CONEXIÓN CEREBRO-MÚSCULO COMPARTIDA EN DOMINGO",
-
-      // Semana 3 (Peak Week/Ápex)
-      w3d1: "ALCANZAR ÁPEX TÉCNICO EN EL COMPLEX DE CO-OP EN PAREJAS",
-      w3d2: "SOSTENER VELOCIDAD DE SALIDA BAJO FATIGA EN EL METCON",
-      w3d3: "FUERZA DE AGARRE: MAXIMIZAR TENSIÓN EXCENTRICA EN ACCESORIOS SÓLIDOS",
-      w3d4: "REGULAR EL CARDIO EN HAEDO FRACCIONANDO PERFECTAMENTE CADA SET",
-      w3d5: "CALIDAD DEL RANGO DE MOVIMIENTO ANTES QUE LA CARGA",
-      w3d6: "EXECUCIÓN CLÍNICA EXIGENTE CON PRECISIÓN MÁXIMA DE COMPAÑERO",
-      w3d7: "ALINEACIÓN INTEGRAL BAJO FATIGA Y DIETA DE ENERGÍA",
-
-      // Semana 4 (Deload / Descarga)
-      w4d1: "MANTENER VELOCIDAD DE BARRA CON BAJO PESO AL 50%",
-      w4d2: "ACTIVACIÓN SUAVE CON ESTIRAMIENTO PASIVO ASISTIDO",
-      w4d3: "REDUCIR EL VOLUMEN METABÓLICO EN EL METCON LIGERO CO-OP",
-      w4d4: "DRILLS TÉCNICOS SUTILES CON BASTÓN PVC O BARRA VACÍA",
-      w4d5: "PROTEGER LUMBARES Y DESCOMPRESIÓN ESPINAL EN BARRA",
-      w4d6: "PARTNER CO-OP SUAVE SIN ACUMULAR LACTATO NI AGOTAR SNC",
-      w4d7: "ACTO I SELLADO: PREPARAR EL CUERPO PARA EL DESIERTO (ACTO II)",
-    };
-  });
   // Workout program: defaults to the codegen'd snapshot, but can be refreshed
   // live from the Google Sheet (cached to localStorage across reloads).
   const [database, setDatabase] = useState<Database>(
@@ -521,6 +477,22 @@ export default function App() {
   const activeVariation =
     activeDay?.variations[currentVariationIndex] || activeDay?.variations[0];
 
+  const {
+    dailyGoals,
+    setDailyGoals,
+    sideQuests,
+    setSideQuests,
+    isGeneratingQuest,
+    lightningFlash,
+    setLightningFlash,
+    totalSideQuestXp,
+    earnedLootList,
+    dayTitleAlertTrigger,
+    handleFetchSideQuest,
+    handleValidateQuest,
+    handleResetQuest,
+  } = useSideQuests(activeDay, activeVariation, checkAndUnlockAchievement);
+
   const handleRefreshFromSheet = async () => {
     setIsRefreshingSheet(true);
     try {
@@ -536,7 +508,6 @@ export default function App() {
     }
   };
 
-  const [isGeneratingQuest, setIsGeneratingQuest] = useState(false);
 
   const {
     isExportingJPG,
@@ -600,34 +571,6 @@ export default function App() {
     return "PRVN / HWPO INSPIRED";
   };
 
-  // --- SIDE QUEST STATS & POOL ---
-  const [sideQuests, setSideQuests] = useState<
-    Record<
-      string,
-      {
-        completed: boolean;
-        proofText: string;
-        proofFileName: string;
-        checkedRom: boolean;
-        checkedBio: boolean;
-        checkedRpe: boolean;
-        rewardItem: string;
-        xpEarned: number;
-        completedAt?: string;
-      }
-    >
-  >(() => {
-    const saved = localStorage.getItem("nexus_daily_quests_v2");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return {};
-  });
-
-  const [lightningFlash, setLightningFlash] = useState(false);
-
   // --- INTRO GLITCH ---
   const [isIntroGlitching, setIsIntroGlitching] = useState(true);
 
@@ -637,18 +580,6 @@ export default function App() {
     }, 850);
     return () => clearTimeout(timer);
   }, []);
-
-  const totalSideQuestXp = useMemo(() => {
-    return Object.values(sideQuests)
-      .filter((q: any) => q.completed)
-      .reduce((acc: number, q: any) => acc + (q.xpEarned || 0), 0);
-  }, [sideQuests]);
-
-  const earnedLootList = useMemo(() => {
-    return Object.values(sideQuests)
-      .filter((q: any) => q.completed && q.rewardItem)
-      .map((q: any) => q.rewardItem);
-  }, [sideQuests]);
 
   // --- CLOUD SYNC LIFE CYCLES ---
   useEffect(() => {
@@ -761,61 +692,7 @@ export default function App() {
     };
   }, []);
 
-  // Side Quest proof states
-  const [proofInput, setProofInput] = useState("");
-  const [selectedProofFileName, setSelectedProofFileName] = useState("");
-  const [romCheck, setRomCheck] = useState(false);
-  const [bioCheck, setBioCheck] = useState(false);
-  const [rpeCheck, setRpeCheck] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-
-  // States to trigger a violent shake / electric flash animation on the day title
-  const [dayTitleAlertTrigger, setDayTitleAlertTrigger] = useState(false);
-  const prevQuestCompletedRef = useRef<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (!activeDay?.id) return;
-    const currentlyCompleted = !!sideQuests[activeDay.id]?.completed;
-    const previouslyCompleted = !!prevQuestCompletedRef.current[activeDay.id];
-
-    if (currentlyCompleted && !previouslyCompleted) {
-      // Trigger side quest completed excitement!
-      setDayTitleAlertTrigger(true);
-      const timer = setTimeout(() => {
-        setDayTitleAlertTrigger(false);
-      }, 1500);
-
-      // Also trigger lightning flash
-      setLightningFlash(true);
-      const lTimer = setTimeout(() => {
-        setLightningFlash(false);
-      }, 1200);
-    }
-
-    // Save current state as historical context
-    const updatedHistory = { ...prevQuestCompletedRef.current };
-    Object.keys(sideQuests).forEach((key) => {
-      updatedHistory[key] = !!sideQuests[key]?.completed;
-    });
-    prevQuestCompletedRef.current = updatedHistory;
-  }, [sideQuests, activeDay?.id]);
-
-  useEffect(() => {
-    if (activeDay) {
-      setProofInput(sideQuests[activeDay.id]?.proofText || "");
-      setSelectedProofFileName(sideQuests[activeDay.id]?.proofFileName || "");
-      setRomCheck(sideQuests[activeDay.id]?.checkedRom || false);
-      setBioCheck(sideQuests[activeDay.id]?.checkedBio || false);
-      setRpeCheck(sideQuests[activeDay.id]?.checkedRpe || false);
-    }
-  }, [activeDay?.id, sideQuests]);
-
-  // Auto-fetch sidequest if none exists for activeDay
-  useEffect(() => {
-    if (activeDay && !dailyGoals[activeDay.id] && !isGeneratingQuest) {
-      handleFetchSideQuest();
-    }
-  }, [activeDay?.id, dailyGoals]);
 
   const [logsVersion, setLogsVersion] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState<number>(0);
@@ -1116,72 +993,6 @@ export default function App() {
       setCurrentWeek(autoWeek);
       setCurrentDayIndex(autoDayIndex);
     }
-  };
-
-  const handleFetchSideQuest = async () => {
-    if (!activeDay) return;
-    setIsGeneratingQuest(true);
-    try {
-      const data = await generateSidequest(activeDay.id, activeDay.name, activeDay.title, activeVariation);
-      if (data && data.sidequest) {
-        const updated = {
-          ...dailyGoals,
-          [activeDay.id]: data.sidequest.trim().toUpperCase(),
-        };
-        setDailyGoals(updated);
-        localStorage.setItem("nexus_daily_goals", JSON.stringify(updated));
-      }
-    } catch (e) {
-      console.error("Error rolling sidequest:", e);
-    } finally {
-      setIsGeneratingQuest(false);
-    }
-  };
-
-  const handleValidateQuest = (
-    dayId: string,
-    proofText: string,
-    proofFileName: string,
-    checkedRom: boolean,
-    checkedBio: boolean,
-    checkedRpe: boolean,
-  ) => {
-    const rewards = getDayReward(dayId);
-
-    // play spectacular lightning strobe flash!
-    setLightningFlash(true);
-    setTimeout(() => {
-      setLightningFlash(false);
-    }, 1200);
-
-    const updated = {
-      ...sideQuests,
-      [dayId]: {
-        completed: true,
-        proofText,
-        proofFileName,
-        checkedRom,
-        checkedBio,
-        checkedRpe,
-        rewardItem: rewards.item,
-        xpEarned: rewards.xp,
-        completedAt: new Date().toISOString(),
-      },
-    };
-    setSideQuests(updated);
-    localStorage.setItem("nexus_daily_quests_v2", JSON.stringify(updated));
-
-    // Unlock achievement if complete clinical indicators are satisfied
-    if (checkedRom && checkedBio && checkedRpe) {
-      setTimeout(() => checkAndUnlockAchievement("clinical_sec"), 800);
-    }
-  };
-
-  const handleResetQuest = (dayId: string) => {
-    const updated = { ...sideQuests };
-    delete updated[dayId];
-    setSideQuests(updated);
-    localStorage.setItem("nexus_daily_quests_v2", JSON.stringify(updated));
   };
 
   const renderExplicitTimeCapBlock = (
