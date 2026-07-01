@@ -1,0 +1,1214 @@
+{
+  "w1": {
+    "days": [
+      {
+        "id": "w1d1",
+        "name": "LUNES",
+        "title": "La Guarida del Mal",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "AMRAP 6 MIN",
+              "items": [
+                "Remo",
+                "Banded Good Mornings",
+                "Cossack Squats"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "4x6 @ 65-70% | Rest 90s",
+              "items": [
+                "Back Squat"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "3 Min ON / 1 Min OFF x 4 Rondas",
+              "items": [
+                "Double Unders — 60 reps",
+                "Wall Balls — 15 reps (9kg)",
+                "Max Burpees — Tiempo restante"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Goblet Bulgarian Split Squats",
+                "V-Ups Lastrados"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w1d2",
+        "name": "MARTES",
+        "title": "Espectros del Abismo",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "10 Minutos",
+              "items": [
+                "Foam Roller",
+                "Movilidad de tobillo"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "35 Minutos Continuos",
+              "items": [
+                "Cardio continuo Zona 2"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Rondas",
+              "items": [
+                "Planchas (Alta + Baja + Lateral)",
+                "Farmer Carry Pesado"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w1d3",
+        "name": "MIÉRCOLES",
+        "title": "Brujo de las Sombras",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Arm Circles",
+                "Push-ups",
+                "Band Pull-aparts"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "4x6 @ 65-70% | Rest 90s",
+              "items": [
+                "Strict Press"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "21-15-9 | Cap 8:00",
+              "items": [
+                "Calorías Ski o Remo",
+                "Doble KB Push Press"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Strict Pull-ups con Banda",
+                "Chin-ups con Banda",
+                "Bicep Curls con Barra Vacía"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w1d4",
+        "name": "JUEVES",
+        "title": "Gólem de Hierro",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Goblet Squats",
+                "Scapular Pull-ups",
+                "KB Single Arm Press"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA TÉCNICA",
+              "scheme": "4x3 @ 60%",
+              "items": [
+                "Power Snatch",
+                "Hang Power Snatch",
+                "Overhead Squat (OHS)"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "AMRAP 12 MIN",
+              "items": [
+                "Box Step-overs / Jump Overs — 15 reps",
+                "Power Snatches — 10 reps (Carga ligera 30-35kg)",
+                "Double Unders — 30 reps (Uso de Crossovers opcional) · realice crossovers"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Vuelos Laterales",
+                "Handstand Hold"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w1d5",
+        "name": "VIERNES",
+        "title": "Gargantúa",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. DESCANSO",
+              "scheme": "Excepción: Salida Standup (Trabajo pasado al Domingo)",
+              "items": [
+                "Descanso Pasivo Absoluto"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "",
+              "items": []
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "",
+              "items": []
+            }
+          }
+        ]
+      },
+      {
+        "id": "w1d6",
+        "name": "SÁBADO",
+        "title": "Hordas del Infierno",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Remo (o Ski / Bike)",
+                "Scapular Pull-ups",
+                "KB Deadlifts",
+                "Spiderman Lunges con rotación"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "Por Tiempo | Cap 25:00",
+              "items": [
+                "Remo — 1000m (Time Cap 25:00)",
+                "KB Swings — 50 reps (24kg)",
+                "Wall Balls — 40 reps (9kg)",
+                "Pull-ups — 30 reps",
+                "Devil Press — 20 reps (Pesados)",
+                "Double Unders — 250 reps"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "Por Tiempo",
+              "items": [
+                "Abmat Sit-ups"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w1d7",
+        "name": "DOMINGO",
+        "title": "Descanso Activo",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Glute Bridges",
+                "Extensiones lumbares (Supermans)",
+                "KB Swings ligeros"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "4x6 @ 60% | Rest 90s",
+              "items": [
+                "Deadlift Tradicional"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "EMOM 15 MIN",
+              "items": [
+                "Deadlifts ligeros — Minuto 1: 8 reps (30-40% RM)",
+                "Hang Power Cleans — Minuto 2: 6 reps",
+                "Push Jerks — Minuto 3: 4 reps"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Remo inclinado con barra",
+                "Barbell Hip Thrusts"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "w2": {
+    "days": [
+      {
+        "id": "w2d1",
+        "name": "LUNES",
+        "title": "La Guarida del Mal V2",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Air Squats",
+                "Walkouts",
+                "Glute Bridges"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "4x4 @ 75-80% | Rest 120s",
+              "items": [
+                "Back Squat"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "4 Min ON / 1 Min OFF x 4 Rondas",
+              "items": [
+                "Remo o Ski — 400m",
+                "Wall Balls — 20 reps",
+                "Max KB Swing (russian) — Tiempo restante"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Goblet Bulgarian Split Squats",
+                "V-Ups Lastrados"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w2d2",
+        "name": "MARTES",
+        "title": "Espectros V2",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "10 Minutos",
+              "items": [
+                "Foam Roller",
+                "Estiramiento dinámico",
+                "Hollow Hold — 30s",
+                "Puentes de Glúteo Marchando — 10 por lado"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "40 Minutos Continuos",
+              "items": [
+                "Cardio continuo Zona 2"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Rondas",
+              "items": [
+                "Farmer Carry Pesado",
+                "Plancha Frontal Isométrica"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w2d3",
+        "name": "MIÉRCOLES",
+        "title": "Brujo V2",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Band Pull-aparts",
+                "Flexiones a tempo",
+                "Scapular Pull-ups"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "4x4 @ 75-80% | Rest 120s",
+              "items": [
+                "Strict Press"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "21-15-9 | Cap 9:00",
+              "items": [
+                "Calorías Ski o Remo",
+                "Dumbbell Push Press"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Strict Pull-ups con Banda",
+                "Chin-ups con Banda",
+                "Hammer Curls con mancuernas"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w2d4",
+        "name": "JUEVES",
+        "title": "Gólem V2",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Goblet Squats",
+                "Scapular Pull-ups",
+                "KB Single Arm Press"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA TÉCNICA",
+              "scheme": "Every 1:30 x 5",
+              "items": [
+                "Hang Squat Snatch"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "AMRAP 14 MIN",
+              "items": [
+                "Box Step Overs — 15 reps",
+                "Power Snatches — 10 reps (Carga moderada)",
+                "Crossovers — 30 reps"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Vuelos Laterales",
+                "Handstand Hold"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w2d5",
+        "name": "VIERNES",
+        "title": "Gargantúa V2",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Glute Bridges",
+                "Extensiones lumbares (Supermans)",
+                "KB Swings ligeros"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "4x4 @ 75-80% | Rest 120s",
+              "items": [
+                "Deadlift Tradicional"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "5 Rondas Por Tiempo",
+              "items": [
+                "Deadlifts — 9 reps (Carga moderada para WOD)",
+                "Hang Power Cleans — 6 reps",
+                "Push Jerks — 3 reps"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "Bent Over Rows con barra",
+                "Barbell Hip Thrusts"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w2d6",
+        "name": "SÁBADO",
+        "title": "Hordas V2",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas | Cap 10:00",
+              "items": [
+                "15 supermans",
+                "10 spiderman push up"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "Por Tiempo | Cap 35:00",
+              "items": [
+                "Remo — 1200m (Time Cap 35:00)",
+                "Wall Balls — 50 reps",
+                "DB Snatches — 40 reps",
+                "Devil Press — 30 reps (con burpee)"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "Por Tiempo",
+              "items": [
+                "Abmat Sit-ups"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w2d7",
+        "name": "DOMINGO",
+        "title": "Tavern Portal",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. DESCANSO",
+              "scheme": "Recuperación neural plena / Súper-compensación",
+              "items": [
+                "Descanso Pasivo Absoluto"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "",
+              "items": []
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "",
+              "items": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "w3": {
+    "days": [
+      {
+        "id": "w3d1",
+        "name": "LUNES",
+        "title": "La Guarida del Mal V3",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "10 Air Squats",
+                "10 Walkouts",
+                "15 Glute Bridges"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA PEAK",
+              "scheme": "3x3 @ 85-90%",
+              "items": [
+                "Back Squat — Cinturón recomendado. Máxima tensión muscular"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "5 Min ON / 1 Min OFF x 3 Rondas",
+              "items": [
+                "80 Double Unders",
+                "12 Thrusters Pesados (50/35 kg)",
+                "Max Burpees Over Bar"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "6/6 Bulgarian Split Squats (Heavy)",
+                "15 V-Ups Lastrados"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w3d2",
+        "name": "MARTES",
+        "title": "Espectros V3",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "10 Arm Circles",
+                "10 Push-ups",
+                "15 Band Pull-aparts"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA PEAK",
+              "scheme": "3x3 @ 85-90%",
+              "items": [
+                "Strict Press — Estabilización torácica máxima. Empuje vertical puro"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON SPRINT",
+              "scheme": "Por Tiempo | Cap 6:00",
+              "items": [
+                "Calorías Máquina (O Battle Ropes rápidas)",
+                "Push Jerk con barra"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "3 Series",
+              "items": [
+                "6 Strict Pull-ups + 6 Chin-ups (Lastradas si es posible)",
+                "15 Bicep Curls pesados"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w3d3",
+        "name": "MIÉRCOLES",
+        "title": "Brujo V3",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "10 Halos",
+                "10 Fig 8",
+                "10 Squats",
+                "5 Walkout"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "4 Rondas",
+              "items": [
+                "10 Abs cortos con carga",
+                "8/8 Gorilla Row",
+                "8 Deadlift In Family"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "AMRAP 10 MIN",
+              "items": [
+                "3 Burpee Sync — Duplas: A Thruster / B Iso Squat. Penalidad: 5 Burpees c/2’",
+                "6 Thruster",
+                "18 Push-Up",
+                "45 Singles",
+                "3 Bastard Burpee Sync — Duplas: A Devil Press / B Plank. Penalidad: 5 Burpees c/2’",
+                "6 Devil Press",
+                "18 TRX",
+                "45 Squats"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "",
+              "items": []
+            }
+          }
+        ]
+      },
+      {
+        "id": "w3d4",
+        "name": "JUEVES",
+        "title": "Gólem V3",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "3 Rondas",
+              "items": [
+                "Movilidad articular libre, enfoque en tobillos, caderas y calentamiento con barra vacía."
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA TÉCNICA",
+              "scheme": "EMOM 8 MIN",
+              "items": [
+                "Complejo de 1 Power Snatch + 1 Hang Power Snatch + 1 Overhead Squat (OHS). — Enfoque en la velocidad de caída debajo de la barra"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "",
+              "items": []
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "",
+              "items": []
+            }
+          }
+        ]
+      },
+      {
+        "id": "w3d5",
+        "name": "VIERNES",
+        "title": "Gargantúa V3",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "Dinámico",
+              "items": [
+                "Activación estricta de lumbares y glúteos",
+                "10 Good Mornings PVC",
+                "15 Glute Bridges",
+                "Kipping drills",
+                "Lubricación de hombros",
+                "Supermans"
+              ]
+            },
+            "strength": {
+              "title": "02. STRENGTH PEAK",
+              "scheme": "3x3 @ 85-90%",
+              "items": [
+                "Heavy Deadlift"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "21-15-9",
+              "items": [
+                "Deadlift (80-85 kg) — Ejecutar For Quality para proteger la espalda",
+                "Box Jumps Altos (24 in)"
+              ]
+            },
+            "accessories": {
+              "title": "04. REINFORCE",
+              "scheme": "3 Series",
+              "items": [
+                "Barbell Hip Thrusts Heavy (85-95 kg)",
+                "Reverse Flys (10-12 kg)"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w3d6",
+        "name": "SÁBADO",
+        "title": "ANDARIEL",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "Gimnástico",
+              "items": [
+                "Kipping drills",
+                "Lubricación de hombros",
+                "Supermans",
+                "2 Rondas Extras: 10 Crunches cortos + 10 Air Squats — Activación articular"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. BOSS FIGHT",
+              "scheme": "Por Tiempo | Cap 35:00",
+              "items": [
+                "50 Cal Máquina (Buy-in) — Duplas activas",
+                "75 Ring Row",
+                "75 Sit Up",
+                "75 Box Jump Over",
+                "50 Cal Máquina (Cash-out) — 🎯 Dinámica L4: Trabajo brutal"
+              ]
+            },
+            "accessories": {
+              "title": "04. COOLDOWN",
+              "scheme": "10 Minutos",
+              "items": [
+                "3x5 Strict Pull up"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w3d7",
+        "name": "DOMINGO",
+        "title": "Tavern Portal",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. DESCANSO",
+              "scheme": "Recuperación neural plena / Súper-compensación",
+              "items": [
+                "Descanso Pasivo Absoluto — Regla de Oro Nexus L4: Reseteo de chasis neural"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "",
+              "items": []
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "",
+              "items": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "w4": {
+    "days": [
+      {
+        "id": "w4d1",
+        "name": "LUNES",
+        "title": "La Guarida del Mal V4",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "Flujo Suave",
+              "items": [
+                "Movilidad general 10 minutos"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA DELOAD",
+              "scheme": "3x5 @ 50%",
+              "items": [
+                "Back Squat — Velocidad concéntrica. Cero peso real"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON LIGERO",
+              "scheme": "AMRAP 10 MIN",
+              "items": [
+                "100 Single Unders",
+                "10 Air Squats",
+                "5 Burpees"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "2 Series",
+              "items": [
+                "Core pasivo",
+                "Planchas frontales suaves"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w4d2",
+        "name": "MARTES",
+        "title": "Espectros V4",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. MOVILIDAD",
+              "scheme": "15 Minutos",
+              "items": [
+                "Yoga / Stretching profundo en el living",
+                "Rodillo de espuma miofascial",
+                "Estiramiento asistido de isquiotibiales"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. FLUSH REGENERATIVO",
+              "scheme": "30 Minutos Continuos",
+              "items": [
+                "Caminata rápida al aire libre o bici muy suave — Evitar cualquier acumulación de fatiga"
+              ]
+            },
+            "accessories": {
+              "title": "04. RECUPERACIÓN",
+              "scheme": "Opcional",
+              "items": [
+                "Masaje deportivo",
+                "Sauna o tina caliente"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w4d3",
+        "name": "MIÉRCOLES",
+        "title": "Brujo V4",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "Flujo Suave",
+              "items": [
+                "Activación suave de hombros con bastón",
+                "10 rotaciones con banda"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA DELOAD",
+              "scheme": "3x5 @ 50%",
+              "items": [
+                "Strict Press — Trabajo puramente técnico y de movilidad"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON LIGERO",
+              "scheme": "Por Tiempo",
+              "items": [
+                "15 Cal Remo (Suave)",
+                "10 Push Press Livianos"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "2 Series",
+              "items": [
+                "Curls livianos con banda elástica"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w4d4",
+        "name": "JUEVES",
+        "title": "Gólem V4",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "Flujo Técnico",
+              "items": [
+                "Trabajo articular con tubo de PVC",
+                "10 OHS ligeros"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA TÉCNICA",
+              "scheme": "10 Minutos",
+              "items": [
+                "Drills de Snatch con barra vacía — Pulir los puntos de contacto e impulsión"
+              ]
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "EMOM 10 MIN",
+              "items": [
+                "10 Step-ups ligeros",
+                "5 Power Snatches con barra vacía"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "2 Series",
+              "items": [
+                "Movilidad de escápulas",
+                "Colgado de barra activo"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w4d5",
+        "name": "VIERNES",
+        "title": "Gargantúa V4",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "Dinámico",
+              "items": [
+                "Estiramiento dinámico de isquios y lumbar"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA DELOAD",
+              "scheme": "3x5 @ 50%",
+              "items": [
+                "Deadlift — Velocidad concéntrica explosiva, cero esfuerzo de frenado"
+              ]
+            },
+            "metcon": {
+              "title": "03. FLUSH",
+              "scheme": "15 Minutos Continuos",
+              "items": [
+                "Remo continuo a ritmo regenerativo"
+              ]
+            },
+            "accessories": {
+              "title": "04. ACCESORIOS",
+              "scheme": "2 Series",
+              "items": [
+                "Hip Thrusts livianos (40-50 kg)",
+                "Plancha core (BW)"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w4d6",
+        "name": "LUT GHOLEIN",
+        "title": "Social Party",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. WARM-UP",
+              "scheme": "Social",
+              "items": [
+                "Juegos de calentamiento en equipo con Flor",
+                "Mantener el ritmo sin disparar pulsaciones",
+                "Pacing de disfrute"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. TEAM WOD",
+              "scheme": "AMRAP 25 MIN",
+              "items": [
+                "500m Remo — Viaje de descarga. WOD para divertirse sin reloj",
+                "20 Wall Balls",
+                "10 Burpees"
+              ]
+            },
+            "accessories": {
+              "title": "04. COOLDOWN",
+              "scheme": "10 Minutos",
+              "items": [
+                "Chocar los 5",
+                "Estirar charlando de forma recreativa"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "w4d7",
+        "name": "DOMINGO",
+        "title": "Tavern Portal",
+        "isCompleted": false,
+        "hasTabs": false,
+        "variations": [
+          {
+            "tabName": "RX · REGISTRO REAL",
+            "warmup": {
+              "title": "01. LOGRO OBTENIDO",
+              "scheme": "Acto I Completo",
+              "items": [
+                "Sobreviviste al Campamento de las Arpías",
+                "Nivel de resiliencia biomecánica: Avanzado",
+                "Estabilidad lumbar blindada",
+                "Core activado y cadena posterior robustecida",
+                "Totalmente recuperado",
+                "Preparado para el Desierto (Acto II)"
+              ]
+            },
+            "strength": {
+              "title": "02. FUERZA",
+              "scheme": "",
+              "items": []
+            },
+            "metcon": {
+              "title": "03. METCON",
+              "scheme": "",
+              "items": []
+            },
+            "accessories": {
+              "title": "04. PRÓXIMO PASO",
+              "scheme": "Fase II",
+              "items": [
+                "Apertura del Acto II: Las Catacumbas",
+                "Aumento progresivo de cargas axiales"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

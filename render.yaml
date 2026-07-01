@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nexus-l4-api
+    env: docker
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /

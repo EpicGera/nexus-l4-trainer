@@ -1,0 +1,48 @@
+import { describe, it, expect, beforeEach } from "vitest";
+import { recordManualLog, getSessionForDay } from "./sessionStore";
+
+describe("recordManualLog (manual → structured bridge)", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("mirrors a manual loaded-lift log into a structured session", () => {
+    recordManualLog("w1d1", "Back Squat", [
+      { id: "a", weight: "100 kg", reps: "5 reps", rpe: "8", rir: "2", timestamp: 111 },
+    ]);
+    const s = getSessionForDay("w1d1");
+    expect(s).toBeTruthy();
+    expect(s!.sets).toHaveLength(1);
+    expect(s!.sets[0].exerciseId).toBe("back-squat");
+    expect(s!.sets[0].weightKg).toBe(100);
+    expect(s!.sets[0].reps).toBe(5);
+    expect(s!.sets[0].rpe).toBe(8);
+    expect(s!.sets[0].isBodyweight).toBe(false);
+  });
+
+  it("treats a non-kg weight as bodyweight", () => {
+    recordManualLog("w1d4", "Pull-up", [{ weight: "P. Corporal", reps: "10 reps", rpe: "7" }]);
+    const s = getSessionForDay("w1d4");
+    expect(s!.sets[0].isBodyweight).toBe(true);
+    expect(s!.sets[0].weightKg).toBeNull();
+    expect(s!.sets[0].reps).toBe(10);
+  });
+
+  it("routes cardio ergs to calories and replaces (not appends) on re-save", () => {
+    recordManualLog("w1d2", "Row", [{ weight: "", reps: "15cal", rpe: "7" }]);
+    let s = getSessionForDay("w1d2");
+    expect(s!.sets[0].exerciseId).toBe("row-erg");
+    expect(s!.sets[0].calories).toBe(15);
+    expect(s!.sets[0].weightKg).toBeNull();
+
+    recordManualLog("w1d2", "Row", [{ weight: "", reps: "20cal", rpe: "8" }]);
+    s = getSessionForDay("w1d2");
+    expect(s!.sets.filter((x) => x.exerciseName === "Row")).toHaveLength(1);
+    expect(s!.sets[0].calories).toBe(20);
+  });
+
+  it("merges into the day's session without dropping other movements", () => {
+    recordManualLog("w1d3", "Back Squat", [{ weight: "100 kg", reps: "5", rpe: "8" }]);
+    recordManualLog("w1d3", "Deadlift", [{ weight: "140 kg", reps: "3", rpe: "9" }]);
+    const s = getSessionForDay("w1d3");
+    expect(s!.sets).toHaveLength(2);
+  });
+});

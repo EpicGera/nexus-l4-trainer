@@ -1,0 +1,6 @@
+{
+  "name": "NEXUS L4 // TRAINER",
+  "description": "Fase I: Fuerza de Base y Densidad Aeróbica. Un panel clínico de alto rendimiento para Gerardo & Flor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
