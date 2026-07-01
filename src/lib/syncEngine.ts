@@ -85,6 +85,24 @@ export function setupStorageMonkeypatch() {
   };
 }
 
+// ponytail: one toast per failure streak (resets on the next successful push)
+// — enough to stop silent data-loss surprises without a retry queue.
+let pushFailureNotified = false;
+function notifyPushFailure() {
+  if (pushFailureNotified) return;
+  pushFailureNotified = true;
+  window.dispatchEvent(
+    new CustomEvent('nexus_toast', {
+      detail: {
+        message:
+          '⚠️ La sincronización a la nube falló — tus datos siguen guardados en este dispositivo',
+        kind: 'error',
+        durationMs: 8000,
+      },
+    }),
+  );
+}
+
 // Queue a Firestore update with a 300ms debounce
 function queueCloudPush(userId: string, key: string, value: string | null) {
   if (writeTimeouts.has(key)) {
@@ -109,8 +127,10 @@ function queueCloudPush(userId: string, key: string, value: string | null) {
           updatedAt: updatedAtStr
         });
       }
+      pushFailureNotified = false;
     } catch (error) {
       console.error(`Error syncing key ${key} to Firestore:`, error);
+      notifyPushFailure();
       // Suppress alert popups using the silent handleFirestoreError pattern
       try {
         const safeDocId = getSafeDocId(key);
