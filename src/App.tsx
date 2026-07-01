@@ -8,6 +8,7 @@ import { loadCustomFont } from "./lib/customFont";
 import { SYSTEM_VERSION, SYSTEM_NAME, SYSTEM_TAGLINE } from "./lib/version";
 import { getProgramTodayPosition } from "./lib/programStart";
 import { getDayReward } from "./lib/sideQuests";
+import { useSheetSwipe } from "./hooks/useSheetSwipe";
 import {
   fetchWorkoutsFromSheet,
   loadCachedWorkouts,
@@ -801,18 +802,21 @@ export default function App() {
   const [confettiTrigger, setConfettiTrigger] = useState<number>(0);
   const [rpeTrendRange, setRpeTrendRange] = useState<number>(30);
   const [lastLoggingPercentage, setLastLoggingPercentage] = useState<number>(0);
-  const [transitionDirection, setTransitionDirection] = useState<
-    "left" | "right"
-  >("right");
   const [completedCompExercises, setCompletedCompExercises] = useState<{
     [key: string]: boolean;
   }>({});
   const [showRpeDemo, setShowRpeDemo] = useState<boolean>(true);
 
-  // Multi-sheet paging states
-  const [activeSheet, setActiveSheet] = useState<number>(0); // 0: Pizarrón Diario, 1: RPE & Progresiones, 2: Perfil y Telemetría, 3: Guerrero
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+  const {
+    activeSheet,
+    transitionDirection,
+    handleNextSheet,
+    handlePrevSheet,
+    handleSetActiveSheetWithDirection,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useSheetSwipe();
 
   // Variation swipe states
   const [variationTouchStartX, setVariationTouchStartX] = useState<
@@ -872,48 +876,6 @@ export default function App() {
     setVariationTouchStartY(null);
     setVariationTouchEndX(null);
     setVariationTouchEndY(null);
-  };
-
-  const handleNextSheet = () => {
-    setTransitionDirection("right"); // "se moverá a la derecha"
-    setActiveSheet((prev) => (prev + 1) % 4);
-  };
-
-  const handlePrevSheet = () => {
-    setTransitionDirection("left"); // "la pantalla se moverá a la izquierda"
-    setActiveSheet((prev) => (prev - 1 + 4) % 4);
-  };
-
-  const handleSetActiveSheetWithDirection = (index: number) => {
-    if (index > activeSheet) {
-      setTransitionDirection("right");
-    } else if (index < activeSheet) {
-      setTransitionDirection("left");
-    }
-    setActiveSheet(index);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEndX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX === null || touchEndX === null) return;
-    const distance = touchStartX - touchEndX;
-    const isSwipeLeft = distance > 75; // Swipe left -> go next page
-    const isSwipeRight = distance < -75; // Swipe right -> go prev page
-
-    if (isSwipeLeft) {
-      handleNextSheet();
-    } else if (isSwipeRight) {
-      handlePrevSheet();
-    }
-    setTouchStartX(null);
-    setTouchEndX(null);
   };
 
   useEffect(() => {
