@@ -6,6 +6,7 @@
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { cleanExerciseLabel } from "./historyUtils";
+import { parseLoggedNumber, parseLoggedWeightKg } from "./logParse";
 import { loadSessions } from "./sessionStore";
 import { getBodyweightKg } from "./profileMetrics";
 import {
@@ -52,10 +53,8 @@ export interface AthleteStatsDoc {
   patternTonnageKg: Record<string, number>;
 }
 
-const numFrom = (v: unknown): number => {
-  const m = String(v ?? "").match(/(\d+(?:\.\d+)?)/);
-  return m ? parseFloat(m[1]) : 0;
-};
+// Unit-aware legacy parsers: "400m" in the weight field is cardio, not 400 kg.
+const numFrom = parseLoggedNumber;
 
 // Firestore map keys cannot contain ~ * / [ ] and dotted keys are ambiguous.
 const safeFieldKey = (s: string): string =>
@@ -153,7 +152,7 @@ export function computeAthleteStats(): AthleteStatsDoc {
 
       sets.forEach((set: any) => {
         totalSets++;
-        const weight = numFrom(set.weight);
+        const weight = parseLoggedWeightKg(set.weight);
         const reps = numFrom(set.reps);
         const volume = weight * reps;
         totalVolumeKg += volume;

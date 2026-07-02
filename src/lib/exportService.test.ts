@@ -15,10 +15,26 @@ describe('getMonthlyVolumeStats', () => {
 
     expect(stats.totalVolume).toBe(0);
     expect(stats.totalLogsCount).toBe(0);
-    expect(stats.weeklyVolume).toEqual({ w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 });
-    expect(stats.weeklyCount).toEqual({ w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 });
-    expect(stats.weeklyRpeSum).toEqual({ w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 });
-    expect(stats.weeklyRpeCount).toEqual({ w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 });
+    // Week keys are dynamic now (created on demand, any week number) — an
+    // empty store yields empty maps, not the old fixed w1..w6 dict.
+    expect(stats.weeklyVolume).toEqual({});
+    expect(stats.weeklyCount).toEqual({});
+    expect(stats.weeklyRpeSum).toEqual({});
+    expect(stats.weeklyRpeCount).toEqual({});
+  });
+
+  it('counts week 7+ and rejects cardio strings stored as weight', () => {
+    localStorage.setItem(
+      'nexus_logs_w7d1_squat',
+      JSON.stringify([{ weight: '80 kg', reps: 5, rpe: 8 }]),
+    );
+    localStorage.setItem(
+      'nexus_logs_w7d2_row',
+      JSON.stringify([{ weight: '400m', reps: 1, rpe: 7 }]),
+    );
+    const stats = getMonthlyVolumeStats();
+    expect(stats.weeklyVolume.w7).toBe(400); // 80×5; the 400m adds 0 kg
+    expect(stats.weeklyRpeCount.w7).toBe(2); // RPE still counts for cardio
   });
 
   it('should ignore irrelevant keys in localStorage', () => {

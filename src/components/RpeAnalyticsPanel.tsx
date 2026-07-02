@@ -86,7 +86,10 @@ export default function RpeAnalyticsPanel({
             El RPE objetivo de cada semana es tu vara: comparalo con tu RPE real para ver si vas suave,
             en punto, o pasado. Más abajo, la fatiga acumulada sobre el SNC te avisa cuándo meter recuperación.
           </HelpNote>
-          <RpeProgressionSection currentWeek={currentWeek} />
+          <RpeProgressionSection
+            currentWeek={currentWeek}
+            weekIntention={database?.[currentWeek]?.meta?.intention}
+          />
           <WeeklyRpeSection
             currentWeek={currentWeek}
             activeDayId={activeDay?.id ?? null}

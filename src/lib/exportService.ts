@@ -8,6 +8,7 @@ import { exportToGoogleSheets } from "./sheets";
 import { loadCachedWorkouts, getDefaultProgram } from "./sheetImport";
 import { cleanExerciseLabel, getCleanExerciseName } from "./historyUtils";
 import { parseDayId } from "./storageKeys";
+import { parseLoggedNumber, parseLoggedWeightKg } from "./logParse";
 import { AthleteState, DayWorkout, DayVariation } from "../types/workout";
 
 // Lightweight global toast: any component listening to "nexus_toast" renders it.
@@ -199,38 +200,11 @@ export const handleExportGoogleSheets = async (
 
 // --- Statistics Compilation ---
 export const getMonthlyVolumeStats = () => {
-  const weeklyVolume: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
-  const weeklyCount: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
-  const weeklyRpeSum: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
-  const weeklyRpeCount: Record<string, number> = {
-    w1: 0,
-    w2: 0,
-    w3: 0,
-    w4: 0,
-    w5: 0,
-    w6: 0,
-  };
+  // Dynamic week keys — the old fixed w1..w6 dicts silently dropped week 7+.
+  const weeklyVolume: Record<string, number> = {};
+  const weeklyCount: Record<string, number> = {};
+  const weeklyRpeSum: Record<string, number> = {};
+  const weeklyRpeCount: Record<string, number> = {};
 
   let totalVolume = 0;
   let totalLogsCount = 0;
@@ -246,25 +220,24 @@ export const getMonthlyVolumeStats = () => {
             const parts = key.split("_");
             const dayId = parts[2] || "";
             const parsed = parseDayId(dayId);
-            // Multi-digit safe: "w10d1" → "w10" (not "w1"). Weeks past this
-            // 6-week report fall outside the dict and are skipped, not folded
-            // into week 1 (the old substring(0,2) bug).
+            // Multi-digit safe: "w10d1" → "w10" (not "w1", the old
+            // substring(0,2) bug). Any week number counts.
             const wkKey = parsed ? `w${parsed.week}` : "";
 
-            if (wkKey && weeklyVolume[wkKey] !== undefined) {
-              weeklyCount[wkKey]++;
+            if (wkKey) {
+              weeklyCount[wkKey] = (weeklyCount[wkKey] || 0) + 1;
               totalLogsCount++;
 
               parsedLogs.forEach((set) => {
-                const wt = parseFloat(set.weight) || 0;
-                const rp = parseFloat(set.reps) || 0;
-                weeklyVolume[wkKey] += wt * rp;
+                const wt = parseLoggedWeightKg(set.weight);
+                const rp = parseLoggedNumber(set.reps);
+                weeklyVolume[wkKey] = (weeklyVolume[wkKey] || 0) + wt * rp;
                 totalVolume += wt * rp;
 
                 const rpVal = parseFloat(set.rpe);
                 if (!isNaN(rpVal) && rpVal > 0) {
-                  weeklyRpeSum[wkKey] += rpVal;
-                  weeklyRpeCount[wkKey]++;
+                  weeklyRpeSum[wkKey] = (weeklyRpeSum[wkKey] || 0) + rpVal;
+                  weeklyRpeCount[wkKey] = (weeklyRpeCount[wkKey] || 0) + 1;
                 }
               });
             }
@@ -605,7 +578,7 @@ export const handleGenerateMonthlyReportPDF = (athlete: AthleteState) => {
     doc.setTextColor(255, 255, 255);
 
     doc.text(weekLabels[wk] || wk.toUpperCase(), 13, currentY + 6.5);
-    doc.text(`${stats.weeklyCount[wk]} movs.`, 70, currentY + 6.5);
+    doc.text(`${stats.weeklyCount[wk] || 0} movs.`, 70, currentY + 6.5);
     doc.text(`${stats.weeklyVolume[wk]?.toLocaleString() || "0"} kg`, 115, currentY + 6.5);
 
     const rpeAvg = stats.weeklyRpeCount[wk] > 0 ? stats.weeklyRpeSum[wk] / stats.weeklyRpeCount[wk] : 0;

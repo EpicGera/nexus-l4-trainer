@@ -129,8 +129,13 @@ export default function WarriorScreen({
   }, [stats]);
 
   const weeklyVolume = useMemo(() => {
+    // Numeric week sort — localeCompare put w10 before w2.
     return Object.entries(stats.weeklyVolumeKg)
-      .sort((a, b) => a[0].localeCompare(b[0]))
+      .sort(
+        (a, b) =>
+          (parseInt(a[0].slice(1), 10) || 0) -
+          (parseInt(b[0].slice(1), 10) || 0),
+      )
       .map(([week, vol]) => ({
         week: week.toUpperCase().replace("W", "S"),
         volume: Math.round(vol),

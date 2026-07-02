@@ -122,4 +122,37 @@ describe("auditProgram", () => {
     expect(unreadable[0].where).toMatch(/Crossovers|ítem 4/i);
     expect(r.stats.unreadableItems).toBe(1);
   });
+
+  it("hard-fails (ok:false) when most stations are unreadable — gate, not advice", () => {
+    const broken = {
+      w1: {
+        days: [
+          {
+            id: "w1d1",
+            variations: [
+              {
+                tabName: "RX",
+                b1_strength: {
+                  title: "01. FUERZA",
+                  scheme: "TRABAJO LIBRE",
+                  items: [
+                    "Handstand Walk práctica libre",
+                    "Skill de anillas a criterio",
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const r = auditProgram(broken);
+    expect(r.stats.unreadableItems).toBeGreaterThanOrEqual(1);
+    expect(r.ok).toBe(false);
+    expect(r.issues.some((i) => i.severity === "error")).toBe(true);
+  });
+
+  it("a single unreadable station among many readable ones still imports (ok:true)", () => {
+    expect(auditProgram(realDay).ok).toBe(true);
+  });
 });

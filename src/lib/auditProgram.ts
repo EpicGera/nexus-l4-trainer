@@ -214,6 +214,14 @@ export function auditProgram(raw: unknown): AuditResult {
 
   if (totalLoggableItems === 0) {
     issues.push({ severity: "error", where: "root", message: "El programa no tiene ningún ejercicio loggable (todos los items están vacíos o son notas)." });
+  } else if (stats.unreadableItems * 2 >= totalLoggableItems) {
+    // Gate, not just advice: with most stations unreadable the program is
+    // effectively unloggable — a handful of warnings is importable, this isn't.
+    issues.push({
+      severity: "error",
+      where: "root",
+      message: `${stats.unreadableItems} de ${totalLoggableItems} estaciones no son legibles automáticamente — corregí las prescripciones (series/reps/carga) antes de importar.`,
+    });
   }
 
   const ok = !issues.some((i) => i.severity === "error");

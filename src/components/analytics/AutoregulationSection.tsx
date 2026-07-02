@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Gauge } from "lucide-react";
 import { puntajeNexus } from "../../lib/nexusScore";
 import { proposeAdjustments, Adjustment } from "../../lib/autoregulate";
@@ -21,6 +21,15 @@ const PERF_ES: Record<string, string> = {
  */
 export default function AutoregulationSection({ currentWeek }: { currentWeek: string }) {
   const [refresh, setRefresh] = useState(0);
+
+  // Recompute when new sets are logged anywhere in the app — without this the
+  // Puntaje only refreshed on remount or after applying an adjustment.
+  useEffect(() => {
+    const bump = () => setRefresh((prev) => prev + 1);
+    window.addEventListener("nexus_logs_updated", bump);
+    return () => window.removeEventListener("nexus_logs_updated", bump);
+  }, []);
+
   const { score, result } = useMemo(() => {
     const sc = puntajeNexus(currentWeek);
     const evalA = evaluateAthlete();

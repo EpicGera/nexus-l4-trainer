@@ -45,7 +45,15 @@ export default function VolumeProgressionSection({
 }: VolumeProgressionSectionProps) {
   const stats = getMonthlyVolumeStats();
 
-  const chartData = (["w1", "w2", "w3", "w4"] as const).map((wk) => {
+  // Weeks come from the data itself (numeric sort) — the old fixed w1..w4 map
+  // silently hid week 5+ from the chart. Always show at least the classic 4.
+  const weekKeys = Array.from(
+    new Set(["w1", "w2", "w3", "w4", ...Object.keys(stats.weeklyVolume)]),
+  ).sort(
+    (a, b) => (parseInt(a.slice(1), 10) || 0) - (parseInt(b.slice(1), 10) || 0),
+  );
+
+  const chartData = weekKeys.map((wk) => {
     const volume = Math.round(stats.weeklyVolume[wk] || 0);
     const rpeCount = stats.weeklyRpeCount[wk] || 0;
     const rpe =
@@ -65,11 +73,17 @@ export default function VolumeProgressionSection({
   const totalReal = chartData.reduce((sum, d) => sum + d.volume, 0);
   const hasData = totalReal > 0 || stats.totalLogsCount > 0;
 
-  // W4 deload sanity check vs the athlete's own loading weeks (no fixed kg targets)
-  const loadAvg =
-    (chartData[0].volume + chartData[1].volume + chartData[2].volume) / 3;
+  // Deload sanity check: the cycle's deload week (w4) vs the athlete's own
+  // loading weeks (no fixed kg targets). Only meaningful in the 4-week cycle.
+  const deload = chartData.find((d) => d.week === "w4");
+  const loading = chartData.filter(
+    (d) => ["w1", "w2", "w3"].includes(d.week) && d.volume > 0,
+  );
+  const loadAvg = loading.length
+    ? loading.reduce((s, d) => s + d.volume, 0) / loading.length
+    : 0;
   const isW4Overdoing =
-    chartData[3].volume > 0 && loadAvg > 0 && chartData[3].volume > loadAvg * 0.75;
+    !!deload && deload.volume > 0 && loadAvg > 0 && deload.volume > loadAvg * 0.75;
 
   let accentColor = "#1F51FF";
   const savedColorId = localStorage.getItem("nexus_custom_accent_color");

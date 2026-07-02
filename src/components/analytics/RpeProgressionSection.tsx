@@ -4,7 +4,18 @@ import { SectionCard, Pill, TXT } from "../ui/primitives";
 
 interface RpeProgressionSectionProps {
   currentWeek: string;
+  /** Declared/inferred intention of the current program week (WeekMeta). */
+  weekIntention?: string;
 }
+
+// Card ↔ canonical BlockIntention, so week 5+ of a long program still maps to
+// its real phase instead of matching nothing (the old w1–w4 code equality).
+const INTENTION_TO_CODE: Record<string, string> = {
+  acumulacion: "w1",
+  intensificacion: "w2",
+  realizacion: "w3",
+  restauracion: "w4",
+};
 
 /**
  * Single source of truth for the 4-week intensity cycle: one card per week
@@ -13,13 +24,19 @@ interface RpeProgressionSectionProps {
  */
 export default function RpeProgressionSection({
   currentWeek,
+  weekIntention,
 }: RpeProgressionSectionProps) {
   const [storageUpdate, setStorageUpdate] = useState(0);
 
   useEffect(() => {
     const handleStorage = () => setStorageUpdate((prev) => prev + 1);
+    // "storage" only fires cross-tab; nexus_logs_updated covers same-tab logging.
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("nexus_logs_updated", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("nexus_logs_updated", handleStorage);
+    };
   }, []);
 
   // --- COMPARATIVE RPE TABLE (Current Week vs Last 30 Days) — real data only ---
@@ -137,7 +154,11 @@ export default function RpeProgressionSection({
       >
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {cycle.map((wk) => {
-            const isCurrent = currentWeek === wk.code;
+            // Prefer the program's declared/inferred intention (works for any
+            // cycle length); fall back to code equality for the classic w1–w4.
+            const isCurrent = weekIntention
+              ? INTENTION_TO_CODE[weekIntention] === wk.code
+              : currentWeek === wk.code;
             return (
               <div
                 key={wk.code}
