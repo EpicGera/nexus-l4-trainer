@@ -1,4 +1,4 @@
-// Fase E — cobertura del espectro (PRVN, enciclopedia cap. 11): en una ventana de
+// Fase E — cobertura del espectro (PRVN, enciclopedia V7 caps. 15-16 y 40): en una ventana de
 // programa, ¿qué sistemas energéticos y dominios de tiempo toca el atleta? Las
 // celdas vacías son los huecos. Usa la metadata derivada de los bloques metcon
 // (Fase D), así que solo aplica a programas con `blocks[]`.

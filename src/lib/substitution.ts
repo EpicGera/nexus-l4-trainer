@@ -1,4 +1,4 @@
-// Matriz de sustitución L4 (enciclopedia cap. 45B, estándar Mayhem). Ratios
+// Matriz de sustitución L4 (enciclopedia V7 cap. 58 y Apéndices F-H, estándar Mayhem). Ratios
 // aeróbicos del motor WODForge + sustituciones de gimnasia. El cuerpo entiende
 // de gasto cardíaco, no de máquina: estas equivalencias preservan el estímulo.
 

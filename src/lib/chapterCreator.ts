@@ -1,5 +1,5 @@
 // Phase 4 — Chapter Creator foundation (pure + testable).
-// CF-L4 principle: evaluation precedes prescription (NEXUSL4V7.MD cap.28).
+// CF-L4 principle: evaluation precedes prescription (NEXUSL4V7.MD caps. 28-29).
 // evaluateAthlete() reads the structured sessions + derivation engine and produces
 // a structured assessment (strengths, modal holes, weak skills, load/ACWR,
 // recommended block intention) plus a human-readable summary that grounds the AI

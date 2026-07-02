@@ -1,4 +1,4 @@
-// Agrupación estricta (Tight Grouping, enciclopedia cap. 43): en metcons de
+// Agrupación estricta (Tight Grouping, enciclopedia V7 caps. 17-18): en metcons de
 // intervalos, el dominio aeróbico se mide por la MÍNIMA desviación entre rondas,
 // no por el intervalo más rápido. Picos al inicio + colapso al final = fracaso
 // táctico. Esta es una herramienta de coach: el atleta pega sus tiempos y ve
@@ -72,5 +72,5 @@ export const GROUPING_META: Record<GroupingVerdict, { label: string; color: stri
   elite: { label: "AGRUPACIÓN ÉLITE", color: "#00f0ff", hint: "Dominio absoluto del motor: rondas casi idénticas." },
   solid: { label: "SÓLIDA", color: "#1F51FF", hint: "Buen control de ritmo; pequeñas variaciones." },
   ok: { label: "ACEPTABLE", color: "#ff8a00", hint: "Variación notable — apuntá a rondas más parejas." },
-  loose: { label: "DISPERSA", color: "#ff0055", hint: "Picos y colapsos: fracaso táctico (cap. 43). Salí más conservador." },
+  loose: { label: "DISPERSA", color: "#ff0055", hint: "Picos y colapsos: fracaso táctico (cap. 17). Salí más conservador." },
 };

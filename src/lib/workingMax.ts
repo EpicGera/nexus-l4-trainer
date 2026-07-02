@@ -1,4 +1,4 @@
-// Working Max (HWPO, enciclopedia cap. 17): los porcentajes de fuerza se calculan
+// Working Max (HWPO, enciclopedia V7 cap. 46 / Apéndice K.2): los porcentajes de fuerza se calculan
 // sobre el Working Max = 90% del 1RM real, no sobre el 1RM. Este módulo guarda los
 // 1RM del atleta (syncable: clave `nexus_`), y resuelve un scheme con `% WM`
 // (ej. "4x6 @ 65-70% WM") + un ejercicio a un rango de carga en kg para mostrar.
@@ -33,7 +33,7 @@ export const isMainLift = (id: string) => MAIN_LIFT_IDS.has(id);
 const ADJUST_KEY = "nexus_wm_adjust";
 
 /**
- * Working Max Dinámico coefficient K (enciclopedia cap. 30–31 / Apéndice B):
+ * Working Max Dinámico coefficient K (enciclopedia V7 cap. 46 / Apéndices B y K.2):
  * WMD = 1RM × K, calibrated per athlete (0.85 fast-fatiguing / 0.90 balanced /
  * 0.93–0.95 high volume tolerance). Read from the athlete profile; defaults to
  * the classic 0.9 when unset or out of a sane range.

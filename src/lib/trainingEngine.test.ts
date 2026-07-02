@@ -114,8 +114,14 @@ describe("training load", () => {
     expect(acwr({}, ref)).toBeNull();
   });
 
-  it("monotony/strain: flat week has no monotony; varied week does", () => {
-    expect(monotonyStrain([400, 400, 400]).monotony).toBeNull();
+  it("monotony/strain: flat nonzero week is MAX monotony (Apéndice K.5), not null", () => {
+    // Identical loads across ≥2 days = the highest-risk case Foster warns about.
+    const flat = monotonyStrain([400, 400, 400]);
+    expect(flat.monotony).toBe(5);
+    expect(flat.strain).toBe(1200 * 5);
+    // Insufficient data stays null: a single day, or a week with zero load.
+    expect(monotonyStrain([400]).monotony).toBeNull();
+    expect(monotonyStrain([0, 0, 0]).monotony).toBeNull();
     const ms = monotonyStrain([400, 0, 400, 0, 400, 0, 0]);
     expect(ms.weeklyLoad).toBe(1200);
     expect(ms.monotony).toBeGreaterThan(0);

@@ -193,7 +193,16 @@ export function monotonyStrain(dailyLoads: number[]): MonotonyStrain {
   const mean = weeklyLoad / n;
   const variance = dailyLoads.reduce((a, b) => a + (b - mean) ** 2, 0) / n;
   const sd = Math.sqrt(variance);
-  if (sd === 0) return { weeklyLoad, monotony: null, strain: null };
+  if (sd === 0) {
+    // Identical nonzero loads across ≥2 days is MAXIMUM monotony (Apéndice
+    // K.5) — the highest-risk case, not missing data. mean/sd → ∞, so cap it.
+    // ponytail: fixed 5.0 ceiling (Foster flags ~2.0 as high); a single day
+    // or an all-zero week stays null (insufficient data, not monotone).
+    if (n >= 2 && mean > 0) {
+      return { weeklyLoad, monotony: 5, strain: Math.round(weeklyLoad * 5) };
+    }
+    return { weeklyLoad, monotony: null, strain: null };
+  }
   const monotony = Math.round((mean / sd) * 100) / 100;
   return { weeklyLoad, monotony, strain: Math.round(weeklyLoad * monotony) };
 }

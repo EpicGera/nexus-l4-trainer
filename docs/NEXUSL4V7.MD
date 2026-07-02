@@ -1202,6 +1202,48 @@ $$\\text{1. WARM-UP (Calentamiento específico)} \\rightarrow \\text{2. STRENGTH
 
 ---
 
+## Apéndice K — Fórmulas canónicas de la capa de medición
+
+Estas fórmulas son la definición vinculante de las métricas que la plataforma calcula sobre los registros del atleta. Ante cualquier divergencia entre este apéndice y una implementación, este apéndice es la fuente de verdad; la implementación de referencia vive en `src/lib/` de la plataforma.
+
+### K.1 — 1RM estimado (e1RM, fórmula de Epley)
+
+`e1RM = peso × (1 + reps / 30)`
+
+Con 1 repetición, el e1RM es el peso levantado. La estimación pierde validez pasadas ~15 repeticiones: por encima de ese umbral no se calcula. El PR de un levantamiento es el máximo e1RM registrado, no el kilaje bruto (normaliza series de distintas repeticiones). Implementación: `trainingEngine.estimate1RM`.
+
+### K.2 — Working Max Dinámico (WMD)
+
+`WMD = 1RM × K × factor de autorregulación`
+
+`K` es el coeficiente por perfil del Apéndice B (default 0.90; rango sano 0.85–0.95). El factor de autorregulación (default 1.0) lo propone el Puntaje Nexus al cierre de semana y **siempre lo confirma el atleta** — nunca se aplica solo (jerarquía de veto, Capítulo 37). Implementación: `workingMax.ts`.
+
+### K.3 — Carga de sesión (sRPE, método de Foster)
+
+`carga (AU) = RPE de sesión × duración en minutos`
+
+La carga semanal es la suma de los 7 días. Requiere el RPE de sesión y la duración del sello de la INCURSIÓN — sin ambos datos la sesión no aporta carga (no se inventa).
+
+### K.4 — ACWR (ratio agudo:crónico)
+
+`ACWR = (Σ carga 7 días / 7) ÷ (Σ carga 28 días / 28)`
+
+Ambos términos son promedios diarios, lo que equivale al ratio de cargas semanales promedio. Sweet spot 0.8–1.3; >1.5 = zona de riesgo. No se reporta con menos de 7 días con datos (con historial corto el crónico subestima y el ratio se infla — la plataforma prefiere callar antes que alarmar en falso).
+
+### K.5 — Monotonía y strain (Foster)
+
+`monotonía = media(carga diaria de la semana) ÷ DE(carga diaria)` · `strain = carga semanal × monotonía`
+
+La desviación estándar es poblacional (los 7 días realizados son la población, no una muestra). Una semana de cargas idénticas (DE→0) es el caso de **máxima** monotonía — máximo riesgo, no ausencia de dato.
+
+### K.6 — Tonelaje (volumen de carga externa)
+
+`tonelaje (kg) = Σ (peso externo × reps)`
+
+Cuenta **solo carga externa**: el trabajo cardio (metros, calorías, tiempo) y el peso corporal no suman kilos al tonelaje — se miden por sus propias vías (K.3 para carga interna; trabajo/potencia del modelo completo cuando exista). Un registro con unidad de distancia/caloría/tiempo en el campo de peso vale 0 kg por definición.
+
+---
+
 # PARTE XX — ENTRENAMIENTOS EN EQUIPO: ESTRUCTURAS, MÉTODOS Y PRINCIPIOS DE ESCALADO
 
 ## Capítulo 86\. El principio fundamental del trabajo en equipo: el estímulo es por persona
