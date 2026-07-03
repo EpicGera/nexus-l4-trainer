@@ -26,6 +26,24 @@ describe("EL PLATEAU — escudo que solo rompen los críticos", () => {
   });
 });
 
+describe("ÉLITES y ORBES — botín y escalado", () => {
+  it("applyElite escala hp/daño/tamaño y baja la velocidad", async () => {
+    const { applyElite } = await import("./mechanics");
+    const e = applyElite({ hp: 100, damage: 10, radius: 20, speed: 100 });
+    expect(e).toEqual({ hp: 220, damage: 15, radius: 27, speed: 85 });
+  });
+
+  it("orbDropCount: jefe y plateau garantizan botín; élite siempre; resto por roll", async () => {
+    const { orbDropCount } = await import("./mechanics");
+    expect(orbDropCount("boss", false, 0.99)).toBe(5);
+    expect(orbDropCount("plateau", false, 0.99)).toBe(3);
+    expect(orbDropCount("minion", true, 0.99)).toBe(2);
+    expect(orbDropCount("minion", false, 0.1)).toBe(1);
+    expect(orbDropCount("minion", false, 0.5)).toBe(0);
+    expect(orbDropCount("lesion", false, 0.4)).toBe(1);
+  });
+});
+
 describe("spawnPlanForDepth — tabla de aparición por acto", () => {
   it("acto 1: sin lesión ni plateau; acto 2: lesión; acto final: ambos", () => {
     expect(spawnPlanForDepth(1, 3)).toEqual({ lesionChancePerRoom: 0, plateauOnFloor: false });

@@ -34,6 +34,13 @@ import {
   plateauShieldAfterHit,
   plateauShieldRegen,
   spawnPlanForDepth,
+  applyElite,
+  ELITE_CHANCE,
+  orbDropCount,
+  ORB_HEAL_FRAC,
+  ORB_MAGNET_RADIUS,
+  ORB_PICKUP_RADIUS,
+  COMBO_WINDOW_SEC,
 } from "./mechanics";
 
 // enemigos nuevos de Fase 2: reutilizan las siluetas existentes con tinte fijo
@@ -101,6 +108,14 @@ interface Enemy {
   shield: number;
   maxShield: number;
   sinceCrit: number;
+  elite: boolean;
+}
+
+interface Orb {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
 }
 
 interface Projectile {
@@ -169,6 +184,9 @@ export class AbyssEngine {
   private projectiles: Projectile[] = [];
   private particles: Particle[] = [];
   private dmgNumbers: DamageNumber[] = [];
+  private orbs: Orb[] = [];
+  private combo = 0;
+  private comboTimer = 0;
   private kills = 0;
   private shake = 0;
   private bossAlive = false;
@@ -200,7 +218,7 @@ export class AbyssEngine {
     this.heroDesign = getHeroDesign(opt.heroVariantIndex);
     this.auraColor = opt.character.cosmetics.find((c) => c.kind === "aura")?.color ?? null;
     this.trailColor = opt.character.cosmetics.find((c) => c.kind === "trail")?.color ?? null;
-    this.r3d.setHeroColors(this.heroDesign.colors.primary, this.heroDesign.colors.accent);
+    this.r3d.setHeroDesign(this.heroDesign);
     this.r3d.setAura(this.auraColor);
 
     const startDepth = Math.max(1, Math.min(opt.run.totalFloors, opt.startDepth ?? 1));
@@ -225,6 +243,9 @@ export class AbyssEngine {
 
     this.enemies = [];
     this.projectiles = [];
+    this.orbs = [];
+    this.combo = 0;
+    this.comboTimer = 0;
     this.bossAlive = false;
     this.lesionSec = 0; // el debuff se limpia al cambiar de acto
     this.spawnFloorEnemies();
@@ -287,7 +308,8 @@ export class AbyssEngine {
     const tintIndex = this.rng.int(0, ENEMY_TINTS.length - 1);
     const variant = this.rng.int(0, 2);
     const zero = { attackCd: 0, hitFlash: 0, active: false, faceLeft: false,
-      charging: 0, chargeDx: 0, chargeDy: 0, shield: 0, maxShield: 0, sinceCrit: 0 };
+      charging: 0, chargeDx: 0, chargeDy: 0, shield: 0, maxShield: 0, sinceCrit: 0,
+      elite: false };
     if (kind === "boss") {
       return {
         kind, name: "EL SEDENTARIO", x, y,
@@ -311,18 +333,26 @@ export class AbyssEngine {
         speed: 92, damage: 6, tintIndex: 0, variant: 1, ...zero,
       };
     }
-    if (kind === "brute") {
-      return {
+    const base: Enemy = kind === "brute"
+      ? {
         kind, name: `BRUTO · ${dayName}`, x, y,
         hp: 80 * scale, maxHp: 80 * scale, radius: 22,
         speed: 62, damage: 15, tintIndex, variant, ...zero,
+      }
+      : {
+        kind, name: dayName, x, y,
+        hp: 24 * scale, maxHp: 24 * scale, radius: 13,
+        speed: 118 + this.rng.int(0, 30), damage: 7, tintIndex, variant, ...zero,
       };
+    // sombras marcadas: más grandes, más letales, botín garantizado
+    if (this.rng.chance(ELITE_CHANCE)) {
+      const e = applyElite(base);
+      e.maxHp = e.hp;
+      e.elite = true;
+      e.name = `◆ ${base.name}`;
+      return e;
     }
-    return {
-      kind, name: dayName, x, y,
-      hp: 24 * scale, maxHp: 24 * scale, radius: 13,
-      speed: 118 + this.rng.int(0, 30), damage: 7, tintIndex, variant, ...zero,
-    };
+    return base;
   }
 
   // ── lifecycle ──────────────────────────────────────────────────────────
@@ -444,6 +474,34 @@ export class AbyssEngine {
       this.wantSkill = null;
       this.castSkill(idx);
     }
+
+    // combo decae si no encadenás bajas
+    this.comboTimer = Math.max(0, this.comboTimer - dt);
+    if (this.comboTimer <= 0) this.combo = 0;
+
+    // orbes de vida: derivan, imantan hacia el Eco y curan al tocarlo
+    this.orbs = this.orbs.filter((o) => {
+      const dx = this.px - o.x, dy = this.py - o.y;
+      const d = Math.hypot(dx, dy) || 1;
+      if (d < ORB_PICKUP_RADIUS) {
+        this.hp = Math.min(
+          this.opt.character.vitality,
+          this.hp + this.opt.character.vitality * ORB_HEAL_FRAC,
+        );
+        this.spawnParticles(this.px, this.py, 6, "#f87171");
+        return false;
+      }
+      if (d < ORB_MAGNET_RADIUS) {
+        o.vx = (dx / d) * 330;
+        o.vy = (dy / d) * 330;
+      } else {
+        o.vx *= 1 - Math.min(1, dt * 4); // frena el scatter inicial
+        o.vy *= 1 - Math.min(1, dt * 4);
+      }
+      o.x += o.vx * dt;
+      o.y += o.vy * dt;
+      return true;
+    });
 
     this.updateEnemies(dt);
     this.updateProjectiles(dt);
@@ -643,6 +701,17 @@ export class AbyssEngine {
     if (crit) this.shake = Math.max(this.shake, 3);
     if (e.hp <= 0) {
       this.kills++;
+      this.combo++;
+      this.comboTimer = COMBO_WINDOW_SEC;
+      // botín: orbes de vida que vuelan hacia el Eco
+      const drops = orbDropCount(e.kind, e.elite, this.rng.next());
+      for (let i = 0; i < drops; i++) {
+        const a = this.rng.next() * Math.PI * 2;
+        this.orbs.push({
+          x: e.x, y: e.y,
+          vx: Math.cos(a) * 90, vy: Math.sin(a) * 90,
+        });
+      }
       this.spawnParticles(e.x, e.y, e.kind === "boss" ? 22 : 12, e.kind === "boss" ? "#dc2626" : "#a855f7");
       if (e.kind === "boss") {
         this.bossAlive = false;
@@ -855,14 +924,18 @@ export class AbyssEngine {
         return {
           kind: e.kind, x: e.x, y: e.y, radius: e.radius,
           hp: e.hp, maxHp: e.maxHp, hitFlash: e.hitFlash, charging: e.charging,
-          faceLeft: e.faceLeft, name: e.name,
+          chargeDx: e.chargeDx, chargeDy: e.chargeDy,
+          faceLeft: e.faceLeft, name: e.name, elite: e.elite,
           shield: e.shield, maxShield: e.maxShield,
-          tintBody: tint.body, tintEdge: tint.edge,
+          tintBody: tint.body, tintEdge: tint.edge, tintEye: tint.eye,
         };
       }),
       projectiles: this.projectiles,
       particles: this.particles,
       dmgNumbers: this.dmgNumbers,
+      orbs: this.orbs,
+      combo: this.combo,
+      comboFrac: this.comboTimer / COMBO_WINDOW_SEC,
       shake: this.shake,
       bossAlive: this.bossAlive,
       transition: this.transition,
