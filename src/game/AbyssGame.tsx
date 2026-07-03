@@ -144,6 +144,7 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
   const startDepth = useRef(1);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const overlayRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<AbyssEngine | null>(null);
   const lastHudPush = useRef(0);
   const joyOrigin = useRef<{ x: number; y: number; id: number } | null>(null);
@@ -168,10 +169,9 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
   useEffect(() => {
     if (phase !== "playing") return;
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const overlay = overlayRef.current;
+    if (!canvas || !overlay) return;
     const parent = canvas.parentElement!;
-    canvas.width = parent.clientWidth;
-    canvas.height = parent.clientHeight;
 
     const engine = new AbyssEngine(canvas, {
       character,
@@ -179,6 +179,7 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
       run,
       runNonce: runNonce.current,
       startDepth: startDepth.current,
+      overlayCanvas: overlay,
       onEnd: (res) => {
         setResult(res);
         setBest(saveBest(res));
@@ -200,11 +201,11 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
       },
     });
     engineRef.current = engine;
+    engine.resize(parent.clientWidth, parent.clientHeight);
     engine.start();
 
     const onResize = () => {
-      canvas.width = parent.clientWidth;
-      canvas.height = parent.clientHeight;
+      engineRef.current?.resize(parent.clientWidth, parent.clientHeight);
     };
     window.addEventListener("resize", onResize);
     return () => {
@@ -445,6 +446,10 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
       {phase === "playing" && (
         <div className="relative flex-grow overflow-hidden">
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+          <canvas
+            ref={overlayRef}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+          />
 
           <div className="absolute top-0 left-0 right-0 p-3 flex items-start justify-between gap-3 pointer-events-none">
             <div className="space-y-1.5 w-52 max-w-[45vw]">
