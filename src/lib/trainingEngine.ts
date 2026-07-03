@@ -24,6 +24,9 @@ export const GRAVITY = 9.80665;
 export const KCAL_TO_J = 4184;
 /** Mechanical external-work approximation for bodyweight transport (J per kg per m). Tunable. */
 export const TRANSPORT_J_PER_KG_M = 1.0;
+/** ponytail: potencia estimada (W) para cardio logueado SOLO por tiempo — calibrable.
+ *  Se usa únicamente cuando el atleta registró tiempo pero no cal/metros. */
+export const CARDIO_EST_W = 100;
 /** Fallback bodyweight (kg) when the athlete hasn't logged one. */
 export const DEFAULT_BODYWEIGHT_KG = 75;
 
@@ -49,9 +52,16 @@ export function effectiveLoadKg(set: LoggedSet, ex: Exercise, bw: number): numbe
   return 0;
 }
 
-/** External mechanical work of one set, in joules. */
+/**
+ * External mechanical work of one set, in joules.
+ * Cardio (modalidad M): cadena de prioridad sobre lo que el atleta LOGUEÓ —
+ * calorías exactas > metros exactos > tiempo × CARDIO_EST_W (estimación
+ * calibrable). Skills sin medida siguen en 0: nunca fabricamos joules.
+ */
 export function setWorkJ(set: LoggedSet, ex: Exercise, bw = DEFAULT_BODYWEIGHT_KG): number {
   const reps = set.reps ?? 0;
+  const timeEstJ =
+    ex.modality === "M" && (set.timeSec ?? 0) > 0 ? (set.timeSec as number) * CARDIO_EST_W : 0;
   switch (ex.workModel) {
     case "load-displacement":
     case "bodyweight": {
@@ -60,11 +70,13 @@ export function setWorkJ(set: LoggedSet, ex: Exercise, bw = DEFAULT_BODYWEIGHT_K
       return load * GRAVITY * disp * reps;
     }
     case "erg-calories":
-      return (set.calories ?? 0) * KCAL_TO_J;
+      return (set.calories ?? 0) > 0 ? (set.calories as number) * KCAL_TO_J : timeEstJ;
     case "distance":
-      return (set.distanceM ?? 0) * bw * TRANSPORT_J_PER_KG_M;
+      return (set.distanceM ?? 0) > 0
+        ? (set.distanceM as number) * bw * TRANSPORT_J_PER_KG_M
+        : timeEstJ;
     default:
-      return 0; // "none" — skill/cardio with negligible external work
+      return timeEstJ; // "none": skill → 0; cardio con tiempo real → estimado
   }
 }
 
@@ -259,8 +271,11 @@ export function dominantModality(session: TrainingSession, bw = DEFAULT_BODYWEIG
 
 /**
  * Modal map coverage: work (J) bucketed by modality × time-domain. Reveals the
- * athlete's holes (empty/low cells) — the Hopper. Only sessions with a timed
- * metcon contribute (the time domain comes from the effort duration).
+ * athlete's holes (empty/low cells) — the Hopper.
+ * - Dominio: segundos reales del esfuerzo; si no hay, el snapshot timeDomain
+ *   que la sesión capturó del bloque (antes esas sesiones se descartaban).
+ * - Atribución: el trabajo se reparte entre las modalidades REALES de la
+ *   sesión (antes todo iba a la dominante y el cardio embebido desaparecía).
  */
 export function modalMapCoverage(
   sessions: TrainingSession[],
@@ -270,11 +285,12 @@ export function modalMapCoverage(
   const out: Record<Modality, Record<TimeDomain, number>> = { M: empty(), G: empty(), W: empty() };
   for (const session of sessions) {
     const sec = workingSeconds(session);
-    if (!sec) continue;
-    const mod = dominantModality(session, bw);
-    if (!mod) continue;
-    const { totalWorkJ } = sessionTotals(session, bw);
-    out[mod][timeDomain(sec)] += totalWorkJ;
+    const td: TimeDomain | null = sec ? timeDomain(sec) : session.metcon?.timeDomain ?? null;
+    if (!td) continue;
+    const { modalityWorkJ } = sessionTotals(session, bw);
+    (Object.keys(modalityWorkJ) as Modality[]).forEach((m) => {
+      if (modalityWorkJ[m] > 0) out[m][td] += modalityWorkJ[m];
+    });
   }
   return out;
 }

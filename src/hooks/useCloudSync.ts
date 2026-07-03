@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { User } from "firebase/auth";
 import { initAuth } from "../lib/firebase";
 import { initializeSyncEngine } from "../lib/syncEngine";
-import { getWeekOfProgram } from "../lib/constants";
+import { getProgramTodayPosition } from "../lib/programStart";
 import { getAutoFollow, setAutoFollow } from "../lib/storageKeys";
 
 // ponytail: reloadAllLocalStorageState stays in App.tsx — it writes state owned
@@ -59,13 +59,10 @@ export function useCloudSync(
     setSyncWithRealTime(nextSync);
     setAutoFollow(nextSync);
     if (nextSync) {
-      const now = new Date();
-      const autoWeek = getWeekOfProgram(now);
-      const jsDay = now.getDay();
-      const autoDayIndex = jsDay === 0 ? 6 : jsDay - 1;
-
-      setCurrentWeek(autoWeek);
-      setCurrentDayIndex(autoDayIndex);
+      // posición REAL del programa (ancla del capítulo), no semana calendario
+      const pos = getProgramTodayPosition();
+      setCurrentWeek(pos.week);
+      setCurrentDayIndex(pos.dayIndex);
     }
   };
 

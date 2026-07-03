@@ -3,6 +3,7 @@ import {
   ensureChaptersInitialized, listChapters, getActiveChapterId, createChapter,
   switchToChapter, viewChapterProgram, getChapterSessionsRaw, getChapterCompleted,
 } from "./chapterStore";
+import { getProgramStartDate, getProgramTodayPosition, setProgramStartDate } from "./programStart";
 
 const program = (tag: string) => ({ w1: { days: [{ id: "w1d1", name: "LUNES", title: tag, variations: [] }] } }) as any;
 const setLive = (prog: any, sessions: string, completed: string[], logKey: string, logVal: string) => {
@@ -61,6 +62,29 @@ describe("chapterStore — snapshot/restore", () => {
     expect(localStorage.getItem("nexus_sessions_v1")).toBe("[\"s2\"]");
     expect(localStorage.getItem("nexus_logs_w1d1_Squat")).toBe("sunken");
     expect(getChapterSessionsRaw("c1")).toBe("[\"s1\"]");
+  });
+
+  it("createChapter anchors the cycle: today becomes Semana 1", () => {
+    setLive(program("A"), "[]", [], "nexus_logs_x", "1");
+    ensureChaptersInitialized();
+    expect(getProgramStartDate()).toBeNull();
+    createChapter({ title: "B" }, program("B"));
+    expect(getProgramStartDate()).not.toBeNull();
+    expect(getProgramTodayPosition().week).toBe("w1");
+  });
+
+  it("each chapter keeps its own calendar anchor across switches", () => {
+    setLive(program("A"), "[]", [], "nexus_logs_x", "1");
+    ensureChaptersInitialized();
+    setProgramStartDate("2026-06-01"); // ancla manual del capítulo 1
+    const c2 = createChapter({ title: "B" }, program("B")); // ancla c2 a esta semana
+    const c2Anchor = getProgramStartDate();
+    expect(c2Anchor).not.toBe("2026-06-01");
+
+    switchToChapter("c1");
+    expect(getProgramStartDate()).toBe("2026-06-01"); // c1 restaura la suya
+    switchToChapter(c2.id);
+    expect(getProgramStartDate()).toBe(c2Anchor); // y c2 la suya
   });
 
   it("listChapters is ordered and switching to active/unknown is a no-op", () => {

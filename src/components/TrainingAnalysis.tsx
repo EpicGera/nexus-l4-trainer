@@ -264,7 +264,10 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         subtitle="Sistemas energéticos × dominios del programa — las celdas vacías son tus huecos (PRVN)"
       >
         <div className="text-[10px] font-mono text-neutral-500 uppercase mb-2">
-          {coverage.totalMetcons} metcon(s) con metadata
+          {coverage.totalMetcons} metcon(s) del programa con metadata
+          {coverage.unclassified > 0 && (
+            <span className="text-amber-500/80"> · {coverage.unclassified} sin clasificar (sin duración parseable)</span>
+          )}
         </div>
         <div className="mb-3">
           <div className={`${TXT.label} mb-1.5`}>Sistemas energéticos</div>

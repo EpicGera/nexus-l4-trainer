@@ -8,6 +8,7 @@
 import { Database, DayVariation, DayWorkout, ProgramBlock, BlockBucket, WeekMeta, BlockIntention, EnergySystem, BlockTimeDomain } from "../types/workout";
 import { getAccessToken, requestSheetsAccess } from "./firebase";
 import { STORAGE_KEYS, buildLogsKey } from "./storageKeys";
+import { getProgramTodayPosition } from "./programStart";
 import { isCueOrNote } from "./cueDetection";
 import dayLore from "../data/dayLore.json";
 // Neutral starter program (no personal results) bundled for new users. This is
@@ -426,6 +427,12 @@ function schemeDurationMin(scheme: string): number | null {
     const rounds = r ? parseInt(r[1], 10) : 4;
     return (on + off) * rounds;
   }
+  // "Every 1:30 x 5" / "Every 2 min x 4" — intervalos por vuelta
+  const every = U.match(/EVERY\s*(\d+)(?::(\d{2}))?\s*(?:MIN)?\s*X\s*(\d+)/);
+  if (every) {
+    const per = parseInt(every[1], 10) + (every[2] ? parseInt(every[2], 10) / 60 : 0);
+    return per * parseInt(every[3], 10);
+  }
   const amrap = U.match(/AMRAP\s*(\d+)/);
   if (amrap) return parseInt(amrap[1], 10);
   const emom = U.match(/EMOM\s*(\d+)/);
@@ -436,6 +443,8 @@ function schemeDurationMin(scheme: string): number | null {
   if (range) return parseInt(range[2], 10);
   const mins = U.match(/(\d+)\s*MIN/);
   if (mins) return parseInt(mins[1], 10);
+  const apos = U.match(/(\d+)\s*['′]/); // "12'" = 12 minutos
+  if (apos) return parseInt(apos[1], 10);
   return null;
 }
 
@@ -725,15 +734,45 @@ export function summarizeDatabase(db: Database): {
   return { weeks: Object.keys(db).length, days, items };
 }
 
-/** Extracts historical log data embedded in the database and seeds localStorage */
-export function backfillLocalLogsFromDatabase(db: Database) {
+/** ¿El contenido de un log coincide con la firma exacta del backfill (fantasma)? */
+function isBackfillGhost(raw: string, weight: string, rpe: string): boolean {
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr) || arr.length !== 1) return false;
+    const e = arr[0];
+    return (
+      e &&
+      e.reps === "1" && // el backfill siempre escribe reps "1"
+      String(e.weight ?? "") === weight &&
+      String(e.rpe ?? "") === rpe &&
+      typeof e.timestamp === "number"
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Extracts historical log data embedded in the database and seeds localStorage.
+ * Solo siembra días en o antes de la posición ACTUAL del programa: las celdas
+ * de RPE residuales en semanas futuras del sheet no deben fabricar historia
+ * (era la causa de la "SEM 3 fantasma" en el gráfico de tonelaje/RPE). Para
+ * días futuros, si existe un log con la firma exacta del backfill, se retira.
+ */
+export function backfillLocalLogsFromDatabase(
+  db: Database,
+  pos: { week: string; dayIndex: number } = getProgramTodayPosition(),
+) {
   const now = Date.now();
+  const posW = parseInt(pos.week.replace("w", ""), 10) || 1;
   let addedCount = 0;
+  let removedCount = 0;
 
   for (const [weekKey, week] of Object.entries(db)) {
     const w = parseInt(weekKey.replace('w', '')) || 1;
     for (const day of week.days) {
       const d = parseInt(day.id.replace(/w\d+d/, '')) || 1;
+      const isFutureDay = w > posW || (w === posW && d > pos.dayIndex + 1);
       
       // Calculate realistic chronological timestamps so the charts span correctly
       const daysAgo = (4 - w) * 7 + (7 - d);
@@ -771,8 +810,20 @@ export function backfillLocalLogsFromDatabase(db: Database) {
             if (!rpe && !weight) continue;
 
             const logKey = buildLogsKey(day.id, exerciseName);
+            const existing = localStorage.getItem(logKey);
 
-            if (!localStorage.getItem(logKey)) {
+            if (isFutureDay) {
+              // día que aún no llegó: nunca sembrar; retirar solo fantasmas
+              // de corridas anteriores (firma exacta del backfill) — un log
+              // real divergente se conserva
+              if (existing && isBackfillGhost(existing, weight, rpe)) {
+                localStorage.removeItem(logKey);
+                removedCount++;
+              }
+              continue;
+            }
+
+            if (!existing) {
               const logEntry = {
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                 weight,
@@ -789,8 +840,8 @@ export function backfillLocalLogsFromDatabase(db: Database) {
     }
   }
   
-  if (addedCount > 0) {
-    console.log(`[Backfill] Extraídos y sincronizados ${addedCount} registros históricos para los gráficos.`);
+  if (addedCount + removedCount > 0) {
+    console.log(`[Backfill] ${addedCount} registros históricos sembrados · ${removedCount} fantasmas futuros retirados.`);
     // Trigger global event so charts re-render immediately
     window.dispatchEvent(new CustomEvent('nexus_storage_changed'));
   }

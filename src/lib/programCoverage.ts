@@ -9,6 +9,8 @@ export interface SpectrumCoverage {
   energy: Record<EnergySystem, number>;
   timeDomain: Record<BlockTimeDomain, number>;
   totalMetcons: number;
+  /** Metcons del programa sin metadata derivable (duración no parseable) — visibles, no ocultos. */
+  unclassified: number;
   /** Pure energy systems with zero exposure (mixto se excluye: es catch-all). */
   energyGaps: EnergySystem[];
   timeGaps: BlockTimeDomain[];
@@ -21,13 +23,17 @@ export function programCoverage(db: Database): SpectrumCoverage {
   const energy: Record<EnergySystem, number> = { phosphagen: 0, glycolytic: 0, oxidative: 0, mixed: 0 };
   const timeDomain: Record<BlockTimeDomain, number> = { sprint: 0, short: 0, medium: 0, long: 0 };
   let total = 0;
+  let unclassified = 0;
 
   for (const wk of Object.values(db)) {
     for (const day of wk.days) {
       for (const v of day.variations) {
         for (const b of v.blocks ?? []) {
           if (b.bucket !== "metcon") continue;
-          if (!b.energySystem && !b.timeDomain) continue;
+          if (!b.energySystem && !b.timeDomain) {
+            unclassified++;
+            continue;
+          }
           total++;
           if (b.energySystem) energy[b.energySystem]++;
           if (b.timeDomain) timeDomain[b.timeDomain]++;
@@ -40,6 +46,7 @@ export function programCoverage(db: Database): SpectrumCoverage {
     energy,
     timeDomain,
     totalMetcons: total,
+    unclassified,
     energyGaps: total > 0 ? ENERGY_PURE.filter((e) => energy[e] === 0) : [],
     timeGaps: total > 0 ? TD_ALL.filter((t) => timeDomain[t] === 0) : [],
   };

@@ -14,6 +14,7 @@ const prog = {
     { id: "w1d2", name: "MARTES", title: "B", variations: [{
       tabName: "RX",
       b1_metcon: { title: "01. METCON", scheme: "FOR TIME (Cap 5 MIN)", items: ["Thrusters"] }, // short · glycolytic
+      b2_metcon: { title: "02. METCON", scheme: "21-15-9 Por Tiempo", items: ["Burpees"] },     // sin duración → sin clasificar
     }] },
   ] },
 };
@@ -22,6 +23,7 @@ describe("programCoverage (Fase E spectrum)", () => {
   it("tallies energy systems + time domains from derived metcon metadata", () => {
     const cov = programCoverage(parseJsonToDatabase(JSON.stringify(prog)));
     expect(cov.totalMetcons).toBe(3);
+    expect(cov.unclassified).toBe(1); // el 21-15-9 sin duración es visible, no desaparece
     expect(cov.energy.oxidative).toBe(1);
     expect(cov.energy.mixed).toBe(1);
     expect(cov.energy.glycolytic).toBe(1);

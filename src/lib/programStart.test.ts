@@ -3,6 +3,7 @@ import {
   getProgramStartDate,
   setProgramStartDate,
   getProgramTodayPosition,
+  anchorProgramStartToCurrentWeek,
 } from './programStart';
 import { getWeekOfProgram } from './constants';
 
@@ -35,6 +36,15 @@ describe('programStart', () => {
     expect(week('2026-06-29')).toBe('w4'); // +3 weeks
     expect(week('2026-07-06')).toBe('w1'); // +4 weeks → wraps the cycle
     expect(week('2026-07-13')).toBe('w2'); // +5 weeks
+  });
+
+  it('anchorProgramStartToCurrentWeek makes today land on Semana 1', () => {
+    const wed = new Date('2026-07-01T09:00:00'); // miércoles
+    anchorProgramStartToCurrentWeek(wed);
+    expect(getProgramStartDate()).toBe('2026-06-29'); // lunes de esa semana
+    expect(getProgramTodayPosition(wed).week).toBe('w1');
+    // y la semana siguiente ya es w2
+    expect(getProgramTodayPosition(new Date('2026-07-06T09:00:00')).week).toBe('w2');
   });
 
   it('always reports the real weekday as the day index', () => {

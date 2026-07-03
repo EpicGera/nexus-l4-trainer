@@ -14,6 +14,8 @@ import {
   patternVolume,
   skillsRadar,
   dominantModality,
+  modalMapCoverage,
+  CARDIO_EST_W,
 } from "./trainingEngine";
 
 function mkSet(p: Partial<LoggedSet>): LoggedSet {
@@ -56,8 +58,46 @@ describe("setWorkJ (work model per movement)", () => {
   it("erg-calories: calories → joules", () => {
     expect(work({ exerciseId: "row-erg", calories: 20 })).toBe(83680);
   });
-  it("none: skill/cardio movements fabricate no work", () => {
-    expect(work({ exerciseId: "double-under", reps: 100 })).toBe(0);
+  it("none: skills fabricate no work, even with time logged (plank is G)", () => {
+    expect(work({ exerciseId: "plank", timeSec: 60 })).toBe(0);
+  });
+
+  it("cardio chain: exact measure wins; logged time is the estimated fallback", () => {
+    // calorías logueadas → exacto (la estimación no interviene)
+    expect(work({ exerciseId: "row-erg", calories: 20, timeSec: 600 })).toBe(83680);
+    // sin calorías pero con tiempo real → tiempo × CARDIO_EST_W
+    expect(work({ exerciseId: "row-erg", timeSec: 600 })).toBe(600 * CARDIO_EST_W);
+    // run sin metros pero con tiempo → estimado también
+    expect(work({ exerciseId: "run", timeSec: 300 })).toBe(300 * CARDIO_EST_W);
+  });
+
+  it("jump rope: double-unders earn per-rep work via bodyweight (no more 0 J cardio)", () => {
+    expect(work({ exerciseId: "double-under", reps: 100 }, 75)).toBeGreaterThan(4000);
+    expect(work({ exerciseId: "single-under", reps: 100 }, 75)).toBeGreaterThan(0);
+  });
+});
+
+describe("modalMapCoverage (el Hopper)", () => {
+  it("splits session work across its REAL modalities (embedded cardio shows up)", () => {
+    const session = mkSession({
+      metcon: { format: "fortime", timeSec: 600, scaling: "rx" },
+      sets: [
+        mkSet({ exerciseId: "back-squat", exerciseName: "Back Squat", weightKg: 100, reps: 5 }),
+        mkSet({ exerciseId: "row-erg", exerciseName: "Row", calories: 20 }),
+      ],
+    });
+    const map = modalMapCoverage([session], 80);
+    expect(map.W.medium).toBeGreaterThan(0); // pesas en su fila
+    expect(map.M.medium).toBe(83680); // y el cardio embebido en la suya
+  });
+
+  it("falls back to the recorded timeDomain snapshot when no seconds were logged", () => {
+    const session = mkSession({
+      metcon: { format: "fortime", scaling: "rx", timeDomain: "short" },
+      sets: [mkSet({ exerciseId: "back-squat", exerciseName: "Back Squat", weightKg: 100, reps: 5 })],
+    });
+    const map = modalMapCoverage([session], 80);
+    expect(map.W.short).toBeGreaterThan(0); // antes esta sesión se descartaba
   });
 });
 

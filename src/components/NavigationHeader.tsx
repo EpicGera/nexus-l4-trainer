@@ -1,11 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { LayoutDashboard, TrendingUp, UserCheck, Swords } from "lucide-react";
-import {
-  WEEK_ACCENT_COLORS,
-  WEEK_MID_BAND_COLORS,
-  getWeekOfProgram,
-} from "../lib/constants";
+import { WEEK_ACCENT_COLORS, WEEK_MID_BAND_COLORS } from "../lib/constants";
 
 interface NavigationHeaderProps {
   activeSheet: number;

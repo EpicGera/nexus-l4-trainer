@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { parseCsvToDatabase } from "./sheetImport";
+import { describe, it, expect, beforeEach } from "vitest";
+import { parseCsvToDatabase, deriveBlockMeta, backfillLocalLogsFromDatabase } from "./sheetImport";
 import { isCueOrNote } from "./cueDetection";
 
 const HEADER =
@@ -59,5 +59,70 @@ describe("sheetImport - parseCsvToDatabase", () => {
     const martes = db.w1.days[1].variations[0];
     expect(martes.strength.items).toEqual([]);
     expect(martes.metcon.items).toEqual([]);
+  });
+});
+
+describe("deriveBlockMeta — duración de intervalos EVERY", () => {
+  it("Every M:SS x N clasifica corto/glucolítico (antes quedaba sin metadata)", () => {
+    const meta = deriveBlockMeta("metcon", "Every 1:30 x 5");
+    expect(meta.timeDomain).toBe("short"); // 7.5 min
+    expect(meta.energySystem).toBe("glycolytic");
+  });
+
+  it("Every N min x K también", () => {
+    const meta = deriveBlockMeta("metcon", "Every 2 min x 12");
+    expect(meta.timeDomain).toBe("long"); // 24 min
+  });
+
+  it("esquemas sin duración inferible siguen honestamente sin clasificar", () => {
+    const meta = deriveBlockMeta("metcon", "21-15-9 Por Tiempo");
+    expect(meta.timeDomain).toBeUndefined();
+    expect(meta.energySystem).toBeUndefined();
+  });
+});
+
+describe("backfillLocalLogsFromDatabase — guard de posición del programa", () => {
+  const cueItem = (name: string, reg: string) =>
+    `${name} <span class='cue'>Registro: ${reg}</span>`;
+  const dayWith = (id: string, items: string[]) => ({
+    id,
+    name: "LUNES",
+    title: "X",
+    variations: [{
+      tabName: "RX",
+      warmup: { title: "", scheme: "", items: [] },
+      strength: { title: "", scheme: "", items },
+      metcon: { title: "", scheme: "", items: [] },
+      accessories: { title: "", scheme: "", items: [] },
+    }],
+  });
+  const db = {
+    w1: { days: [dayWith("w1d1", [cueItem("Back Squat", "80kg · RPE 7")])] },
+    w3: { days: [dayWith("w3d2", [cueItem("Deadlift", "RPE 8")])] },
+  } as any;
+  const pos = { week: "w2", dayIndex: 3 }; // el atleta va por la semana 2
+
+  beforeEach(() => localStorage.clear());
+
+  it("siembra días pasados pero nunca días futuros", () => {
+    backfillLocalLogsFromDatabase(db, pos);
+    expect(localStorage.getItem("nexus_logs_w1d1_Back_Squat")).not.toBeNull();
+    expect(localStorage.getItem("nexus_logs_w3d2_Deadlift")).toBeNull();
+  });
+
+  it("retira el fantasma futuro con firma exacta del backfill", () => {
+    localStorage.setItem(
+      "nexus_logs_w3d2_Deadlift",
+      JSON.stringify([{ id: "g1", weight: "", reps: "1", rpe: "8", timestamp: 123 }]),
+    );
+    backfillLocalLogsFromDatabase(db, pos);
+    expect(localStorage.getItem("nexus_logs_w3d2_Deadlift")).toBeNull();
+  });
+
+  it("preserva un log futuro divergente (puede ser real)", () => {
+    const real = JSON.stringify([{ id: "r1", weight: "140", reps: "5", rpe: "9", timestamp: 456 }]);
+    localStorage.setItem("nexus_logs_w3d2_Deadlift", real);
+    backfillLocalLogsFromDatabase(db, pos);
+    expect(localStorage.getItem("nexus_logs_w3d2_Deadlift")).toBe(real);
   });
 });

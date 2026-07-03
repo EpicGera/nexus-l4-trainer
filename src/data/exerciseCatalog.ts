@@ -143,12 +143,16 @@ export const CATALOG: Exercise[] = [
   { id: "run", name: "Run", aliases: ["run", "running", "correr", "carrera", "trote"],
     modality: "M", pattern: "monostructural", loadType: "distance", unilateral: false,
     skills: ["cardio", "speed", "stamina"], workModel: "distance" },
+  // saltos de soga: trabajo por rep vía bodyweight (elevación del salto) para
+  // que el cardio real no valga 0 J — antes eran workModel "none"
   { id: "double-under", name: "Double Under", aliases: ["double under", "double unders", "du", "dobles"],
     modality: "M", pattern: "monostructural", loadType: "timed", unilateral: false,
-    skills: ["coordination", "cardio", "speed", "agility"], workModel: "none" },
+    skills: ["coordination", "cardio", "speed", "agility"], workModel: "bodyweight",
+    bodyweightFraction: 1, displacementM: 0.06 },
   { id: "single-under", name: "Single Under", aliases: ["single under", "single unders", "jump rope", "comba", "saltar la cuerda"],
     modality: "M", pattern: "monostructural", loadType: "timed", unilateral: false,
-    skills: ["coordination", "cardio"], workModel: "none" },
+    skills: ["coordination", "cardio"], workModel: "bodyweight",
+    bodyweightFraction: 1, displacementM: 0.04 },
 
   // ── Extended catalog (broad coverage to reduce "uncategorized" surprises) ──
   // More weightlifting / loaded

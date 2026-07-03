@@ -37,6 +37,19 @@ function mondayOf(d: Date): Date {
 }
 
 /**
+ * Anchor the cycle: today's week becomes "Semana 1". Called when a chapter is
+ * created so auto-follow tracks the REAL program position instead of the
+ * calendar week; the athlete can still adjust the date in the profile.
+ */
+export function anchorProgramStartToCurrentWeek(now: Date = new Date()): void {
+  const mon = mondayOf(now);
+  const iso = `${mon.getFullYear()}-${String(mon.getMonth() + 1).padStart(2, "0")}-${String(
+    mon.getDate(),
+  ).padStart(2, "0")}`;
+  setProgramStartDate(iso);
+}
+
+/**
  * The program week + day index for `now`.
  * - Week: when a start date is set, derived from full weeks elapsed since the
  *   start week's Monday, wrapped over the 4-week cycle; otherwise it falls back

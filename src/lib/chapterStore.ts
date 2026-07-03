@@ -20,6 +20,11 @@
 
 import { Database } from "../types/workout";
 import { STORAGE_KEYS } from "./storageKeys";
+import {
+  getProgramStartDate,
+  setProgramStartDate,
+  anchorProgramStartToCurrentWeek,
+} from "./programStart";
 
 export interface ChapterTheme {
   key: string;
@@ -47,6 +52,8 @@ interface AthleteDataBlob {
   sessions: string | null; // raw nexus_sessions_v1 JSON
   completed: Record<string, boolean>; // bare day keys
   logs: Record<string, string>; // nexus_logs_* key → value
+  /** ancla de calendario del capítulo (nexus_program_start_date); undefined en archivos viejos */
+  startDate?: string | null;
 }
 
 // ── Live keys + patterns ─────────────────────────────────────────────────────
@@ -103,7 +110,12 @@ function notifyChange(): void {
 
 // ── Live athlete-data snapshot/restore ───────────────────────────────────────
 function collectActiveAthleteData(): AthleteDataBlob {
-  const blob: AthleteDataBlob = { sessions: localStorage.getItem(LIVE_SESSIONS), completed: {}, logs: {} };
+  const blob: AthleteDataBlob = {
+    sessions: localStorage.getItem(LIVE_SESSIONS),
+    completed: {},
+    logs: {},
+    startDate: getProgramStartDate(),
+  };
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
     if (!k) continue;
@@ -142,6 +154,9 @@ function applyAthleteData(blob: AthleteDataBlob | null): void {
       if (blob.completed[k]) localStorage.setItem(k, "true");
     });
     Object.entries(blob.logs || {}).forEach(([k, v]) => localStorage.setItem(k, v));
+    // cada capítulo conserva su propio ancla de calendario; los archivos
+    // anteriores a este campo (undefined) no tocan el ancla vigente
+    if (blob.startDate !== undefined) setProgramStartDate(blob.startDate);
   } catch {
     /* ignore */
   }
@@ -272,6 +287,8 @@ export function createChapter(
     /* ignore */
   }
   clearActiveAthleteData();
+  // capítulo nuevo = Semana 1 arranca esta semana (ajustable en el perfil)
+  anchorProgramStartToCurrentWeek();
   idx.chapters.push(meta);
   idx.activeId = id;
   writeIndex(idx);

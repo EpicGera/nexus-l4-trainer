@@ -118,7 +118,6 @@ import {
   WEEK_ACCENT_COLORS,
   ACCENT_COLORS_MAP,
   WEEK_MID_BAND_COLORS,
-  getWeekOfProgram,
   resolveBlockBrand,
   MASTER_ACHIEVEMENTS,
 } from "./lib/constants";
@@ -156,19 +155,17 @@ export default function App() {
   const [realTime, setRealTime] = useState(new Date());
 
   const [currentWeek, setCurrentWeek] = useState<string>(() => {
-    const savedSync = getAutoFollow();
-    if (savedSync) {
-      return getWeekOfProgram(new Date());
+    if (getAutoFollow()) {
+      // posición REAL del programa (ancla del capítulo), no semana calendario
+      return getProgramTodayPosition().week;
     }
     const saved = localStorage.getItem("nexus_current_week_slug");
     return saved && ["w1", "w2", "w3", "w4"].includes(saved) ? saved : "w2";
   });
 
   const [currentDayIndex, setCurrentDayIndex] = useState<number>(() => {
-    const savedSync = getAutoFollow();
-    if (savedSync) {
-      const jsDay = new Date().getDay();
-      return jsDay === 0 ? 6 : jsDay - 1;
+    if (getAutoFollow()) {
+      return getProgramTodayPosition().dayIndex;
     }
     const saved = localStorage.getItem("nexus_current_day_idx");
     return saved ? Math.max(0, Math.min(6, parseInt(saved, 10))) : 0;

@@ -57,7 +57,7 @@ export default function AchievedStimulusSection() {
       title="ESTÍMULO REGISTRADO (LO QUE ENTRENASTE)"
       icon={<Activity size={15} className="text-cyan-300" />}
       subtitle="Distribución real de tus sesiones por sistema energético y dominio temporal"
-      badge={<Pill tone="accent">{data.tagged} METCONS</Pill>}
+      badge={<Pill tone="accent">{data.tagged} METCONS REGISTRADOS</Pill>}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
