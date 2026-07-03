@@ -26,6 +26,7 @@ import {
 } from "./dungeon";
 import { drawHero, getHeroDesign, HeroDesign } from "./heroDesign";
 import { drawEnemy, ENEMY_TINTS, BOSS_TINT } from "./enemyDesign";
+import { ZoneTheme, zoneForDepth } from "./zones";
 
 export interface HudState {
   hp: number;
@@ -40,6 +41,7 @@ export interface HudState {
   healUsed: boolean;
   objective: string;
   onExit: boolean;
+  zoneName: string;
 }
 
 export interface GameResult {
@@ -55,6 +57,8 @@ export interface EngineOptions {
   heroVariantIndex: number;
   run: RunContext;
   runNonce: number;
+  /** Acto inicial (1-based) — permite reintentar desde el acto alcanzado. */
+  startDepth?: number;
   onEnd: (r: GameResult) => void;
   onHud: (h: HudState) => void;
 }
@@ -108,8 +112,10 @@ export class AbyssEngine {
   // dungeon
   private floor!: DungeonFloor;
   private explored!: Uint8Array;
+  private zone!: ZoneTheme;
   private depth = 0;
   private transition = 0; // >0 while fading between floors
+  private transitionTotal = 0.85;
   private pendingDescend = false;
 
   // player
@@ -174,12 +180,17 @@ export class AbyssEngine {
 
     this.heroDesign = getHeroDesign(opt.heroVariantIndex);
 
-    this.loadFloor(1);
+    const startDepth = Math.max(1, Math.min(opt.run.totalFloors, opt.startDepth ?? 1));
+    this.loadFloor(startDepth);
+    // entry banner: the act announces itself before control kicks in
+    this.transition = 1.1;
+    this.transitionTotal = 1.1;
   }
 
   // ── floor lifecycle ──────────────────────────────────────────────────────
   private loadFloor(depth: number) {
     this.depth = depth;
+    this.zone = zoneForDepth(depth, this.opt.run.totalFloors);
     const isBoss = this.opt.run.isBossDay && depth >= this.opt.run.totalFloors;
     const floorSeed = this.opt.run.seed ^ (this.opt.runNonce * 2654435761) ^ (depth * 40503);
     this.floor = generateFloor(floorSeed, depth, isBoss);
@@ -306,6 +317,11 @@ export class AbyssEngine {
       if (this.transition <= 0 && this.pendingDescend) {
         this.pendingDescend = false;
         this.loadFloor(this.depth + 1);
+        // curación parcial entre actos (Persona-style breather)
+        this.hp = Math.min(
+          this.opt.character.vitality,
+          this.hp + Math.round(this.opt.character.vitality * 0.25),
+        );
       }
       this.pushHud();
       return;
@@ -517,7 +533,8 @@ export class AbyssEngine {
       this.finish(true);
       return;
     }
-    this.transition = 0.85;
+    this.transition = 1.4; // long enough to read the act banner
+    this.transitionTotal = 1.4;
     this.pendingDescend = descend;
     this.spawnParticles(this.px, this.py, 18, "#a855f7");
   }
@@ -726,6 +743,7 @@ export class AbyssEngine {
       healUsed: this.healUsed,
       objective,
       onExit,
+      zoneName: this.zone.name,
     });
   }
 
@@ -744,7 +762,7 @@ export class AbyssEngine {
     camX = worldW <= cw ? (worldW - cw) / 2 : Math.max(0, Math.min(worldW - cw, camX));
     camY = worldH <= ch ? (worldH - ch) / 2 : Math.max(0, Math.min(worldH - ch, camY));
 
-    ctx.fillStyle = "#040406";
+    ctx.fillStyle = this.zone.bg;
     ctx.fillRect(0, 0, cw, ch);
 
     ctx.save();
@@ -769,17 +787,17 @@ export class AbyssEngine {
 
         if (t === Tile.Wall) {
           // only draw wall blocks adjacent to floor (cuts overdraw, cleaner look)
-          ctx.fillStyle = `rgba(22,20,30,${dim})`;
+          ctx.fillStyle = `rgba(${this.zone.wall},${dim})`;
           ctx.fillRect(wx, wy, TILE, TILE);
-          ctx.fillStyle = `rgba(60,52,80,${dim})`;
+          ctx.fillStyle = `rgba(${this.zone.wallTop},${dim})`;
           ctx.fillRect(wx, wy, TILE, 4); // top highlight
           ctx.fillStyle = `rgba(0,0,0,${dim * 0.5})`;
           ctx.fillRect(wx, wy + TILE - 5, TILE, 5);
         } else {
           // floor
-          ctx.fillStyle = `rgba(13,13,19,${dim})`;
+          ctx.fillStyle = `rgba(${this.zone.floor},${dim})`;
           ctx.fillRect(wx, wy, TILE, TILE);
-          ctx.strokeStyle = `rgba(255,255,255,${dim * 0.03})`;
+          ctx.strokeStyle = `rgba(${this.zone.accentRgb},${dim * 0.05})`;
           ctx.lineWidth = 1;
           ctx.strokeRect(wx + 0.5, wy + 0.5, TILE - 1, TILE - 1);
 
@@ -835,15 +853,39 @@ export class AbyssEngine {
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, cw, ch);
 
+    // luna carmesí permanente en la azotea
+    if (this.zone.id === "azotea") {
+      ctx.fillStyle = `rgba(220,38,38,${0.04 + 0.02 * Math.sin(performance.now() / 900)})`;
+      ctx.fillRect(0, 0, cw, ch);
+    }
+
     if (this.hp / this.opt.character.vitality < 0.3) {
       ctx.fillStyle = `rgba(220,38,38,${0.08 + 0.05 * Math.sin(performance.now() / 180)})`;
       ctx.fillRect(0, 0, cw, ch);
     }
 
-    // floor transition fade
+    // floor transition fade + act banner (Persona-style diagonal cut)
     if (this.transition > 0) {
-      ctx.fillStyle = `rgba(0,0,0,${1 - Math.abs(this.transition - 0.42) / 0.42})`;
+      const half = this.transitionTotal / 2;
+      const fade = Math.max(0, 1 - Math.abs(this.transition - half) / half);
+      ctx.fillStyle = `rgba(0,0,0,${fade})`;
       ctx.fillRect(0, 0, cw, ch);
+
+      const target = this.pendingDescend
+        ? zoneForDepth(this.depth + 1, this.opt.run.totalFloors)
+        : this.zone;
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, fade * 1.6);
+      ctx.translate(cw / 2, ch / 2);
+      ctx.rotate(-0.055);
+      ctx.fillStyle = target.accent;
+      ctx.fillRect(-cw, -34, cw * 2, 68);
+      ctx.fillStyle = "#050507";
+      ctx.font = `bold ${Math.min(30, cw / 16)}px monospace`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(target.name, 0, 1);
+      ctx.restore();
     }
   }
 

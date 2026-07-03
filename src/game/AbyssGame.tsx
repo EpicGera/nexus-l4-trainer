@@ -64,6 +64,25 @@ function saveBest(result: GameResult): BestRecord {
   return next;
 }
 
+// Progreso del descenso del día: si LA SOMBRA te consume en el acto 2 o 3,
+// podés reintentar desde el inicio de ese acto (solo para el mismo dayId).
+const PROGRESS_KEY = "nexus_abyss_progress"; // nexus_* → roams with the account
+
+function loadProgress(dayId: string): number | null {
+  try {
+    const p = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "null");
+    return p && p.dayId === dayId && Number(p.depth) > 1 ? Math.floor(p.depth) : null;
+  } catch {
+    return null;
+  }
+}
+function saveProgress(dayId: string, depth: number) {
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify({ dayId, depth }));
+}
+function clearProgress() {
+  localStorage.removeItem(PROGRESS_KEY);
+}
+
 function loadHeroIndex(): number {
   const n = parseInt(localStorage.getItem(HERO_KEY) || "0", 10);
   return Number.isFinite(n) ? ((n % HERO_DESIGNS.length) + HERO_DESIGNS.length) % HERO_DESIGNS.length : 0;
@@ -120,7 +139,9 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
   const [hud, setHud] = useState<HudState | null>(null);
   const [result, setResult] = useState<GameResult | null>(null);
   const [best, setBest] = useState<BestRecord>(loadBest);
+  const [resumeDepth, setResumeDepth] = useState<number | null>(() => loadProgress(dayId));
   const runNonce = useRef(Math.floor(Math.random() * 1e9));
+  const startDepth = useRef(1);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<AbyssEngine | null>(null);
@@ -157,9 +178,17 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
       heroVariantIndex: heroIndex,
       run,
       runNonce: runNonce.current,
+      startDepth: startDepth.current,
       onEnd: (res) => {
         setResult(res);
         setBest(saveBest(res));
+        if (res.victory) {
+          clearProgress();
+          setResumeDepth(null);
+        } else if (res.depth > 1) {
+          saveProgress(dayId, res.depth);
+          setResumeDepth(res.depth);
+        }
         setPhase("result");
       },
       onHud: (h) => {
@@ -185,8 +214,9 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
     };
   }, [phase, character, heroIndex, run]);
 
-  const startRun = () => {
+  const startRun = (fromDepth = 1) => {
     runNonce.current = Math.floor(Math.random() * 1e9);
+    startDepth.current = fromDepth;
     setResult(null);
     setHud(null);
     setPhase("playing");
@@ -383,8 +413,16 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
             )}
 
             <div className="flex gap-3">
+              {resumeDepth !== null && (
+                <button
+                  onClick={() => startRun(resumeDepth)}
+                  className="flex-grow bg-violet-800 hover:bg-violet-700 text-white font-brutalist py-3.5 text-base tracking-[0.15em] transition-all active:scale-95 cursor-pointer"
+                >
+                  CONTINUAR — ACTO {resumeDepth}
+                </button>
+              )}
               <button
-                onClick={startRun}
+                onClick={() => startRun()}
                 className="flex-grow bg-red-700 hover:bg-red-600 text-white font-brutalist py-3.5 text-lg tracking-[0.2em] transition-all active:scale-95 cursor-pointer"
               >
                 DESCENDER
@@ -427,7 +465,7 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
 
             <div className="text-center">
               <div className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-[0.25em]">
-                PISO {hud?.depth ?? 1}/{hud?.totalFloors ?? 3}
+                {hud?.zoneName ?? `ACTO ${hud?.depth ?? 1}`} · {hud?.depth ?? 1}/{hud?.totalFloors ?? 3}
               </div>
               <div className="text-[9px] font-mono text-neutral-500">
                 {hud?.enemiesLeft ?? 0} sombras · {hud?.kills ?? 0} bajas
@@ -559,7 +597,7 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { l: "PISO", v: `${result.depth}/${run.totalFloors}` },
+                { l: "ACTO", v: `${result.depth}/${run.totalFloors}` },
                 { l: "BAJAS", v: result.kills },
                 { l: "TIEMPO", v: fmtTime(result.timeMs) },
               ].map((s) => (
@@ -584,8 +622,16 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
             </p>
 
             <div className="flex gap-3">
+              {!result.victory && result.depth > 1 && (
+                <button
+                  onClick={() => startRun(result.depth)}
+                  className="flex-grow bg-violet-800 hover:bg-violet-700 text-white font-brutalist py-3 text-base tracking-[0.15em] transition-all active:scale-95 cursor-pointer"
+                >
+                  REINTENTAR ACTO {result.depth}
+                </button>
+              )}
               <button
-                onClick={startRun}
+                onClick={() => startRun()}
                 className="flex-grow bg-red-700 hover:bg-red-600 text-white font-brutalist py-3 text-base tracking-[0.2em] transition-all active:scale-95 cursor-pointer"
               >
                 DESCENDER OTRA VEZ
