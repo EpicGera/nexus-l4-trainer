@@ -484,6 +484,14 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
             </button>
           </div>
 
+          {(hud?.lesionSec ?? 0) > 0 && (
+            <div className="absolute top-14 left-1/2 -translate-x-1/2 pointer-events-none">
+              <div className="bg-lime-950/80 border border-lime-500/50 px-3 py-1 text-[10px] font-mono text-lime-300 uppercase tracking-wider animate-pulse">
+                ⚠ lesión — movilidad reducida
+              </div>
+            </div>
+          )}
+
           {hud?.onExit && (
             <div className="absolute top-20 left-1/2 -translate-x-1/2 pointer-events-none">
               <div className="bg-emerald-950/80 border border-emerald-500/50 px-3 py-1 text-[10px] font-mono text-emerald-300 uppercase tracking-wider animate-pulse">

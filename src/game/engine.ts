@@ -25,8 +25,19 @@ import {
   Room,
 } from "./dungeon";
 import { drawHero, getHeroDesign, HeroDesign } from "./heroDesign";
-import { drawEnemy, ENEMY_TINTS, BOSS_TINT } from "./enemyDesign";
+import { drawEnemy, ENEMY_TINTS, BOSS_TINT, EnemyTint } from "./enemyDesign";
 import { ZoneTheme, zoneForDepth } from "./zones";
+import {
+  LESION_DEBUFF_SEC,
+  LESION_SLOW_FACTOR,
+  plateauShieldAfterHit,
+  plateauShieldRegen,
+  spawnPlanForDepth,
+} from "./mechanics";
+
+// enemigos nuevos de Fase 2: reutilizan las siluetas existentes con tinte fijo
+const LESION_TINT: EnemyTint = { body: "#101a10", edge: "#84cc16", eye: "#bef264" };
+const PLATEAU_TINT: EnemyTint = { body: "#0e141c", edge: "#94a3b8", eye: "#67e8f9" };
 
 export interface HudState {
   hp: number;
@@ -42,6 +53,8 @@ export interface HudState {
   objective: string;
   onExit: boolean;
   zoneName: string;
+  /** segundos restantes del debuff de LA LESIÓN (0 = sano) */
+  lesionSec: number;
 }
 
 export interface GameResult {
@@ -64,7 +77,7 @@ export interface EngineOptions {
 }
 
 interface Enemy {
-  kind: "minion" | "brute" | "boss";
+  kind: "minion" | "brute" | "boss" | "lesion" | "plateau";
   name: string;
   x: number;
   y: number;
@@ -82,6 +95,9 @@ interface Enemy {
   charging: number;
   chargeDx: number;
   chargeDy: number;
+  shield: number;
+  maxShield: number;
+  sinceCrit: number;
 }
 
 interface Projectile {
@@ -132,6 +148,7 @@ export class AbyssEngine {
   private speedBuff = 0;
   private guardBuff = 0;
   private healUsed = false;
+  private lesionSec = 0; // debuff de LA LESIÓN — movilidad reducida
   private skillCds: number[];
   private walkPhase = 0;
   private moving = false;
@@ -203,6 +220,7 @@ export class AbyssEngine {
     this.enemies = [];
     this.projectiles = [];
     this.bossAlive = false;
+    this.lesionSec = 0; // el debuff se limpia al cambiar de acto
     this.spawnFloorEnemies();
     this.revealAround();
   }
@@ -210,6 +228,7 @@ export class AbyssEngine {
   private spawnFloorEnemies() {
     const { run } = this.opt;
     const depthScale = 1 + (this.depth - 1) * 0.25 + (this.opt.character.level - 1) * 0.04;
+    const plan = spawnPlanForDepth(this.depth, run.totalFloors);
 
     this.floor.rooms.forEach((room) => {
       if (room.kind === "start") return;
@@ -235,7 +254,20 @@ export class AbyssEngine {
         const p = this.scatterInRoom(room);
         this.enemies.push(this.makeEnemy("brute", p.x, p.y, depthScale, run.dayName));
       }
+      if (this.rng.chance(plan.lesionChancePerRoom)) {
+        const p = this.scatterInRoom(room);
+        this.enemies.push(this.makeEnemy("lesion", p.x, p.y, depthScale, run.dayName));
+      }
     });
+
+    // EL PLATEAU custodia el último acto (mini-jefe, fuera de la arena del boss)
+    if (plan.plateauOnFloor) {
+      const room = this.floor.rooms.find((r) => r.kind === "combat");
+      if (room) {
+        const p = this.scatterInRoom(room);
+        this.enemies.push(this.makeEnemy("plateau", p.x, p.y, depthScale, run.dayName));
+      }
+    }
   }
 
   private scatterInRoom(room: Room): { x: number; y: number } {
@@ -249,30 +281,42 @@ export class AbyssEngine {
   ): Enemy {
     const tintIndex = this.rng.int(0, ENEMY_TINTS.length - 1);
     const variant = this.rng.int(0, 2);
+    const zero = { attackCd: 0, hitFlash: 0, active: false, faceLeft: false,
+      charging: 0, chargeDx: 0, chargeDy: 0, shield: 0, maxShield: 0, sinceCrit: 0 };
     if (kind === "boss") {
       return {
         kind, name: "EL SEDENTARIO", x, y,
         hp: 900 * scale, maxHp: 900 * scale, radius: 38,
-        speed: 78, damage: 24, attackCd: 0, hitFlash: 0,
-        active: false, faceLeft: false,
-        tintIndex: 0, variant: 0, charging: 0, chargeDx: 0, chargeDy: 0,
+        speed: 78, damage: 24, tintIndex: 0, variant: 0, ...zero,
+      };
+    }
+    if (kind === "plateau") {
+      const shield = Math.round(110 * scale);
+      return {
+        kind, name: "EL PLATEAU", x, y,
+        hp: 170 * scale, maxHp: 170 * scale, radius: 26,
+        speed: 46, damage: 18, tintIndex: 0, variant: 0,
+        ...zero, shield, maxShield: shield,
+      };
+    }
+    if (kind === "lesion") {
+      return {
+        kind, name: "LA LESIÓN", x, y,
+        hp: 40 * scale, maxHp: 40 * scale, radius: 15,
+        speed: 92, damage: 6, tintIndex: 0, variant: 1, ...zero,
       };
     }
     if (kind === "brute") {
       return {
         kind, name: `BRUTO · ${dayName}`, x, y,
         hp: 80 * scale, maxHp: 80 * scale, radius: 22,
-        speed: 62, damage: 15, attackCd: 0, hitFlash: 0,
-        active: false, faceLeft: false,
-        tintIndex, variant, charging: 0, chargeDx: 0, chargeDy: 0,
+        speed: 62, damage: 15, tintIndex, variant, ...zero,
       };
     }
     return {
       kind, name: dayName, x, y,
       hp: 24 * scale, maxHp: 24 * scale, radius: 13,
-      speed: 118 + this.rng.int(0, 30), damage: 7, attackCd: 0, hitFlash: 0,
-      active: false, faceLeft: false,
-      tintIndex, variant, charging: 0, chargeDx: 0, chargeDy: 0,
+      speed: 118 + this.rng.int(0, 30), damage: 7, tintIndex, variant, ...zero,
     };
   }
 
@@ -342,7 +386,9 @@ export class AbyssEngine {
       this.facingX = mx;
       this.facingY = my;
       if (Math.abs(mx) > 0.1) this.faceLeft = mx < 0;
-      const speed = this.opt.character.moveSpeed * (this.speedBuff > 0 ? 1.6 : 1);
+      const speed = this.opt.character.moveSpeed
+        * (this.speedBuff > 0 ? 1.6 : 1)
+        * (this.lesionSec > 0 ? LESION_SLOW_FACTOR : 1);
       this.moveBody(mx * speed * dt, my * speed * dt);
     }
 
@@ -362,6 +408,7 @@ export class AbyssEngine {
     this.attackAnim = Math.max(0, this.attackAnim - dt);
     this.castAnim = Math.max(0, this.castAnim - dt);
     this.iframes = Math.max(0, this.iframes - dt);
+    this.lesionSec = Math.max(0, this.lesionSec - dt);
     this.speedBuff = Math.max(0, this.speedBuff - dt);
     this.guardBuff = Math.max(0, this.guardBuff - dt);
     this.shake = Math.max(0, this.shake - dt * 30);
@@ -439,6 +486,10 @@ export class AbyssEngine {
     this.enemies.forEach((e) => {
       e.hitFlash = Math.max(0, e.hitFlash - dt * 6);
       e.attackCd = Math.max(0, e.attackCd - dt);
+      if (e.kind === "plateau") {
+        e.sinceCrit += dt;
+        e.shield = plateauShieldRegen(e.shield, e.maxShield, e.sinceCrit, dt);
+      }
 
       const dx = this.px - e.x;
       const dy = this.py - e.y;
@@ -487,6 +538,11 @@ export class AbyssEngine {
         this.iframes = 0.45;
         this.shake = 6;
         this.spawnParticles(this.px, this.py, 8, "#ef4444");
+        if (e.kind === "lesion") {
+          // el golpe de LA LESIÓN deja al Eco rengueando
+          this.lesionSec = LESION_DEBUFF_SEC;
+          this.spawnParticles(this.px, this.py, 7, "#84cc16");
+        }
         if (this.hp <= 0) { this.hp = 0; this.finish(false); }
       }
     });
@@ -548,6 +604,24 @@ export class AbyssEngine {
 
   private damageEnemy(e: Enemy, base: number) {
     const { value, crit } = this.rollDamage(base);
+    if (e.kind === "plateau" && e.shield > 0) {
+      e.active = true;
+      if (crit) {
+        e.sinceCrit = 0;
+        e.shield = plateauShieldAfterHit(e.shield, value, true);
+        e.hitFlash = 1;
+        this.dmgNumbers.push({ x: e.x, y: e.y - e.radius - 6, value, crit: true, life: 0.9 });
+        if (e.shield <= 0) {
+          this.shake = Math.max(this.shake, 8);
+          this.spawnParticles(e.x, e.y, 16, "#67e8f9");
+        }
+      } else {
+        // bloqueado: solo los críticos muerden el escudo
+        this.dmgNumbers.push({ x: e.x, y: e.y - e.radius - 6, value: 0, crit: false, life: 0.6 });
+        this.spawnParticles(e.x, e.y, 3, "#94a3b8");
+      }
+      return;
+    }
     e.hp -= value;
     e.hitFlash = 1;
     e.active = true;
@@ -744,6 +818,7 @@ export class AbyssEngine {
       objective,
       onExit,
       zoneName: this.zone.name,
+      lesionSec: this.lesionSec,
     });
   }
 
@@ -942,8 +1017,14 @@ export class AbyssEngine {
 
   private drawEnemy(e: Enemy) {
     const ctx = this.ctx;
-    const tint = e.kind === "boss" ? BOSS_TINT : ENEMY_TINTS[e.tintIndex];
-    drawEnemy(ctx, e.kind, tint, {
+    const tint =
+      e.kind === "boss" ? BOSS_TINT :
+      e.kind === "lesion" ? LESION_TINT :
+      e.kind === "plateau" ? PLATEAU_TINT :
+      ENEMY_TINTS[e.tintIndex];
+    // los enemigos de Fase 2 reutilizan las siluetas existentes
+    const silhouette = e.kind === "lesion" ? "minion" : e.kind === "plateau" ? "brute" : e.kind;
+    drawEnemy(ctx, silhouette, tint, {
       x: e.x,
       y: e.y,
       radius: e.radius,
@@ -954,19 +1035,35 @@ export class AbyssEngine {
       variant: e.variant,
     });
 
+    // anillo de escudo de EL PLATEAU — solo lo rompen los críticos
+    if (e.kind === "plateau" && e.shield > 0) {
+      const frac = e.shield / e.maxShield;
+      ctx.strokeStyle = `rgba(103,232,249,${0.35 + 0.55 * frac})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.radius + 7, 0, Math.PI * 2 * frac);
+      ctx.stroke();
+    }
+
     // hp bar + name
-    if (e.hp < e.maxHp || e.kind === "boss") {
+    if (e.hp < e.maxHp || e.kind === "boss" || e.kind === "plateau") {
       const bw = Math.max(e.radius * 2, e.kind === "boss" ? 120 : 30);
       const by = e.y - e.radius - (e.kind === "boss" ? 26 : 16);
       ctx.fillStyle = "rgba(0,0,0,0.75)";
       ctx.fillRect(e.x - bw / 2, by, bw, e.kind === "boss" ? 7 : 5);
       ctx.fillStyle = e.kind === "boss" ? "#dc2626" : "#a855f7";
       ctx.fillRect(e.x - bw / 2, by, (bw * Math.max(0, e.hp)) / e.maxHp, e.kind === "boss" ? 7 : 5);
-      if (e.kind === "boss" || e.kind === "brute") {
+      if (e.kind === "plateau" && e.shield > 0) {
+        ctx.fillStyle = "#67e8f9";
+        ctx.fillRect(e.x - bw / 2, by - 3, (bw * e.shield) / e.maxShield, 2);
+      }
+      if (e.kind === "boss" || e.kind === "brute" || e.kind === "plateau" || e.kind === "lesion") {
         ctx.font = e.kind === "boss" ? "bold 13px monospace" : "bold 9px monospace";
-        ctx.fillStyle = e.kind === "boss" ? "#fca5a5" : "#cbd5e1";
+        ctx.fillStyle = e.kind === "boss" ? "#fca5a5" :
+          e.kind === "plateau" ? "#a5f3fc" :
+          e.kind === "lesion" ? "#bef264" : "#cbd5e1";
         ctx.textAlign = "center";
-        ctx.fillText(e.name, e.x, by - 4);
+        ctx.fillText(e.name, e.x, by - (e.kind === "plateau" ? 7 : 4));
       }
     }
   }
