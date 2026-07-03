@@ -98,8 +98,8 @@ Los 4 Jinetes del Sedentarismo como jefes de acto.
 
 | Fase | Contenido |
 |---|---|
-| **1 (esta)** | Arena de oleadas jugable embebida en la app, stats+poderes reales, jefe, persistencia de récord |
-| 2 | Actos/zonas (calle → subte → azotea), loot cosmético por logros reales, La Lesión y El Plateau |
+| **1 ✅** | Crawl procedural jugable embebido en la app, stats+poderes reales, jefe, persistencia de récord |
+| **2 ✅** | Actos/zonas (CALLE → SUBTE → AZOTEA, `zones.ts`), La Lesión y El Plateau (`mechanics.ts`), reliquias cosméticas por logros reales (`cosmetics.ts`), reintento por acto (`nexus_abyss_progress`). PRD: `docs/PRD-ABISMO-FASE2.md` |
 | 3 | Lectura directa de `users/{uid}/profile/stats` desde un cliente standalone (el juego como app aparte) |
 | 4 | Grietas co-op con el crew real (`nexus_crew`) y leaderboards de box |
 
