@@ -172,6 +172,8 @@ export class AbyssEngine {
   private bossAlive = false;
 
   private heroDesign: HeroDesign;
+  private auraColor: string | null = null;
+  private trailColor: string | null = null;
 
   private keydownHandler = (e: KeyboardEvent) => {
     this.keys.add(e.key.toLowerCase());
@@ -196,6 +198,8 @@ export class AbyssEngine {
     this.skillCds = opt.character.loadout.map(() => 0);
 
     this.heroDesign = getHeroDesign(opt.heroVariantIndex);
+    this.auraColor = opt.character.cosmetics.find((c) => c.kind === "aura")?.color ?? null;
+    this.trailColor = opt.character.cosmetics.find((c) => c.kind === "trail")?.color ?? null;
 
     const startDepth = Math.max(1, Math.min(opt.run.totalFloors, opt.startDepth ?? 1));
     this.loadFloor(startDepth);
@@ -400,6 +404,11 @@ export class AbyssEngine {
 
     // walk animation phase
     if (this.moving || this.dashTime > 0) this.walkPhase += dt * 2.2;
+
+    // ESTELA (cosmético por PR real) — partículas al caminar, cero gameplay
+    if (this.trailColor && this.moving && this.rng.chance(0.4)) {
+      this.spawnParticles(this.px, this.py + PLAYER_RADIUS * 0.6, 1, this.trailColor);
+    }
 
     this.revealAround();
 
@@ -993,6 +1002,18 @@ export class AbyssEngine {
 
   private drawHero() {
     const ctx = this.ctx;
+    // AURA (cosmético por semana perfecta) — anillo pulsante bajo el Eco
+    if (this.auraColor) {
+      const pulse = 0.25 + 0.12 * Math.sin(performance.now() / 260);
+      ctx.save();
+      ctx.globalAlpha = pulse;
+      ctx.strokeStyle = this.auraColor;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.ellipse(this.px, this.py + PLAYER_RADIUS, PLAYER_RADIUS + 8, 7, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
     const flicker = this.iframes > 0 && Math.floor(this.iframes * 20) % 2 === 0;
     ctx.globalAlpha = flicker ? 0.5 : 1;
     drawHero(

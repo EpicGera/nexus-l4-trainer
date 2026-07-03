@@ -465,6 +465,10 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
 
             <div className="text-center">
               <div className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-[0.25em]">
+                {(() => {
+                  const mark = character.cosmetics.find((c) => c.kind === "mark");
+                  return mark ? <span style={{ color: mark.color }} title={mark.name}>★ </span> : null;
+                })()}
                 {hud?.zoneName ?? `ACTO ${hud?.depth ?? 1}`} · {hud?.depth ?? 1}/{hud?.totalFloors ?? 3}
               </div>
               <div className="text-[9px] font-mono text-neutral-500">
@@ -615,6 +619,27 @@ export default function AbyssGame({ onClose, week, dayIndex, dayId, dayName }: A
                 </div>
               ))}
             </div>
+
+            {character.cosmetics.length > 0 && (
+              <div className="border border-white/15 bg-black/70 p-3">
+                <div className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider mb-2">
+                  RELIQUIAS DEL ECO — forjadas entrenando, jamás compradas
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {character.cosmetics.map((c) => (
+                    <span
+                      key={c.id}
+                      className="inline-flex items-center gap-1.5 border px-2 py-1 text-[9px] font-mono uppercase tracking-wider"
+                      style={{ borderColor: c.color, color: c.color }}
+                      title={c.source}
+                    >
+                      <span className="w-2 h-2 rounded-full" style={{ background: c.color }} />
+                      {c.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
               Récord: piso {best.bestDepth} · {best.bestKills} bajas · {best.victories}/{best.runs} selladas

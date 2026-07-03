@@ -13,6 +13,7 @@
 import { AthleteStatsDoc } from "../lib/athleteStats";
 import { cleanExerciseLabel } from "../lib/historyUtils";
 import { detectSkills, pickLoadout, UnlockedSkill } from "./skills";
+import { Cosmetic, unlockCosmetics } from "./cosmetics";
 
 export interface GameCharacter {
   identity: string;
@@ -34,6 +35,8 @@ export interface GameCharacter {
   skills: UnlockedSkill[];
   /** loadout actually equipped for a rift (max 4) */
   loadout: UnlockedSkill[];
+  /** reliquias visuales por logros reales — jamás tocan stats */
+  cosmetics: Cosmetic[];
 }
 
 const RANKS: { xp: number; name: string }[] = [
@@ -163,5 +166,10 @@ export function buildCharacter(
     moveSpeed,
     skills,
     loadout,
+    cosmetics: unlockCosmetics({
+      perfectWeeks: stats.perfectWeeks,
+      bestPrKg: bestPr,
+      daysCompleted: stats.daysCompleted,
+    }),
   };
 }
