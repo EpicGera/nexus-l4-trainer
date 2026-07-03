@@ -22,6 +22,20 @@ export const parseDayId = (dayId: string): { week: number; day: number } | null 
   return m ? { week: Number(m[1]), day: Number(m[2]) } : null;
 };
 
+// Auto-follow week/day (the "sync tiempo real" toggle) is a per-DEVICE UI
+// preference. The l4_ prefix keeps it out of cloud roaming (nexus_* keys sync
+// across devices); reads fall back to the legacy nexus_ key it used to
+// (wrongly) roam under, so existing devices keep their setting.
+const AUTO_FOLLOW_KEY = "l4_sync_real_time";
+const AUTO_FOLLOW_LEGACY_KEY = "nexus_sync_real_time";
+
+export const getAutoFollow = (): boolean =>
+  (localStorage.getItem(AUTO_FOLLOW_KEY) ??
+    localStorage.getItem(AUTO_FOLLOW_LEGACY_KEY)) !== "false";
+
+export const setAutoFollow = (on: boolean): void =>
+  localStorage.setItem(AUTO_FOLLOW_KEY, String(on));
+
 /**
  * Legacy per-exercise log key: `nexus_logs_<dayId>_<Exercise_Name>`.
  * Keeps the historical `\s+ -> _` encoding so keys already in localStorage

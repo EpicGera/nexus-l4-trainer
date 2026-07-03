@@ -3,6 +3,7 @@ import type { User } from "firebase/auth";
 import { initAuth } from "../lib/firebase";
 import { initializeSyncEngine } from "../lib/syncEngine";
 import { getWeekOfProgram } from "../lib/constants";
+import { getAutoFollow, setAutoFollow } from "../lib/storageKeys";
 
 // ponytail: reloadAllLocalStorageState stays in App.tsx — it writes state owned
 // by several hooks/App; move it only when each piece has a single owner.
@@ -19,10 +20,9 @@ export function useCloudSync(
     lastSyncTime: Date.now(),
   });
 
-  const [syncWithRealTime, setSyncWithRealTime] = useState<boolean>(() => {
-    const saved = localStorage.getItem("nexus_sync_real_time");
-    return saved !== "false"; // Defaults to true
-  });
+  const [syncWithRealTime, setSyncWithRealTime] = useState<boolean>(() =>
+    getAutoFollow(),
+  );
 
   const [manualSyncState, setManualSyncState] = useState<
     "idle" | "syncing" | "success" | "error"
@@ -57,7 +57,7 @@ export function useCloudSync(
   const handleToggleSync = () => {
     const nextSync = !syncWithRealTime;
     setSyncWithRealTime(nextSync);
-    localStorage.setItem("nexus_sync_real_time", String(nextSync));
+    setAutoFollow(nextSync);
     if (nextSync) {
       const now = new Date();
       const autoWeek = getWeekOfProgram(now);

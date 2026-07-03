@@ -104,6 +104,7 @@ import {
 import { auth, googleProvider, googleSignIn, getAccessToken } from "./lib/firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { pushAllLocalToCloud } from "./lib/syncEngine";
+import { getAutoFollow, setAutoFollow } from "./lib/storageKeys";
 import { pushAthleteStats } from "./lib/athleteStats";
 import { exportToGoogleSheets } from "./lib/sheets";
 
@@ -155,7 +156,7 @@ export default function App() {
   const [realTime, setRealTime] = useState(new Date());
 
   const [currentWeek, setCurrentWeek] = useState<string>(() => {
-    const savedSync = localStorage.getItem("nexus_sync_real_time") !== "false";
+    const savedSync = getAutoFollow();
     if (savedSync) {
       return getWeekOfProgram(new Date());
     }
@@ -164,7 +165,7 @@ export default function App() {
   });
 
   const [currentDayIndex, setCurrentDayIndex] = useState<number>(() => {
-    const savedSync = localStorage.getItem("nexus_sync_real_time") !== "false";
+    const savedSync = getAutoFollow();
     if (savedSync) {
       const jsDay = new Date().getDay();
       return jsDay === 0 ? 6 : jsDay - 1;
@@ -580,8 +581,7 @@ export default function App() {
 
   useEffect(() => {
     const reloadAllLocalStorageState = () => {
-      const checkSync =
-        localStorage.getItem("nexus_sync_real_time") !== "false";
+      const checkSync = getAutoFollow();
       setSyncWithRealTime(checkSync);
 
       // Refresh the active chapter theme so the app-wide accent follows the
@@ -1441,7 +1441,7 @@ export default function App() {
                   }`}
                   onClick={() => {
                     setSyncWithRealTime(false);
-                    localStorage.setItem("nexus_sync_real_time", "false");
+                    setAutoFollow(false);
                     setCurrentWeek(w);
                   }}
                 >
@@ -1561,7 +1561,7 @@ export default function App() {
                         style={activeStyle}
                         onClick={() => {
                           setSyncWithRealTime(false);
-                          localStorage.setItem("nexus_sync_real_time", "false");
+                          setAutoFollow(false);
                           setCurrentDayIndex(idx);
                         }}
                       >

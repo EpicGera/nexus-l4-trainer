@@ -50,8 +50,13 @@ function getLocalTimestamp(key: string): number {
   return getLocalTimestamps()[key] || 0;
 }
 
-// Monkeypatch localStorage to transparently intercept any writes
+// Monkeypatch localStorage to transparently intercept any writes.
+// Guarded: re-running initializeSyncEngine (StrictMode/HMR) must not re-wrap
+// the already-wrapped methods, or every write dispatches duplicate events.
+let monkeypatchInstalled = false;
 export function setupStorageMonkeypatch() {
+  if (monkeypatchInstalled) return;
+  monkeypatchInstalled = true;
   const originalSetItem = localStorage.setItem;
   localStorage.setItem = function(key: string, value: string) {
     originalSetItem.apply(this, [key, value]);
@@ -144,31 +149,51 @@ function queueCloudPush(userId: string, key: string, value: string | null) {
   writeTimeouts.set(key, timeout);
 }
 
-// Push all syncable local keys to the cloud
+// Manual "push all" (sync button): local → cloud, but with the same LWW rule
+// as the sweep — never clobber a cloud copy that is newer than the local one.
 export async function pushAllLocalToCloud(userId: string) {
-  const syncableKeys: { key: string; value: string }[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && isSyncableKey(key)) {
-      const value = localStorage.getItem(key);
-      if (value) {
-        syncableKeys.push({ key, value });
-      }
+  const cloudTimes = new Map<string, number>();
+  const snapshot = await getDocs(collection(db, 'users', userId, 'localStorageSync'));
+  snapshot.forEach((docSnap) => {
+    const data = docSnap.data();
+    if (data && data.key) {
+      cloudTimes.set(data.key, data.updatedAt ? new Date(data.updatedAt).getTime() : 0);
     }
-  }
-
-  const promises = syncableKeys.map(async ({ key, value }) => {
-    const safeDocId = getSafeDocId(key);
-    const docRef = doc(db, 'users', userId, 'localStorageSync', safeDocId);
-    const localTime = getLocalTimestamp(key) || Date.now();
-    await setDoc(docRef, {
-      key,
-      value,
-      updatedAt: new Date(localTime).toISOString()
-    });
   });
 
+  const promises: Promise<void>[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !isSyncableKey(key)) continue;
+    const value = localStorage.getItem(key);
+    if (!value) continue;
+    const localTime = getLocalTimestamp(key);
+    if ((cloudTimes.get(key) ?? 0) > localTime) continue; // cloud is newer — skip
+    const docRef = doc(db, 'users', userId, 'localStorageSync', getSafeDocId(key));
+    promises.push(setDoc(docRef, {
+      key,
+      value,
+      updatedAt: new Date(localTime || Date.now()).toISOString()
+    }));
+  }
+
   await Promise.all(promises);
+}
+
+// Reset flow (`localStorage.clear()` in handleConfirmReset): mirror the wipe to
+// the cloud — without this the next sweep resurrects everything from Firestore.
+// ponytail: pending debounced pushes are cancelled first; the SDK write stream
+// keeps delete-before-recreate ordering for the keys the reset re-seeds.
+async function clearAllCloudDocs(userId: string) {
+  for (const t of writeTimeouts.values()) clearTimeout(t);
+  writeTimeouts.clear();
+  try {
+    const snapshot = await getDocs(collection(db, 'users', userId, 'localStorageSync'));
+    await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
+  } catch (error) {
+    console.error('Error clearing cloud sync docs:', error);
+    notifyPushFailure();
+  }
 }
 
 // Initialize the sync engine and auth state listeners
@@ -187,7 +212,7 @@ export function initializeSyncEngine(
     if (customEvent.detail) {
       const { key, value, clearAll } = customEvent.detail;
       if (clearAll) {
-        // Delete all syncable documents on auth clear
+        void clearAllCloudDocs(userId);
         return;
       }
       if (key) {
@@ -201,7 +226,7 @@ export function initializeSyncEngine(
   let activeOnlineListener: (() => void) | null = null;
 
   // Monitor Auth State Changes
-  onAuthStateChanged(auth, async (user) => {
+  const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
     // Unsubscribe from any previous Firestore listeners and browser events to avoid resource leaks
     if (currentUnsubscribe) {
       currentUnsubscribe();
@@ -243,7 +268,10 @@ export function initializeSyncEngine(
                   setLocalTimestamp(key, cloudTime);
                   changed = true;
                 } else {
-                  // Exists in both -> Conflict resolution based on timestamps
+                  // Exists in both -> Conflict resolution based on timestamps.
+                  // ponytail: LWW over device wall-clocks — a device with a
+                  // skewed clock can win with older data. Accepted trade-off;
+                  // the real fix (server-issued timestamps) changes the doc schema.
                   if (cloudTime > localTime) {
                     // Cloud is newer -> Pull to local
                     if (localValue !== data.value) {
@@ -278,6 +306,9 @@ export function initializeSyncEngine(
           }
         } catch (err) {
           console.error('Error in runFullBidirectionalSync:', err);
+          // Pull failed = this device is NOT synced; surface it instead of
+          // letting the user believe the login sweep worked.
+          notifyPushFailure();
         }
       };
 
@@ -318,15 +349,23 @@ export function initializeSyncEngine(
             const cloudTime = data.updatedAt ? new Date(data.updatedAt).getTime() : 0;
 
             if (change.type === 'removed') {
-              if (localStorage.getItem(key) !== null) {
-                localStorage.removeItem(key);
-                // Also remove locally tracked timestamp
-                try {
-                  const stamps = getLocalTimestamps();
-                  delete stamps[key];
-                  localStorage.setItem('nexus_sys_sync_timestamps', JSON.stringify(stamps));
-                } catch (e) {}
-                changed = true;
+              const localValue = localStorage.getItem(key);
+              if (localValue !== null) {
+                if (getLocalTimestamp(key) > cloudTime) {
+                  // Local edit is newer than the deleted cloud copy — keep it
+                  // and re-push instead of propagating a stale deletion (same
+                  // LWW rule as updates).
+                  queueCloudPush(userId, key, localValue);
+                } else {
+                  localStorage.removeItem(key);
+                  // Also remove locally tracked timestamp
+                  try {
+                    const stamps = getLocalTimestamps();
+                    delete stamps[key];
+                    localStorage.setItem('nexus_sys_sync_timestamps', JSON.stringify(stamps));
+                  } catch (e) {}
+                  changed = true;
+                }
               }
             } else {
               const localValue = localStorage.getItem(key);
@@ -373,5 +412,6 @@ export function initializeSyncEngine(
     if (currentUnsubscribe) {
       currentUnsubscribe();
     }
+    unsubscribeAuth();
   };
 }

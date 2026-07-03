@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { parseDayId, buildLogsKey, STORAGE_KEYS } from "./storageKeys";
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  parseDayId, buildLogsKey, STORAGE_KEYS, getAutoFollow, setAutoFollow,
+} from "./storageKeys";
 
 describe("parseDayId", () => {
   it("parses single-digit weeks", () => {
@@ -16,6 +18,19 @@ describe("parseDayId", () => {
     expect(parseDayId("")).toBeNull();
     expect(parseDayId("week1")).toBeNull();
     expect(parseDayId("w1")).toBeNull();
+  });
+});
+
+describe("getAutoFollow / setAutoFollow (device-local, legacy fallback)", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("defaults to true, falls back to the legacy roamed key, and prefers l4_", () => {
+    expect(getAutoFollow()).toBe(true);
+    localStorage.setItem("nexus_sync_real_time", "false"); // legacy (roamed)
+    expect(getAutoFollow()).toBe(false);
+    setAutoFollow(true); // writes l4_, which wins over legacy
+    expect(getAutoFollow()).toBe(true);
+    expect(localStorage.getItem("l4_sync_real_time")).toBe("true");
   });
 });
 
