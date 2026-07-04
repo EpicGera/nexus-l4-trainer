@@ -20,6 +20,7 @@ import { getBodyweightKg, setBodyweightKg } from "../lib/profileMetrics";
 import { getCleanExerciseName, isCueOrNote } from "../lib/historyUtils";
 import { resolveBlockItems } from "../lib/blockGrouping";
 import { parseSplits } from "../lib/tightGrouping";
+import { expandMetconWork } from "../lib/metconWork";
 import { getSuggestedRpe, getBiomechanicalTips } from "../lib/biomechanicsAdvisor";
 import { getOneRepMaxes, estimateOneRepMaxesFromLogs, resolveWmRange, wmRangeLabel, setOneRepMax } from "../lib/workingMax";
 import {
@@ -282,6 +283,16 @@ export default function SessionWizard({
 
   // Metcon protocol step: every metcon-bucket block's movements (flexible) or the
   // merged metcon lane (legacy).
+  // Items CRUDOS del metcon (conservan cantidades: "15 Cal Row (9kg)") — la
+  // fuente de la expansión prescripción × rondas al sellar.
+  const rawMetconItems = useMemo(() => {
+    if (variation.blocks?.length) {
+      const items = variation.blocks.filter((b) => b.bucket === "metcon").flatMap((b) => b.items);
+      return items.length ? items : variation.metcon.items;
+    }
+    return variation.metcon.items;
+  }, [variation]);
+
   const metconMovements = useMemo(() => {
     if (variation.blocks?.length) {
       const items = variation.blocks.filter((b) => b.bucket === "metcon").flatMap((b) => b.items);
@@ -614,6 +625,35 @@ export default function SessionWizard({
       }
       const splits = parseSplits(mSplits);
       if (splits.length >= 2) metcon.splits = splits;
+
+      // Prescripción × rondas reales → sets con números REALES por movimiento
+      // (15 cal Row × 5 rondas = 75 cal). Con esto el cardio del metcon entra
+      // al trabajo/balance/hopper con datos, no estimaciones.
+      expandMetconWork(rawMetconItems, metconSchemeText, metcon).forEach((q) => {
+        const ex = resolveOrInfer(q.name);
+        sets.push({
+          id: `set_${now}_${Math.random().toString(36).slice(2, 8)}`,
+          exerciseId: ex.id,
+          exerciseName: q.name,
+          weightKg: q.weightKg,
+          isBodyweight: q.weightKg == null,
+          addedLoadKg: null,
+          reps: q.reps,
+          distanceM: q.distanceM,
+          calories: q.calories,
+          timeSec: null,
+          rpe: null,
+          rir: null,
+          tempo: null,
+          setType: "working",
+          ts: now,
+          blockSlot: metconBlock?.key ?? "metcon",
+          blockTitle: cleanBlockTitle(metconBlock?.title || "") || "Metcon",
+          energySystem: metcon.energySystem ?? energyForExercise(ex),
+          timeDomain: metcon.timeDomain,
+          blockCapSec: metconBlock?.capSec,
+        });
+      });
     }
 
     return {
