@@ -42,6 +42,7 @@ import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
 import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
+import { parseSpecialDayJson, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation } from "./lib/specialDay";
 import { getMonthlyVolumeStats } from "./lib/exportService";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -1286,6 +1287,39 @@ export default function App() {
     />
   );
 
+  // ── Día especial por JSON: entra como pestaña ESPECIAL del día activo ────
+  const specialFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const toast = (message: string, kind: "success" | "error" = "success") =>
+    window.dispatchEvent(new CustomEvent("nexus_toast", { detail: { message, kind, durationMs: 5000 } }));
+
+  const handleSpecialDayFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !activeDay) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const { variation, audit } = parseSpecialDayJson(String(reader.result));
+        const next = injectSpecialVariation(database, activeDay.id, variation);
+        setDatabase(next);
+        saveCachedWorkouts(next);
+        const warns = audit.issues.filter((i) => i.severity !== "error").length;
+        toast(`Pestaña ESPECIAL agregada a ${activeDay.name}${warns ? ` (${warns} avisos de auditoría)` : ""} — deslizá para verla`);
+      } catch (err: any) {
+        toast(err?.message || "No se pudo importar el día especial", "error");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleRemoveSpecialDay = () => {
+    if (!activeDay) return;
+    const next = removeSpecialVariation(database, activeDay.id);
+    setDatabase(next);
+    saveCachedWorkouts(next);
+    toast(`Pestaña ESPECIAL quitada de ${activeDay.name}`);
+  };
+
   // Day share actions — STORY JPG (primary) with the "+ FOTO" attach folded in
   // as a borderless secondary. (PROGRAMA DEL DÍA / Markdown lives in the month
   // toolbar now.) Single source of truth for every board layout.
@@ -1497,6 +1531,34 @@ export default function App() {
                 <FileText size={14} className="text-indigo-200" />
                 <span>PROGRAMA DEL DÍA</span>
               </button>
+            )}
+
+            {/* DÍA ESPECIAL: subir JSON de día suelto como pestaña extra del día activo */}
+            {activeDay && (
+              <>
+                <input
+                  ref={specialFileInputRef}
+                  type="file"
+                  accept=".json,application/json"
+                  className="hidden"
+                  onChange={handleSpecialDayFile}
+                />
+                <button
+                  onClick={() =>
+                    hasSpecialVariation(database, activeDay.id)
+                      ? handleRemoveSpecialDay()
+                      : specialFileInputRef.current?.click()
+                  }
+                  className="flex items-center gap-2 px-4 py-2 bg-black border border-white/30 hover:bg-white hover:text-black text-white rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
+                  title={
+                    hasSpecialVariation(database, activeDay.id)
+                      ? "Quitar la pestaña ESPECIAL de este día"
+                      : "Subir un JSON de día suelto como pestaña ESPECIAL de este día"
+                  }
+                >
+                  <span>{hasSpecialVariation(database, activeDay.id) ? "✕ ESPECIAL" : "DÍA ESPECIAL"}</span>
+                </button>
+              </>
             )}
           </div>
         </div>

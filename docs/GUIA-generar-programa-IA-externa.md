@@ -404,3 +404,21 @@ REQUISITOS:
 - [ ] Hay progresión semana a semana y equilibrio M/G/W + patrones.
 - [ ] Hay día(s) de descanso.
 - [ ] La respuesta es **solo el JSON**, sin texto extra.
+
+## Archivo de DÍA SUELTO (pestaña ESPECIAL)
+
+Además del programa completo, la app acepta un JSON de UN día para agregarlo
+como pestaña ESPECIAL del día activo (botón "DÍA ESPECIAL"). Mismo contrato de
+bloques; el original queda intacto y el wizard/cálculos lo toman igual.
+
+```json
+{
+  "title": "TEAM WOD ESPECIAL",
+  "variations": [{
+    "b1_warmup": { "title": "01. WARM-UP", "scheme": "10 Min", "items": ["Remo suave"] },
+    "b2_metcon": { "title": "02. METCON", "scheme": "AMRAP 14 Min", "items": ["15 Cal Row", "10 Burpees"] }
+  }]
+}
+```
+
+También se acepta la variación sola (el objeto interno de `variations`) sin wrapper.
