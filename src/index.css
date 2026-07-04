@@ -1,42 +1,48 @@
 @import "tailwindcss";
 
+/* PRVN monochrome system: black canvas, white type, gray structure, ONE signal
+   red (#DC2626) for RPE/alertas/PRs. Los tokens legacy (electric-blue/neon-pink)
+   se REMAPEAN acá para que toda la app herede la paleta sin tocar cada archivo. */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-brutalist: "Anton", "Impact", sans-serif;
   --font-condensed: "Roboto Condensed", sans-serif;
-  
-  --color-pure-black: #0E0E11;
+
+  --color-pure-black: #0A0A0A;
   --color-pure-white: #FFFFFF;
-  --color-electric-blue: #1F51FF;
-  --color-neon-pink: #FF007F;
-  
-  --shadow-blue-glow: 0 0 15px 2px rgba(31, 81, 255, 0.6);
-  --shadow-pink-glow: 0 0 15px 2px rgba(255, 0, 127, 0.6);
+  --color-signal-red: #DC2626;
+  /* legacy tokens remapeados a la paleta monocroma */
+  --color-electric-blue: #FFFFFF;
+  --color-neon-pink: #DC2626;
+
+  --shadow-blue-glow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+  --shadow-pink-glow: 0 0 12px 1px rgba(220, 38, 38, 0.4);
 }
 
+/* Badges legacy: monocromo + rojo señal */
 .bg-neon-pink {
-  background-color: #FF007F;
+  background-color: #DC2626;
 }
 
 .bg-neon-yellow {
-  background-color: #CCFF00;
+  background-color: #E5E5E5;
 }
 
 .bg-neon-orange {
-  background-color: #FF5A00;
+  background-color: #DC2626;
 }
 
 .bg-neon-green {
-  background-color: #39FF14;
+  background-color: #FFFFFF;
 }
 
 .bg-neon-cyan {
-  background-color: #00F0FF;
+  background-color: #A3A3A3;
 }
 
 body {
-  background-color: #0E0E11;
+  background-color: #0A0A0A;
   color: #FFFFFF;
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -212,16 +218,16 @@ body {
 }
 
 .status-btn.completed {
-  background-color: #10B981;
+  background-color: #FFFFFF;
   border: none;
-  color: #0E0E11;
+  color: #0A0A0A;
   box-shadow: none;
 }
 
 .status-btn.completed:hover {
-  background-color: #059669;
+  background-color: #D4D4D4;
   border: none;
-  color: #FFFFFF;
+  color: #0A0A0A;
 }
 
 /* Print Styles */

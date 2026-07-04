@@ -19,50 +19,23 @@ export const WEEK_COLOR_MAPPING: Record<string, string> = {
 };
 
 // Complementary accent colors for blocks/highlights per week, in perfect sync with the center band
+// PRVN monochrome: las semanas se distinguen por tipografía y estructura, no
+// por color. Blanco uniforme con halo mínimo; la señal roja queda para RPE/PRs.
 export const WEEK_ACCENT_COLORS: Record<string, { color: string; shadow: string }> = {
-  w1: {
-    color: "#00F0FF", // Cyan (Complement to Pink)
-    shadow: "0 0 15px 2px rgba(0, 240, 255, 0.6)",
-  },
-  w2: {
-    color: "#BD00FF", // Electric Purple (Complement to Yellow/Lime)
-    shadow: "0 0 15px 2px rgba(189, 0, 255, 0.6)",
-  },
-  w3: {
-    color: "#FF007F", // Neon Pink (Complement to Neon Green)
-    shadow: "0 0 15px 2px rgba(255, 0, 127, 0.6)",
-  },
-  w4: {
-    color: "#FF5A00", // Neon Orange (Complement to Neon Cyan)
-    shadow: "0 0 15px 2px rgba(255, 90, 0, 0.6)",
-  },
+  w1: { color: "#FFFFFF", shadow: "0 0 0 1px rgba(255,255,255,0.25)" },
+  w2: { color: "#FFFFFF", shadow: "0 0 0 1px rgba(255,255,255,0.25)" },
+  w3: { color: "#FFFFFF", shadow: "0 0 0 1px rgba(255,255,255,0.25)" },
+  w4: { color: "#DC2626", shadow: "0 0 0 1px rgba(220,38,38,0.35)" }, // deload marcada en rojo señal
 };
 
+// Claves legacy remapeadas a la paleta monocroma (blanco/grises + rojo señal).
 export const ACCENT_COLORS_MAP: Record<string, { color: string; shadow: string }> = {
-  "electric-blue": {
-    color: "#1F51FF",
-    shadow: "0 0 15px 2px rgba(31, 81, 255, 0.6)",
-  },
-  "neon-green": {
-    color: "#39FF14",
-    shadow: "0 0 15px 2px rgba(57, 255, 20, 0.6)",
-  },
-  "royal-purple": {
-    color: "#BD00FF",
-    shadow: "0 0 15px 2px rgba(189, 0, 255, 0.6)",
-  },
-  "neon-pink": {
-    color: "#FF007F",
-    shadow: "0 0 15px 2px rgba(255, 0, 127, 0.6)",
-  },
-  "neon-orange": {
-    color: "#FF5A00",
-    shadow: "0 0 15px 2px rgba(255, 90, 0, 0.6)",
-  },
-  "neon-cyan": {
-    color: "#00F0FF",
-    shadow: "0 0 15px 2px rgba(0, 240, 255, 0.6)",
-  },
+  "electric-blue": { color: "#FFFFFF", shadow: "0 0 0 1px rgba(255,255,255,0.25)" },
+  "neon-green": { color: "#FFFFFF", shadow: "0 0 0 1px rgba(255,255,255,0.25)" },
+  "royal-purple": { color: "#A3A3A3", shadow: "0 0 0 1px rgba(163,163,163,0.3)" },
+  "neon-pink": { color: "#DC2626", shadow: "0 0 12px 1px rgba(220,38,38,0.4)" },
+  "neon-orange": { color: "#DC2626", shadow: "0 0 12px 1px rgba(220,38,38,0.4)" },
+  "neon-cyan": { color: "#D4D4D4", shadow: "0 0 0 1px rgba(212,212,212,0.3)" },
 };
 
 // High-contrast, vibrant complementary colored bands in perfect dualistic balance with each week's glowing accent border
@@ -70,25 +43,26 @@ export const WEEK_MID_BAND_COLORS: Record<
   string,
   { bg: string; text: string; bgStyle: React.CSSProperties }
 > = {
+  // PRVN: banda estructural, no fluorescente. w4 (deload) invertida en blanco.
   w1: {
-    bg: "#FF007F", // Vivid Neon Pink/Rose complementary to Cyan accent
-    text: "#000000",
-    bgStyle: { background: "linear-gradient(90deg, #FF007F 0%, #E11D48 100%)" },
+    bg: "#1A1A1A",
+    text: "#FFFFFF",
+    bgStyle: { background: "linear-gradient(90deg, #1F1F1F 0%, #0F0F0F 100%)" },
   },
   w2: {
-    bg: "#39FF14", // Vibrant Neon Lime complementary to Purple accent
-    text: "#000000",
-    bgStyle: { background: "linear-gradient(90deg, #39FF14 0%, #15B300 100%)" },
+    bg: "#1A1A1A",
+    text: "#FFFFFF",
+    bgStyle: { background: "linear-gradient(90deg, #1F1F1F 0%, #0F0F0F 100%)" },
   },
   w3: {
-    bg: "#00F0FF", // Electrifying Cyan complementary to Pink accent
-    text: "#000000",
-    bgStyle: { background: "linear-gradient(90deg, #00F0FF 0%, #0369A1 100%)" },
+    bg: "#1A1A1A",
+    text: "#FFFFFF",
+    bgStyle: { background: "linear-gradient(90deg, #1F1F1F 0%, #0F0F0F 100%)" },
   },
   w4: {
-    bg: "#BD00FF", // Royal Purple complementary to Orange accent
-    text: "#ffffff",
-    bgStyle: { background: "linear-gradient(90deg, #BD00FF 0%, #6D28D9 100%)" },
+    bg: "#FFFFFF",
+    text: "#0A0A0A",
+    bgStyle: { background: "linear-gradient(90deg, #FFFFFF 0%, #D4D4D4 100%)" },
   },
 };
 

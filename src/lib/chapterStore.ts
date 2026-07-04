@@ -67,12 +67,14 @@ const programKey = (id: string) => `nexus_chapter_${id}`;
 const dataKey = (id: string) => `nexus_chapter_data_${id}`;
 
 // ── Theme palettes (assigned by chapter index; refined visually in Fase 2) ───
+// PRVN monochrome: capítulos diferenciados por tono de gris/inversión, con el
+// rojo señal reservado a un solo tema. La identidad la lleva la tipografía.
 export const THEME_PALETTES: ChapterTheme[] = [
-  { key: "diablo", accent: "#e11d2a", band: "#7f1d1d", titleGradient: "linear-gradient(90deg,#ef4444,#7f1d1d)", fontKey: "diablo" },
-  { key: "sunkenrock", accent: "#e0a52a", band: "#134e4a", titleGradient: "linear-gradient(90deg,#f4c430,#b45309)", fontKey: "sunkenrock" },
-  { key: "abyss", accent: "#a855f7", band: "#1e1b4b", titleGradient: "linear-gradient(90deg,#a855f7,#312e81)", fontKey: "default" },
-  { key: "frost", accent: "#22d3ee", band: "#0e7490", titleGradient: "linear-gradient(90deg,#22d3ee,#0e7490)", fontKey: "default" },
-  { key: "ember", accent: "#fb923c", band: "#7c2d12", titleGradient: "linear-gradient(90deg,#fb923c,#7c2d12)", fontKey: "default" },
+  { key: "mono", accent: "#FFFFFF", band: "#1A1A1A", titleGradient: "linear-gradient(90deg,#FFFFFF,#A3A3A3)", fontKey: "diablo" },
+  { key: "signal", accent: "#DC2626", band: "#1A1A1A", titleGradient: "linear-gradient(90deg,#DC2626,#7F1D1D)", fontKey: "sunkenrock" },
+  { key: "steel", accent: "#D4D4D4", band: "#171717", titleGradient: "linear-gradient(90deg,#E5E5E5,#737373)", fontKey: "default" },
+  { key: "invert", accent: "#FFFFFF", band: "#FFFFFF", titleGradient: "linear-gradient(90deg,#FFFFFF,#D4D4D4)", fontKey: "default" },
+  { key: "graphite", accent: "#A3A3A3", band: "#0F0F0F", titleGradient: "linear-gradient(90deg,#A3A3A3,#525252)", fontKey: "default" },
 ];
 export function themeForIndex(index: number): ChapterTheme {
   return THEME_PALETTES[(Math.max(1, index) - 1) % THEME_PALETTES.length];
@@ -225,9 +227,16 @@ export function getChapterMeta(id: string): ChapterMeta | null {
   return readIndex()?.chapters.find((c) => c.id === id) || null;
 }
 
+// Temas persistidos con la paleta neón anterior migran al monocromo al leer.
+const LEGACY_THEME_KEYS = ["diablo", "sunkenrock", "abyss", "frost", "ember"];
+
 export function getActiveChapter(): ChapterMeta | null {
   const idx = readIndex();
-  return idx ? idx.chapters.find((c) => c.id === idx.activeId) || null : null;
+  const meta = idx ? idx.chapters.find((c) => c.id === idx.activeId) || null : null;
+  if (meta?.theme && LEGACY_THEME_KEYS.includes(meta.theme.key)) {
+    return { ...meta, theme: themeForIndex(meta.index) };
+  }
+  return meta;
 }
 
 /** Update mutable fields (title/lore/theme) of a chapter. */
