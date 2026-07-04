@@ -158,6 +158,53 @@ export function backfillMetconDerivedSets(db: Database): number {
   return touched;
 }
 
+/**
+ * Repara los snapshots de estímulo de sesiones YA selladas cuando la
+ * clasificación derivada del bloque cambió (fix del clasificador: intervalos
+ * por esfuerzo, no por total). El snapshot era DERIVADO, no ingresado por el
+ * atleta — corregir una derivación buggy retroactivamente es reparación de
+ * datos, no fabricación. Idempotente: sin diferencias, no escribe.
+ */
+export function repairMetconSnapshots(db: Database): number {
+  const sessions = loadSessions();
+  let touched = 0;
+
+  for (const session of sessions) {
+    const m = session.metcon;
+    if (!m || !session.dayId) continue;
+    const parsed = parseDayId(session.dayId);
+    if (!parsed) continue;
+    const day = db[`w${parsed.week}`]?.days?.find((d) => d.id === session.dayId);
+    const block = day?.variations?.[0]?.blocks?.find((b) => b.bucket === "metcon");
+    if (!block) continue;
+
+    const wantEs = block.energySystem;
+    const wantTd = block.timeDomain;
+    if (m.energySystem === wantEs && m.timeDomain === wantTd) continue;
+
+    m.energySystem = wantEs;
+    m.timeDomain = wantTd;
+    // los sets derivados del metcon heredan la corrección
+    for (const s of session.sets) {
+      if ((s.blockSlot || "").includes("metcon")) {
+        s.energySystem = wantEs ?? s.energySystem;
+        s.timeDomain = wantTd;
+      }
+    }
+    touched++;
+  }
+
+  if (touched > 0) {
+    saveSessions(sessions);
+    try {
+      window.dispatchEvent(new Event("nexus_logs_updated"));
+    } catch {
+      /* no window — ignore */
+    }
+  }
+  return touched;
+}
+
 const num = (v: unknown): number | null => {
   const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
   return m ? parseFloat(m[0]) : null;

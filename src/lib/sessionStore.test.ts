@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
   recordManualLog, getSessionForDay, saveSession, backfillMetconDerivedSets,
+  repairMetconSnapshots,
 } from "./sessionStore";
 import { TrainingSession } from "../types/training";
 
@@ -100,5 +101,51 @@ describe("backfillMetconDerivedSets (retroactivo)", () => {
     });
     saveSession(s);
     expect(backfillMetconDerivedSets(db)).toBe(0);
+  });
+});
+
+describe("repairMetconSnapshots (fix retro de clasificación)", () => {
+  beforeEach(() => localStorage.clear());
+
+  const dbWithBlocks = {
+    w1: {
+      days: [{
+        id: "w1d1", name: "LUNES", title: "X",
+        variations: [{
+          tabName: "RX",
+          warmup: { title: "", scheme: "", items: [] },
+          strength: { title: "", scheme: "", items: [] },
+          metcon: { title: "", scheme: "", items: [] },
+          accessories: { title: "", scheme: "", items: [] },
+          blocks: [{
+            key: "b2_metcon", bucket: "metcon", title: "METCON",
+            scheme: "EMOM 12", items: ["10 Wall Balls"],
+            energySystem: "glycolytic", timeDomain: "sprint", // deriva corregida
+          }],
+        }],
+      }],
+    },
+  } as any;
+
+  it("actualiza el snapshot viejo (medium/mixed) al derivado corregido", () => {
+    saveSession({
+      id: "s1", date: "2026-06-20", dayId: "w1d1", completed: true,
+      durationMin: 30, sessionRpe: 7,
+      metcon: { format: "emom", scaling: "rx", energySystem: "mixed", timeDomain: "medium" },
+      sets: [{
+        id: "a", exerciseId: "wall-ball", exerciseName: "Wall Ball", weightKg: 9,
+        isBodyweight: false, addedLoadKg: null, reps: 120, distanceM: null,
+        calories: null, timeSec: null, rpe: null, rir: null, tempo: null,
+        setType: "working", ts: 1, blockSlot: "b2_metcon",
+        energySystem: "mixed", timeDomain: "medium",
+      }],
+    });
+    expect(repairMetconSnapshots(dbWithBlocks)).toBe(1);
+    const s = getSessionForDay("w1d1")!;
+    expect(s.metcon!.timeDomain).toBe("sprint");
+    expect(s.metcon!.energySystem).toBe("glycolytic");
+    expect(s.sets[0].timeDomain).toBe("sprint"); // el set derivado hereda
+    // idempotente
+    expect(repairMetconSnapshots(dbWithBlocks)).toBe(0);
   });
 });

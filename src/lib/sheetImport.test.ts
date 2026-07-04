@@ -62,16 +62,40 @@ describe("sheetImport - parseCsvToDatabase", () => {
   });
 });
 
-describe("deriveBlockMeta — duración de intervalos EVERY", () => {
-  it("Every M:SS x N clasifica corto/glucolítico (antes quedaba sin metadata)", () => {
+describe("deriveBlockMeta — intervalos clasifican por ESFUERZO, no por total", () => {
+  it("Every 1:30 x 5: el estímulo son esfuerzos de 90s → sprint/glucolítico", () => {
     const meta = deriveBlockMeta("metcon", "Every 1:30 x 5");
-    expect(meta.timeDomain).toBe("short"); // 7.5 min
+    expect(meta.timeDomain).toBe("sprint"); // 90s de esfuerzo, no 7.5 min
     expect(meta.energySystem).toBe("glycolytic");
   });
 
-  it("Every N min x K también", () => {
+  it("Every 2 min x 12: esfuerzos de 2 min → corto (antes: 24 min → largo)", () => {
     const meta = deriveBlockMeta("metcon", "Every 2 min x 12");
-    expect(meta.timeDomain).toBe("long"); // 24 min
+    expect(meta.timeDomain).toBe("short");
+    expect(meta.energySystem).toBe("glycolytic");
+  });
+
+  it("EMOM: ventanas de 1 minuto → sprint/glucolítico", () => {
+    const meta = deriveBlockMeta("metcon", "EMOM 12");
+    expect(meta.timeDomain).toBe("sprint");
+    expect(meta.energySystem).toBe("glycolytic");
+  });
+
+  it("intervalos ON/OFF clasifican por el ON", () => {
+    const meta = deriveBlockMeta("metcon", "3 Min ON / 1 Min OFF x 4 Rondas");
+    expect(meta.timeDomain).toBe("short"); // esfuerzos de 3 min
+    expect(meta.energySystem).toBe("glycolytic");
+  });
+
+  it("esfuerzos ultracortos (≤30s) tocan fosfágeno", () => {
+    const meta = deriveBlockMeta("metcon", "Every 0:30 x 10");
+    expect(meta.timeDomain).toBe("sprint");
+    expect(meta.energySystem).toBe("phosphagen");
+  });
+
+  it("formatos continuos siguen clasificando por duración total", () => {
+    expect(deriveBlockMeta("metcon", "AMRAP 14 MIN").timeDomain).toBe("medium");
+    expect(deriveBlockMeta("metcon", "AMRAP 14 MIN").energySystem).toBe("mixed");
   });
 
   it("esquemas sin duración inferible siguen honestamente sin clasificar", () => {

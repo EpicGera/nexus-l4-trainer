@@ -35,9 +35,12 @@ describe("derived block metadata (Fase D)", () => {
     expect(b.energySystem).toBe("oxidative");
   });
 
-  it("intervals 4 Rondas (3 ON / 1 OFF) → 16 min → medium", () => {
+  it("intervals 4 Rondas (3 ON / 1 OFF) clasifican por el ESFUERZO (3 min → short)", () => {
+    // El estímulo de un intervalo es el esfuerzo individual, no la suma de la
+    // sesión: 4 esfuerzos de 3 min son dominio corto/glucolítico, no medio.
     const b = metconBlock("Intervalos: 4 Rondas (3 Min ON / 1 Min OFF)");
-    expect(b.timeDomain).toBe("medium");
+    expect(b.timeDomain).toBe("short");
+    expect(b.energySystem).toBe("glycolytic");
   });
 
   it("non-metcon blocks get no time domain; cap still parsed if present", () => {

@@ -41,7 +41,7 @@ import ProfileModal from "./components/ProfileModal";
 import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
-import { getSessionForDay, backfillMetconDerivedSets } from "./lib/sessionStore";
+import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
 import { getMonthlyVolumeStats } from "./lib/exportService";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -426,7 +426,9 @@ export default function App() {
   useEffect(() => {
     backfillLocalLogsFromDatabase(database);
     // Sesiones viejas: expandir su metcon (prescripción × rondas reales) para
-    // que el cardio ya registrado entre al análisis retroactivamente.
+    // que el cardio ya registrado entre al análisis retroactivamente, y
+    // reparar snapshots clasificados por el deriva viejo (total vs esfuerzo).
+    repairMetconSnapshots(database);
     backfillMetconDerivedSets(database);
   }, [database]);
 

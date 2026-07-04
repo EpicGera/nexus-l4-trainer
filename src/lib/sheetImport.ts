@@ -448,6 +448,22 @@ function schemeDurationMin(scheme: string): number | null {
   return null;
 }
 
+/**
+ * Duración del ESFUERZO individual en formatos de intervalo, en minutos.
+ * El estímulo de un "Every 1:30 x 8" no son 12 minutos continuos: son ocho
+ * esfuerzos de 90 segundos — el dominio temporal debe clasificar el esfuerzo,
+ * no la suma. Devuelve null para formatos continuos (AMRAP, For Time, caps).
+ */
+function schemeEffortMin(scheme: string): number | null {
+  const U = (scheme || "").toUpperCase();
+  const onOff = U.match(/(\d+)\s*(?:MIN|M|['′])?\s*ON\s*\/\s*\d+\s*(?:MIN|M|['′])?\s*OFF/);
+  if (onOff) return parseInt(onOff[1], 10);
+  const every = U.match(/EVERY\s*(\d+)(?::(\d{2}))?\s*(?:MIN)?\s*X\s*\d+/);
+  if (every) return parseInt(every[1], 10) + (every[2] ? parseInt(every[2], 10) / 60 : 0);
+  if (/\bEMOM\b|E\d+MOM|\bCADA\s+MIN/.test(U)) return 1; // ventana de 1 minuto
+  return null;
+}
+
 /** Time-domain bucket — same thresholds as trainingEngine.timeDomain. */
 function toTimeDomain(min: number): BlockTimeDomain {
   const sec = min * 60;
@@ -457,10 +473,16 @@ function toTimeDomain(min: number): BlockTimeDomain {
   return "long";
 }
 
-function deriveEnergySystem(scheme: string, td: BlockTimeDomain | null): EnergySystem | undefined {
+function deriveEnergySystem(
+  scheme: string,
+  td: BlockTimeDomain | null,
+  effortMin: number | null = null,
+): EnergySystem | undefined {
   const s = stripAccents((scheme || "").toLowerCase());
   if (/zona\s*[12]|conversacional|continu|flush|regenerativ/.test(s)) return "oxidative";
   if (!td) return undefined;
+  // esfuerzos ultracortos all-out (≤30s de intervalo) → fosfágeno
+  if (effortMin != null && effortMin > 0 && effortMin <= 0.5) return "phosphagen";
   if (td === "sprint" || td === "short") return "glycolytic";
   if (td === "medium") return "mixed";
   return "oxidative"; // long
@@ -475,16 +497,39 @@ export function deriveBlockMeta(
   const capMin = parseCapMin((scheme || "").toUpperCase());
   if (capMin != null) out.capSec = Math.round(capMin * 60);
   if (bucket === "metcon") {
-    const min = schemeDurationMin(scheme);
+    // intervalos: el dominio temporal clasifica el ESFUERZO (el ON), no el total
+    const effort = schemeEffortMin(scheme);
+    const min = effort ?? schemeDurationMin(scheme);
     if (min != null && min > 0) {
       out.timeDomain = toTimeDomain(min);
-      out.energySystem = deriveEnergySystem(scheme, out.timeDomain);
+      out.energySystem = deriveEnergySystem(scheme, out.timeDomain, effort);
     } else {
       const es = deriveEnergySystem(scheme, null);
       if (es) out.energySystem = es;
     }
   }
   return out;
+}
+
+/**
+ * Re-deriva la metadata de todos los bloques de una base ya parseada. La base
+ * se cachea PARSEADA, así que sin esto una mejora del clasificador no llega al
+ * atleta hasta reimportar el sheet. Muta y devuelve la misma instancia.
+ */
+export function rederiveDatabaseMeta(db: Database): Database {
+  for (const week of Object.values(db)) {
+    for (const day of week.days ?? []) {
+      for (const v of day.variations ?? []) {
+        for (const b of v.blocks ?? []) {
+          const meta = deriveBlockMeta(b.bucket, b.scheme || "");
+          b.capSec = meta.capSec;
+          b.timeDomain = meta.timeDomain;
+          b.energySystem = meta.energySystem;
+        }
+      }
+    }
+  }
+  return db;
 }
 
 function isBlockLike(val: any): boolean {
@@ -854,7 +899,10 @@ export function loadCachedWorkouts(): Database | null {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const db = JSON.parse(raw);
-    return db && typeof db === "object" && db.w1 ? (db as Database) : null;
+    if (!db || typeof db !== "object" || !db.w1) return null;
+    // la cache guarda la base PARSEADA: re-derivar acá hace que las mejoras
+    // del clasificador lleguen al atleta sin esperar un reimport del sheet
+    return rederiveDatabaseMeta(db as Database);
   } catch {
     return null;
   }
