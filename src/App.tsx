@@ -546,6 +546,9 @@ export default function App() {
     previewScale,
     setPreviewScale,
     exportFileInputRef,
+    cameraInputRef,
+    handleTakePhoto,
+    isFxProcessing,
     handleMonthTextExport,
     handleExportGoogleSheets,
     handleBatchPDFExport,
@@ -1363,18 +1366,46 @@ export default function App() {
 
           {showStoryMenu && (
             <div className="mt-2 space-y-3 border border-white/10 bg-black/40 p-3 rounded-sm">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  exportFileInputRef.current?.click();
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-white/10 bg-amber-900/30 hover:bg-amber-800/40 text-amber-300 active:scale-95 cursor-pointer"
-                title="Adjuntar una foto tuya de fondo para la imagen"
-              >
-                <Camera size={16} />
-                <span>{exportBgImage ? "CAMBIAR FOTO DE FONDO" : "ADJUNTAR FOTO DE FONDO"}</span>
-              </button>
+              {/* web: input con capture abre la cámara del teléfono; nativo usa el plugin */}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                ref={cameraInputRef}
+                onChange={handleBgImageUpload}
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    exportFileInputRef.current?.click();
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-white/15 bg-white/5 hover:bg-white/15 text-white active:scale-95 cursor-pointer"
+                  title="Subir una foto ya tomada"
+                >
+                  <Camera size={16} />
+                  <span>{exportBgImage ? "CAMBIAR FOTO" : "SUBIR FOTO"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleTakePhoto();
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-white/15 bg-white text-black hover:bg-neutral-200 active:scale-95 cursor-pointer"
+                  title="Tomar la foto ahora con la cámara"
+                >
+                  <Camera size={16} />
+                  <span>TOMAR FOTO</span>
+                </button>
+              </div>
+              {isFxProcessing && (
+                <div className="text-[10px] font-mono text-white/60 uppercase tracking-widest animate-pulse text-center">
+                  Detectando personas y aplicando efecto…
+                </div>
+              )}
               {renderExportCustomizationPanel()}
             </div>
           )}

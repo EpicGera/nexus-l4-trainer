@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { Capacitor } from "@capacitor/core";
 import { AthleteState } from "../types/workout";
+import { applyPersonFx } from "../lib/personFx";
+
+export type PhotoFilter = "none" | "vibrant" | "grayscale" | "sepia" | "duotone" | "silueta" | "neon";
 import {
   handleMonthTextExport as serviceMonthTextExport,
   handleExportGoogleSheets as serviceExportGoogleSheets,
@@ -32,7 +36,12 @@ export function useExportPanel(
   const [exportCardBlur, setExportCardBlur] = useState(true);
   const [exportCardOpacity, setExportCardOpacity] = useState(85);
   const [exportTheme, setExportTheme] = useState("nexus"); // nexus·cyberpunk·monochrome·wodfrg·brutalist·synthwave·editorial·holo
-  const [exportPhotoFilter, setExportPhotoFilter] = useState<"none" | "vibrant" | "grayscale" | "sepia" | "duotone">("none");
+  const [exportPhotoFilter, setExportPhotoFilter] = useState<PhotoFilter>("none");
+  const [isFxProcessing, setIsFxProcessing] = useState(false);
+  // la foto ORIGINAL se guarda aparte: los FX de personas (silueta/neon)
+  // pre-procesan en canvas y reemplazan exportBgImage; volver a un filtro CSS
+  // restaura el original
+  const bgOriginalRef = useRef<string | null>(null);
   const [exportCardHeightLimit, setExportCardHeightLimit] = useState<number>(65);
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
   const [blockPositions, setBlockPositions] = useState<{ [key: string]: { x: number; y: number } }>({});
@@ -66,14 +75,68 @@ export function useExportPanel(
     serviceGenerateMonthlyReportPDF(athlete);
   };
 
+  const fxToast = (message: string, kind: "success" | "error" = "error") =>
+    window.dispatchEvent(new CustomEvent("nexus_toast", { detail: { message, kind, durationMs: 5000 } }));
+
+  const runPersonFx = async (source: string, mode: "silueta" | "neon") => {
+    setIsFxProcessing(true);
+    try {
+      setExportBgImage(await applyPersonFx(source, mode));
+    } catch (err: any) {
+      fxToast(err?.message || "No se pudo aplicar el efecto");
+      setExportBgImage(source);
+      setExportPhotoFilter("none");
+    } finally {
+      setIsFxProcessing(false);
+    }
+  };
+
+  const ingestPhoto = (dataUrl: string) => {
+    bgOriginalRef.current = dataUrl;
+    if (exportPhotoFilter === "silueta" || exportPhotoFilter === "neon") {
+      void runPersonFx(dataUrl, exportPhotoFilter);
+    } else {
+      setExportBgImage(dataUrl);
+    }
+  };
+
+  /** Mismo nombre de API que antes: los FX de personas procesan async, el resto restaura el original. */
+  const selectPhotoFilter = (f: PhotoFilter) => {
+    setExportPhotoFilter(f);
+    const original = bgOriginalRef.current;
+    if (!original) return;
+    if (f === "silueta" || f === "neon") void runPersonFx(original, f);
+    else setExportBgImage(original);
+  };
+
   const handleBgImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setExportBgImage(reader.result as string);
+        ingestPhoto(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Tomar la foto con la app: nativo → plugin de cámara; web → input capture.
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const handleTakePhoto = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+        const photo = await Camera.getPhoto({
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera,
+          quality: 90,
+        });
+        if (photo.dataUrl) ingestPhoto(photo.dataUrl);
+      } catch {
+        /* cámara cancelada/denegada — sin drama */
+      }
+    } else {
+      cameraInputRef.current?.click();
     }
   };
 
@@ -124,7 +187,10 @@ export function useExportPanel(
     exportTheme,
     setExportTheme,
     exportPhotoFilter,
-    setExportPhotoFilter,
+    setExportPhotoFilter: selectPhotoFilter,
+    isFxProcessing,
+    cameraInputRef,
+    handleTakePhoto,
     exportCardHeightLimit,
     setExportCardHeightLimit,
     isFullscreenPreview,

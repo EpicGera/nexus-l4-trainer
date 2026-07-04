@@ -32,7 +32,7 @@ interface ShareCardOverlayProps {
   exportCardBlur: boolean;
   exportCardWidth: "compact" | "standard" | "wide";
   exportVerticalLayout: "top" | "center" | "bottom";
-  exportPhotoFilter: "none" | "vibrant" | "grayscale" | "sepia" | "duotone";
+  exportPhotoFilter: "none" | "vibrant" | "grayscale" | "sepia" | "duotone" | "silueta" | "neon";
   exportCardHeightLimit: number;
   teamSize: number;
   activeColorSet: { color: string; hover?: string; pulse?: string; text?: string; shadow?: string };

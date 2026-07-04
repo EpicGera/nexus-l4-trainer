@@ -15,10 +15,12 @@
   "dependencies": {
     "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor/android": "^8.3.4",
+    "@capacitor/camera": "^8.2.0",
     "@capacitor/core": "^8.3.4",
     "@capacitor/filesystem": "^8.1.2",
     "@capacitor/share": "^8.0.1",
     "@google/genai": "^2.10.0",
+    "@mediapipe/tasks-vision": "^0.10.35",
     "@tailwindcss/vite": "^4.1.14",
     "@types/three": "^0.185.0",
     "@vitejs/plugin-react": "^5.0.4",

@@ -22,7 +22,7 @@ interface ExportCustomizationPanelProps {
   setExportCardOpacity: (op: number) => void;
   exportCardHeightLimit: number;
   setExportCardHeightLimit: (height: number) => void;
-  exportPhotoFilter: "none" | "vibrant" | "grayscale" | "sepia" | "duotone";
+  exportPhotoFilter: "none" | "vibrant" | "grayscale" | "sepia" | "duotone" | "silueta" | "neon";
   setExportPhotoFilter: (
     f: "none" | "vibrant" | "grayscale" | "sepia" | "duotone",
   ) => void;
@@ -376,7 +376,7 @@ export default function ExportCustomizationPanel({
           {/* Filtro de Foto de Fondo (tratamiento de la imagen) */}
           <div className="flex flex-col gap-2 font-condensed md:col-span-2">
             <SectionLabel>Filtro de Foto de Fondo</SectionLabel>
-            <div className="grid grid-cols-5 gap-1 bg-black/80 p-1 border border-zinc-800 rounded">
+            <div className="grid grid-cols-4 gap-1 bg-black/80 p-1 border border-zinc-800 rounded">
               <button
                 type="button"
                 onClick={() => setExportPhotoFilter("none")}
@@ -417,7 +417,26 @@ export default function ExportCustomizationPanel({
               >
                 Duotono
               </button>
+              <button
+                type="button"
+                onClick={() => setExportPhotoFilter("silueta")}
+                className={segBtnClass(exportPhotoFilter === "silueta")}
+                title="Detecta personas y las recorta como silueta sólida (local, sin nube)"
+              >
+                Silueta
+              </button>
+              <button
+                type="button"
+                onClick={() => setExportPhotoFilter("neon")}
+                className={segBtnClass(exportPhotoFilter === "neon")}
+                title="Resplandor neón siguiendo el contorno real de las personas"
+              >
+                Neón
+              </button>
             </div>
+            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+              Silueta / Neón detectan personas (procesado local en el dispositivo)
+            </span>
           </div>
         </div>
       </div>
