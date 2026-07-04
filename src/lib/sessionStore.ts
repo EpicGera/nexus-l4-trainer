@@ -4,8 +4,11 @@
 // re-doing a day overwrites. See docs/BLUEPRINT-modelo-atleta.md §3.3.
 
 import { TrainingSession, LoggedSet } from "../types/training";
+import { Database } from "../types/workout";
 import { resolveOrInfer } from "../data/exerciseCatalog";
-import { STORAGE_KEYS, buildLogsKey } from "./storageKeys";
+import { energyForExercise } from "./blockMeta";
+import { expandMetconWork } from "./metconWork";
+import { STORAGE_KEYS, buildLogsKey, parseDayId } from "./storageKeys";
 
 const SESSIONS_KEY = STORAGE_KEYS.SESSIONS;
 
@@ -81,6 +84,78 @@ export function bridgeLegacyLogs(session: TrainingSession): void {
   } catch {
     /* storage restricted — ignore */
   }
+}
+
+/**
+ * Backfill RETROACTIVO de la expansión de metcon: las sesiones selladas antes
+ * de que el wizard emitiera sets derivados (prescripción × rondas reales)
+ * ganan sus cantidades REALES mirando el bloque metcon del programa activo.
+ * Idempotente: una sesión que ya tiene sets del metcon no se toca.
+ * ponytail: usa la primera variación del día (RX) — la sesión no registra cuál
+ * se entrenó; si algún día se guarda la variación, afinar acá.
+ */
+export function backfillMetconDerivedSets(db: Database): number {
+  const sessions = loadSessions();
+  let touched = 0;
+
+  for (const session of sessions) {
+    const m = session.metcon;
+    if (!m || !session.dayId) continue;
+    if (session.sets.some((s) => (s.blockSlot || "").includes("metcon"))) continue;
+
+    const parsed = parseDayId(session.dayId);
+    if (!parsed) continue;
+    const day = db[`w${parsed.week}`]?.days?.find((d) => d.id === session.dayId);
+    const v = day?.variations?.[0];
+    if (!v) continue;
+    const metconBlocks = v.blocks?.filter((b) => b.bucket === "metcon") ?? [];
+    const items = metconBlocks.length ? metconBlocks.flatMap((b) => b.items) : v.metcon?.items ?? [];
+    const scheme = metconBlocks.length
+      ? metconBlocks.map((b) => `${b.title ?? ""} ${b.scheme ?? ""}`).join(" · ")
+      : v.metcon?.scheme ?? "";
+    if (!items.length) continue;
+
+    const derived = expandMetconWork(items, scheme, m);
+    if (!derived.length) continue;
+
+    const now = Date.now();
+    derived.forEach((q, i) => {
+      const ex = resolveOrInfer(q.name);
+      session.sets.push({
+        id: `set_retro_${now}_${i}_${Math.random().toString(36).slice(2, 6)}`,
+        exerciseId: ex.id,
+        exerciseName: q.name,
+        weightKg: q.weightKg,
+        isBodyweight: q.weightKg == null,
+        addedLoadKg: null,
+        reps: q.reps,
+        distanceM: q.distanceM,
+        calories: q.calories,
+        timeSec: null,
+        rpe: null,
+        rir: null,
+        tempo: null,
+        setType: "working",
+        ts: now,
+        blockSlot: metconBlocks[0]?.key ?? "metcon",
+        blockTitle: "Metcon",
+        energySystem: m.energySystem ?? energyForExercise(ex),
+        timeDomain: m.timeDomain,
+        blockCapSec: m.capSec,
+      });
+    });
+    touched++;
+  }
+
+  if (touched > 0) {
+    saveSessions(sessions);
+    try {
+      window.dispatchEvent(new Event("nexus_logs_updated"));
+    } catch {
+      /* no window — ignore */
+    }
+  }
+  return touched;
 }
 
 const num = (v: unknown): number | null => {

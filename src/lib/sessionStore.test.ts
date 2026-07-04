@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { recordManualLog, getSessionForDay } from "./sessionStore";
+import {
+  recordManualLog, getSessionForDay, saveSession, backfillMetconDerivedSets,
+} from "./sessionStore";
+import { TrainingSession } from "../types/training";
 
 describe("recordManualLog (manual → structured bridge)", () => {
   beforeEach(() => localStorage.clear());
@@ -44,5 +47,58 @@ describe("recordManualLog (manual → structured bridge)", () => {
     recordManualLog("w1d3", "Deadlift", [{ weight: "140 kg", reps: "3", rpe: "9" }]);
     const s = getSessionForDay("w1d3");
     expect(s!.sets).toHaveLength(2);
+  });
+});
+
+describe("backfillMetconDerivedSets (retroactivo)", () => {
+  beforeEach(() => localStorage.clear());
+
+  const db = {
+    w1: {
+      days: [{
+        id: "w1d1", name: "LUNES", title: "X",
+        variations: [{
+          tabName: "RX",
+          warmup: { title: "", scheme: "", items: [] },
+          strength: { title: "", scheme: "", items: [] },
+          metcon: { title: "METCON", scheme: "AMRAP 14 MIN", items: ["15 Cal Row", "10 Burpees"] },
+          accessories: { title: "", scheme: "", items: [] },
+        }],
+      }],
+    },
+  } as any;
+
+  const oldSession = (): TrainingSession => ({
+    id: "sess_w1d1_old", date: "2026-06-20", dayId: "w1d1", completed: true,
+    durationMin: 40, sessionRpe: 8,
+    metcon: { format: "amrap", scaling: "rx", rounds: 4 },
+    sets: [],
+  });
+
+  it("expande sesiones viejas con las cantidades reales del programa", () => {
+    saveSession(oldSession());
+    expect(backfillMetconDerivedSets(db)).toBe(1);
+    const s = getSessionForDay("w1d1")!;
+    expect(s.sets.find((x) => x.exerciseName === "Row")?.calories).toBe(60); // 15 × 4 REALES
+    expect(s.sets.find((x) => x.exerciseName === "Burpees")?.reps).toBe(40);
+  });
+
+  it("es idempotente: la segunda pasada no duplica", () => {
+    saveSession(oldSession());
+    backfillMetconDerivedSets(db);
+    expect(backfillMetconDerivedSets(db)).toBe(0);
+    expect(getSessionForDay("w1d1")!.sets).toHaveLength(2);
+  });
+
+  it("no toca sesiones que ya traen sets del metcon (wizard nuevo)", () => {
+    const s = oldSession();
+    s.sets.push({
+      id: "x", exerciseId: "row-erg", exerciseName: "Row", weightKg: null,
+      isBodyweight: true, addedLoadKg: null, reps: null, distanceM: null,
+      calories: 60, timeSec: null, rpe: null, rir: null, tempo: null,
+      setType: "working", ts: 1, blockSlot: "b2_metcon",
+    });
+    saveSession(s);
+    expect(backfillMetconDerivedSets(db)).toBe(0);
   });
 });

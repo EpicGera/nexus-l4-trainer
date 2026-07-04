@@ -41,7 +41,7 @@ import ProfileModal from "./components/ProfileModal";
 import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
-import { getSessionForDay } from "./lib/sessionStore";
+import { getSessionForDay, backfillMetconDerivedSets } from "./lib/sessionStore";
 import { getMonthlyVolumeStats } from "./lib/exportService";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -425,6 +425,9 @@ export default function App() {
   // Auto-extract historical logs from imported program text to feed the analytics charts
   useEffect(() => {
     backfillLocalLogsFromDatabase(database);
+    // Sesiones viejas: expandir su metcon (prescripción × rondas reales) para
+    // que el cardio ya registrado entre al análisis retroactivamente.
+    backfillMetconDerivedSets(database);
   }, [database]);
 
   // The Google Sheet is the source of truth for what's been done: a day with
