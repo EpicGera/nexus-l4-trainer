@@ -5,6 +5,7 @@ import { evaluateAthlete, ChapterRequest, BlockIntention } from "../lib/chapterC
 import { generateChapter, ChapterResult } from "../services/aiService";
 import { parseJsonToDatabase, summarizeDatabase } from "../lib/sheetImport";
 import { getObjective, setObjective, objectiveGapText, AthleteObjective } from "../lib/athleteObjective";
+import { athleteProfileBrief } from "../lib/athleteProfile";
 import { auditProgram } from "../lib/auditProgram";
 import { getOneRepMaxes } from "../lib/workingMax";
 import { CATALOG } from "../data/exerciseCatalog";
@@ -88,6 +89,7 @@ export default function ChapterCreator({
         chapterIndex: prevIndex + 1,
         objective: objectiveGapText(objective, currentMarks) || undefined,
         loads: loads || undefined,
+        profileBrief: athleteProfileBrief() || undefined,
       };
       const r = await generateChapter(req, evaluation);
       setResult(r);

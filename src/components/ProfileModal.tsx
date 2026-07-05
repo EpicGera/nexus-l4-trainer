@@ -26,6 +26,8 @@ interface ProfileModalProps {
   setAccessoriesBg: (bg: string) => void;
   handleUpdateAthlete: (athlete: AthleteState) => void;
   onClose: () => void;
+  /** Re-abre el onboarding (recalibra el punto de referencia del atleta). */
+  onRecalibrate?: () => void;
 }
 
 export default function ProfileModal({
@@ -46,6 +48,7 @@ export default function ProfileModal({
   setAccessoriesBg,
   handleUpdateAthlete,
   onClose,
+  onRecalibrate,
 }: ProfileModalProps) {
   // 1RM store lives in its own syncable key (nexus_athlete_1rm), separate from
   // the athlete identity doc. Writing dispatches an update so the board's
@@ -911,6 +914,18 @@ export default function ProfileModal({
             )}
           </div>
         </div>
+
+        {onRecalibrate && (
+          <div className="pt-4 relative z-10">
+            <button
+              onClick={() => { onRecalibrate(); onClose(); }}
+              className="w-full bg-transparent border border-white/25 text-white font-brutalist py-3 px-4 text-xs tracking-widest hover:bg-white hover:text-black transition-all cursor-pointer uppercase font-bold"
+              title="Volver a responder el cuestionario y recomputar tu punto de referencia"
+            >
+              ⚙ CALIBRAR ATLETA (RE-ONBOARDING)
+            </button>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3 pt-6 relative z-10 mt-2 border-t border-white/10">
           <button

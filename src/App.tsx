@@ -2593,6 +2593,7 @@ export default function App() {
         {showProfileModal && (
           <ProfileModal
             key="profile-modal"
+            onRecalibrate={() => setShowOnboarding(true)}
             tempAthlete={tempAthlete}
             setTempAthlete={setTempAthlete}
             unlockedAchievements={unlockedAchievements}

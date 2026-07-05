@@ -69,6 +69,9 @@ export interface ChapterRequest {
   objective?: string;
   /** rendered athlete load map (movement → kg) so the AI prescribes % WM */
   loads?: string;
+  /** rendered athlete profile (onboarding): lesiones, debilidades, cardio,
+   *  dieta, life-gear — restricciones y contexto que condicionan el diseño */
+  profileBrief?: string;
 }
 
 export function evaluateAthlete(bw: number = getBodyweightKg()): AthleteEvaluation {
@@ -177,6 +180,10 @@ export function buildChapterPrompt(req: ChapterRequest, evaluation: AthleteEvalu
     "",
     "EVALUACIÓN DEL ATLETA (la prescripción debe responder a esto):",
     evaluation.summary,
+    "",
+    req.profileBrief
+      ? "PERFIL DEL ATLETA (onboarding — RESTRICCIONES Y CONTEXTO que condicionan el diseño; respetá lesiones, atacá debilidades, prescribí cardio relativo a los benchmarks, y calibrá volumen/descarga según el life-gear):\n" + req.profileBrief
+      : "Perfil del atleta sin completar (onboarding pendiente): usá defaults conservadores.",
     "",
     req.objective
       ? "OBJETIVO DEL ATLETA (el hilo — este capítulo debe ser el PRÓXIMO PASO hacia esto; atacá la brecha en condiciones favorables, en fresco, sin romper la periodización ni el veto salud>recuperación>adherencia):\n" + req.objective
