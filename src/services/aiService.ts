@@ -528,6 +528,63 @@ export async function generateChapter(
   };
 }
 
+// ── Día especial generado por IA ────────────────────────────────────────────
+export interface SpecialDayRequest {
+  /** enfoque libre: "metcon largo aeróbico", "fuerza de pierna + gimnasia", "hero WOD" */
+  focus: string;
+  minutes?: number;
+  equipment?: string;
+  /** perfil del atleta (athleteProfileBrief) — restricciones y contexto */
+  profileBrief?: string;
+  /** resumen de la evaluación (evaluateAthlete().summary) */
+  evaluationSummary?: string;
+}
+
+const NEXUS_DAY_SYSTEM = `Eres "Nexus L4", Master Coach CF-L4. Generás UN (1) DÍA de entrenamiento CrossFit
+fundamentado en la metodología NEXUS (Mayhem/PRVN/HWPO/CF-L4). Veto innegociable: salud > recuperación >
+adherencia > rendimiento — respetá lesiones declaradas, escalá skills no dominados, no inventes datos del
+atleta. REGLA DE CARGA: todo movimiento con peso se prescribe con "% WM" (ej. "Back Squat — 5×3 @ 80% WM").
+Cada metcon declara su esquema (AMRAP/For Time/EMOM/intervalos con duración). Respondés ÚNICAMENTE el JSON
+pedido, sin markdown ni texto extra.`;
+
+/**
+ * Genera un día suelto listo para inyectar como pestaña ESPECIAL. Devuelve un
+ * JSON string con la forma que consume parseSpecialDayJson
+ * ({ title, variations:[{ b1_warmup, b2_strength, b3_metcon, b4_accessories }] }).
+ * Lanza si no hay proveedor de IA o la generación falla (no hay fallback local:
+ * un día especial es a pedido y explícito).
+ */
+export async function generateSpecialDay(req: SpecialDayRequest): Promise<string> {
+  if (!(getClaudeKey() || getGeminiKey())) {
+    throw new Error("Configurá tu llave de IA en PERFIL & BIO para generar días con IA.");
+  }
+  const prompt = [
+    `Generá UN día especial de CrossFit con este ENFOQUE: ${req.focus}.`,
+    req.minutes ? `Duración objetivo de la sesión: ${req.minutes} min.` : "",
+    req.equipment ? `Material disponible: ${req.equipment}.` : "Material: estándar de box.",
+    req.profileBrief ? `PERFIL DEL ATLETA (respetá lesiones, atacá debilidades, escalá skills no dominados, prescribí cardio relativo a sus benchmarks):\n${req.profileBrief}` : "",
+    req.evaluationSummary ? `EVALUACIÓN:\n${req.evaluationSummary}` : "",
+    "",
+    "Respondé SOLO JSON con esta forma exacta (un día, una variación):",
+    '{ "title": "<nombre temático del día>", "variations": [ {',
+    '  "b1_warmup": { "title": "01. WARM-UP", "scheme": "", "items": ["..."] },',
+    '  "b2_strength": { "title": "02. FUERZA", "scheme": "5x3 @ 80% WM", "items": ["Back Squat"] },',
+    '  "b3_metcon": { "title": "03. METCON", "scheme": "AMRAP 14 Min", "items": ["15 Cal Row", "12 Wall Balls (9kg)", "9 Pull-ups"] },',
+    '  "b4_accessories": { "title": "04. ACCESORIOS", "scheme": "3 Series", "items": ["..."] }',
+    "} ] }",
+    "Incluí al menos un metcon con su esquema (duración explícita). Omití bloques que no apliquen al enfoque.",
+  ].filter(Boolean).join("\n");
+
+  const system = buildSystemPrompt(NEXUS_DAY_SYSTEM);
+  const text = await generateText({ system, prompt, json: true, temperature: 0.85 });
+  if (!text || !text.trim()) throw new Error("La IA no devolvió contenido. Reintentá.");
+  const parsed = JSON.parse(extractJson(text));
+  if (!parsed || !Array.isArray(parsed.variations) || !parsed.variations.length) {
+    throw new Error("La IA devolvió una forma inesperada. Reintentá.");
+  }
+  return JSON.stringify(parsed);
+}
+
 // ── Fase 3: AI block inspiration classification ─────────────────────────────
 
 const NEXUS_CLASSIFY_SYSTEM = `Sos "Nexus L4", Master Coach CF-L4. Clasificás cada bloque de entrenamiento según la "huella" de programación que mejor lo representa, eligiendo UNA de estas cuatro inspiraciones:
