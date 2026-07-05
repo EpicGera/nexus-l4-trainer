@@ -99,8 +99,8 @@ export default function NavigationHeader({
             onClick={() => setShowProfileModal(true)}
           >
             <img src="/logo.svg" alt="Nexus L4 Emblem" className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] shrink-0" />
-            <div className="bg-gradient-to-r from-blue-950/40 to-indigo-950/40 px-1 sm:px-3 py-0.5 sm:py-1 rounded-sm shadow-sm transition-colors">
-              <span className="text-electric-blue font-brutalist text-[5.5px] min-[320px]:text-[6.5px] min-[350px]:text-[7.5px] min-[375px]:text-[10px] sm:text-xs md:text-sm tracking-widest font-extrabold uppercase ">
+            <div className="border-l-2 border-white/40 px-1 sm:px-3 py-0.5 sm:py-1 transition-colors">
+              <span className="text-white font-brutalist text-[5.5px] min-[320px]:text-[6.5px] min-[350px]:text-[7.5px] min-[375px]:text-[10px] sm:text-xs md:text-sm tracking-widest font-extrabold uppercase ">
                 NEXUS L4 MASTER
               </span>
             </div>
@@ -120,9 +120,9 @@ export default function NavigationHeader({
         <div className="flex w-full xl:w-auto items-center justify-between xl:justify-end gap-1 flex-wrap">
           <div className="flex items-center gap-1 sm:gap-2 font-mono bg-black/40 px-1 sm:px-1.5 py-0.5 rounded shrink-0">
             <span
-              className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${syncWithRealTime ? "bg-emerald-500 shadow-sm" : "bg-amber-500 shadow-sm"}`}
+              className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${syncWithRealTime ? "bg-white" : "bg-signal-red"}`}
             />
-            <span className="text-electric-blue text-[7px] min-[375px]:text-[8px] sm:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">
+            <span className="text-white text-[7px] min-[375px]:text-[8px] sm:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">
               {realTime
                 .toLocaleDateString("es-ES", {
                   weekday: "short",
@@ -143,11 +143,11 @@ export default function NavigationHeader({
           <div className="flex items-center gap-1 bg-white/5 px-1.5 sm:px-3 py-0.5 rounded shrink-0 hidden md:flex">
             <span className="text-[8.5px] sm:text-[10px] font-mono shrink-0">
               {syncWithRealTime ? (
-                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                <span className="text-white font-bold flex items-center gap-1">
                   ⚡ SEM {currentWeek.replace("w", "")} • {activeDayName}
                 </span>
               ) : (
-                <span className="text-amber-500 font-bold flex items-center gap-1 ">
+                <span className="text-signal-red font-bold flex items-center gap-1 ">
                   ⚠ OVERRIDE MANUAL
                 </span>
               )}
@@ -158,8 +158,8 @@ export default function NavigationHeader({
             onClick={handleToggleSync}
             className={`px-1 min-[375px]:px-1.5 sm:px-3 py-0.5 sm:py-1 font-brutalist text-[7px] min-[320px]:text-[7.5px] min-[375px]:text-[8.5px] sm:text-[10px] tracking-wider transition-all cursor-pointer rounded-sm shrink-0 font-bold ${
               syncWithRealTime
-                ? "bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/60"
-                : "bg-electric-blue text-white hover:brightness-110 shadow-blue-glow"
+                ? "bg-transparent border border-white/25 text-white hover:bg-white hover:text-black"
+                : "bg-white text-black hover:bg-neutral-200"
             }`}
             title={
               syncWithRealTime
@@ -198,13 +198,13 @@ export default function NavigationHeader({
               onClick={() => setActiveSheet(index)}
               className={`flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 rounded transition-all duration-300 relative cursor-pointer outline-none focus:outline-none ${
                 isActive
-                  ? "bg-gradient-to-br from-blue-950/30 to-indigo-950/30 text-electric-blue shadow-sm font-black"
-                  : "text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-white/10 text-white font-black"
+                  : "text-neutral-500 hover:text-white hover:bg-white/5"
               }`}
             >
               <div className="flex items-center gap-1 sm:gap-1.5 justify-center">
                 <span
-                  className={`${isActive ? "text-electric-blue" : "text-neutral-400"} scale-90 sm:scale-100`}
+                  className={`${isActive ? "text-white" : "text-neutral-500"} scale-90 sm:scale-100`}
                 >
                   {sheet.icon}
                 </span>
@@ -218,7 +218,7 @@ export default function NavigationHeader({
               {isActive && (
                 <motion.div
                   layoutId="activeSheetHeaderIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-electric-blue rounded-full"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-white"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}

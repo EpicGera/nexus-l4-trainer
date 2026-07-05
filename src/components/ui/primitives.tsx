@@ -11,15 +11,17 @@ import { X } from "lucide-react";
  *  - One accent color per section, passed via `accent`.
  */
 
+// PRVN monochrome: la jerarquía la lleva la tipografía (Anton en títulos/números,
+// mono en labels), no el color. Un solo rojo señal (#DC2626) para intensidad/alertas.
 export const TXT = {
   sectionTitle:
-    "text-sm font-brutalist tracking-wider text-white uppercase leading-snug",
+    "text-sm font-brutalist tracking-[0.12em] text-white uppercase leading-snug",
   sectionSubtitle:
-    "text-[10px] font-mono text-neutral-400 uppercase tracking-wider leading-relaxed",
+    "text-[10px] font-mono text-neutral-500 uppercase tracking-wider leading-relaxed",
   label:
-    "text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider",
+    "text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-[0.15em]",
   body: "text-[11px] font-mono text-neutral-300 leading-relaxed",
-  bigValue: "text-2xl font-brutalist font-black text-white tracking-wide",
+  bigValue: "text-3xl font-brutalist font-black text-white tracking-tight tabular-nums",
 };
 
 interface SectionCardProps {
@@ -45,7 +47,7 @@ export function SectionCard({
   return (
     <section
       id={id}
-      className={`border border-white/10 bg-zinc-950/70 rounded-sm p-5 text-left ${className}`}
+      className={`border border-white/10 bg-[#0A0A0A] rounded-none p-5 text-left ${className}`}
     >
       <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-4 pb-3 border-b border-white/10">
         <div className="space-y-1 min-w-0">
@@ -68,11 +70,11 @@ interface BadgeProps {
 }
 
 const BADGE_TONES: Record<NonNullable<BadgeProps["tone"]>, string> = {
-  neutral: "bg-neutral-900 text-neutral-300 border-white/10",
-  good: "bg-emerald-950/40 text-emerald-400 border-emerald-500/30",
-  warn: "bg-amber-950/40 text-amber-400 border-amber-500/30",
-  danger: "bg-rose-950/40 text-rose-400 border-rose-500/30",
-  accent: "bg-cyan-950/40 text-cyan-300 border-cyan-500/30",
+  neutral: "bg-transparent text-neutral-400 border-white/15",
+  good: "bg-white text-black border-transparent",
+  warn: "bg-transparent text-white border-white/40",
+  danger: "bg-signal-red/15 text-signal-red border-signal-red/40",
+  accent: "bg-white text-black border-transparent",
 };
 
 export function Pill({ children, tone = "neutral" }: BadgeProps) {
@@ -95,21 +97,21 @@ interface StatBoxProps {
 
 const STAT_VALUE_TONES: Record<NonNullable<StatBoxProps["tone"]>, string> = {
   neutral: "text-white",
-  accent: "text-cyan-300",
-  good: "text-emerald-400",
-  warn: "text-amber-400",
-  danger: "text-rose-400",
+  accent: "text-white",
+  good: "text-white",
+  warn: "text-neutral-400",
+  danger: "text-signal-red",
 };
 
 /** Compact metric tile: label on top, big value, optional unit & hint. */
 export function StatBox({ label, value, unit, tone = "neutral", hint }: StatBoxProps) {
   return (
-    <div className="bg-black/60 border border-white/10 rounded-sm p-3 text-center min-w-0">
-      <div className={`${TXT.label} mb-1 truncate`} title={label}>
+    <div className="bg-transparent border border-white/10 rounded-none p-3 text-center min-w-0">
+      <div className={`${TXT.label} mb-1.5 truncate`} title={label}>
         {label}
       </div>
       <div
-        className={`text-xl font-brutalist font-black tracking-wide leading-none ${STAT_VALUE_TONES[tone]}`}
+        className={`text-2xl font-brutalist font-black tracking-tight leading-none tabular-nums ${STAT_VALUE_TONES[tone]}`}
       >
         {value}
         {unit && (
@@ -133,13 +135,13 @@ interface NexusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-electric-blue text-black hover:brightness-110 border-transparent font-extrabold",
+    "bg-white text-black hover:bg-neutral-200 border-transparent font-extrabold",
   ghost:
-    "bg-neutral-950 text-neutral-300 hover:text-white hover:bg-neutral-900 border-white/15",
+    "bg-transparent text-neutral-300 hover:text-black hover:bg-white border-white/20",
   danger:
-    "bg-neutral-950 text-rose-400 hover:text-white hover:bg-rose-950/40 border-rose-500/30",
+    "bg-transparent text-signal-red hover:text-white hover:bg-signal-red/20 border-signal-red/40",
   good:
-    "bg-neutral-950 text-emerald-400 hover:text-white hover:bg-emerald-950/40 border-emerald-500/30",
+    "bg-transparent text-white hover:text-black hover:bg-white border-white/30",
 };
 
 /** Uniform action button: same height, font and padding for every action in the app. */
@@ -235,10 +237,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 type BarTone = "accent" | "good" | "warn" | "danger";
 const BAR_TONES: Record<BarTone, string> = {
-  accent: "bg-electric-blue",
-  good: "bg-emerald-500",
-  warn: "bg-amber-400",
-  danger: "bg-rose-500",
+  accent: "bg-white",
+  good: "bg-white",
+  warn: "bg-neutral-500",
+  danger: "bg-signal-red",
 };
 
 interface ProgressBarProps {
@@ -334,11 +336,12 @@ export function ModalSheet({
   );
 }
 
+// RPE es la única señal funcional por color: escala de gris (fácil) → rojo (duro).
 function rpeTier(v: number): string {
-  if (v >= 9) return "bg-rose-500";
-  if (v >= 8.5) return "bg-orange-500";
-  if (v >= 8) return "bg-amber-400";
-  return "bg-emerald-500";
+  if (v >= 9) return "bg-signal-red";
+  if (v >= 8.5) return "bg-signal-red/70";
+  if (v >= 8) return "bg-neutral-300";
+  return "bg-white";
 }
 
 interface RpeDialProps {

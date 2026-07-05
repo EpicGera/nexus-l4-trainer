@@ -66,7 +66,7 @@ export default function VolumeProgressionSection({
       phase: PHASE_NAMES[wk],
       volume,
       rpe,
-      color: WEEK_ACCENT_COLORS[wk]?.color || "#00f0ff",
+      color: WEEK_ACCENT_COLORS[wk]?.color || "#FFFFFF",
     };
   });
 
@@ -85,7 +85,7 @@ export default function VolumeProgressionSection({
   const isW4Overdoing =
     !!deload && deload.volume > 0 && loadAvg > 0 && deload.volume > loadAvg * 0.75;
 
-  let accentColor = "#1F51FF";
+  let accentColor = "#FFFFFF";
   const savedColorId = localStorage.getItem("nexus_custom_accent_color");
   if (savedColorId && ACCENT_COLORS_MAP[savedColorId]) {
     accentColor = ACCENT_COLORS_MAP[savedColorId].color;
@@ -95,7 +95,7 @@ export default function VolumeProgressionSection({
     <div className="space-y-5">
       <SectionCard
         title="VOLUMEN REAL POR SEMANA (TONELAJE)"
-        icon={<Dumbbell size={15} className="text-cyan-300" />}
+        icon={<Dumbbell size={15} className="text-white" />}
         subtitle="Kg × reps de tus series registradas, con tu RPE promedio superpuesto"
         badge={
           <Pill tone="accent">
@@ -183,7 +183,7 @@ export default function VolumeProgressionSection({
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    stroke="#f43f5e"
+                    stroke="#DC2626"
                     fontSize={10}
                     domain={[0, 10]}
                     tickLine={false}
@@ -229,7 +229,7 @@ export default function VolumeProgressionSection({
                     yAxisId="right"
                     type="monotone"
                     dataKey="rpe"
-                    stroke="#f43f5e"
+                    stroke="#DC2626"
                     strokeWidth={2.5}
                     name="RPE Promedio"
                     connectNulls={false}
@@ -264,7 +264,7 @@ export default function VolumeProgressionSection({
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-mono text-neutral-300">
               <span>
                 Series:{" "}
-                <strong className="text-cyan-300">{stats.totalLogsCount}</strong>
+                <strong className="text-white">{stats.totalLogsCount}</strong>
               </span>
               <span>
                 Tonelaje:{" "}

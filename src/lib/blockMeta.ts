@@ -20,11 +20,12 @@ export function energyForExercise(ex: Exercise): EnergySystem {
   return "mixed";
 }
 
+// PRVN monochrome: rampa de grises por fase; el rojo señal marca el pico de carga.
 export const INTENTION_META: Record<BlockIntention, { label: string; short: string; color: string }> = {
-  acumulacion: { label: "ACUMULACIÓN", short: "ACUM", color: "#1F51FF" },
-  intensificacion: { label: "INTENSIFICACIÓN", short: "INTENS", color: "#ff0055" },
-  realizacion: { label: "REALIZACIÓN · PEAK", short: "PEAK", color: "#00f0ff" },
-  restauracion: { label: "RESTAURACIÓN · DELOAD", short: "DELOAD", color: "#a124ff" },
+  acumulacion: { label: "ACUMULACIÓN", short: "ACUM", color: "#A3A3A3" },
+  intensificacion: { label: "INTENSIFICACIÓN", short: "INTENS", color: "#DC2626" },
+  realizacion: { label: "REALIZACIÓN · PEAK", short: "PEAK", color: "#FFFFFF" },
+  restauracion: { label: "RESTAURACIÓN · DELOAD", short: "DELOAD", color: "#525252" },
 };
 
 export const GEAR_LABEL: Record<number, string> = {
@@ -35,11 +36,13 @@ export const GEAR_LABEL: Record<number, string> = {
   5: "GEAR 5 · ÉLITE",
 };
 
+// PRVN monochrome: rampa de gris por intensidad (fosfágeno = más brillante);
+// rojo señal para el glucolítico (el "ardor" es la señal).
 export const ENERGY_META: Record<EnergySystem, { label: string; color: string; hint: string }> = {
-  phosphagen: { label: "FOSFÁGENO", color: "#ff0055", hint: "Sistema fosfágeno: esfuerzos máximos de hasta ~10s (levantamientos pesados, sprints). Potencia pura, recuperaciones largas." },
-  glycolytic: { label: "GLUCOLÍTICO", color: "#ff8a00", hint: "Sistema glucolítico: esfuerzos intensos de ~30s a 2-3 min. El 'ardor' de los metcons cortos y feroces. Costo de recuperación alto." },
-  oxidative: { label: "OXIDATIVO", color: "#00f0ff", hint: "Sistema oxidativo (aeróbico): la base que sostiene todo. Esfuerzos largos sostenibles a ritmo conversacional." },
-  mixed: { label: "MIXTO", color: "#a124ff", hint: "Estímulo mixto: combina varios sistemas energéticos. Típico de metcons medios (10-20 min)." },
+  phosphagen: { label: "FOSFÁGENO", color: "#FFFFFF", hint: "Sistema fosfágeno: esfuerzos máximos de hasta ~10s (levantamientos pesados, sprints). Potencia pura, recuperaciones largas." },
+  glycolytic: { label: "GLUCOLÍTICO", color: "#DC2626", hint: "Sistema glucolítico: esfuerzos intensos de ~30s a 2-3 min. El 'ardor' de los metcons cortos y feroces. Costo de recuperación alto." },
+  oxidative: { label: "OXIDATIVO", color: "#737373", hint: "Sistema oxidativo (aeróbico): la base que sostiene todo. Esfuerzos largos sostenibles a ritmo conversacional." },
+  mixed: { label: "MIXTO", color: "#A3A3A3", hint: "Estímulo mixto: combina varios sistemas energéticos. Típico de metcons medios (10-20 min)." },
 };
 
 export const TIMEDOMAIN_META: Record<BlockTimeDomain, { label: string; hint: string }> = {

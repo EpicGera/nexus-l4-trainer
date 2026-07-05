@@ -40,7 +40,7 @@ export default function AchievedStimulusSection() {
     return (
       <SectionCard
         title="ESTÍMULO REGISTRADO (LO QUE ENTRENASTE)"
-        icon={<Activity size={15} className="text-cyan-300" />}
+        icon={<Activity size={15} className="text-white" />}
         subtitle="Distribución real de tus sesiones por sistema energético y dominio temporal"
         badge={<Pill tone="neutral">SIN DATOS</Pill>}
       >
@@ -55,7 +55,7 @@ export default function AchievedStimulusSection() {
   return (
     <SectionCard
       title="ESTÍMULO REGISTRADO (LO QUE ENTRENASTE)"
-      icon={<Activity size={15} className="text-cyan-300" />}
+      icon={<Activity size={15} className="text-white" />}
       subtitle="Distribución real de tus sesiones por sistema energético y dominio temporal"
       badge={<Pill tone="accent">{data.tagged} METCONS REGISTRADOS</Pill>}
     >
@@ -80,7 +80,7 @@ export default function AchievedStimulusSection() {
               const n = data.domain[k] || 0;
               const pct = data.domainTotal ? Math.round((n / data.domainTotal) * 100) : 0;
               return (
-                <Bar key={k} label={TIMEDOMAIN_META[k].label} color="#67e8f9" pct={pct} count={n} />
+                <Bar key={k} label={TIMEDOMAIN_META[k].label} color="#FFFFFF" pct={pct} count={n} />
               );
             })}
           </div>

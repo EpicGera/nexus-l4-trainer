@@ -148,14 +148,14 @@ export default function FatigueAndIntensitySection({
   }, [allSets]);
 
   const isHighFatigue = windowAvg !== null && windowAvg > 8;
-  const trendLineColor = isHighFatigue ? "#f43f5e" : "#00f0ff";
+  const trendLineColor = isHighFatigue ? "#DC2626" : "#FFFFFF";
 
   return (
     <div className="space-y-5">
       {/* ── TREND OVER TIME ───────────────────────────────────────────── */}
       <SectionCard
         title="TENDENCIA DE FATIGA (RPE EN EL TIEMPO)"
-        icon={<TrendingUp size={15} className="text-cyan-300" />}
+        icon={<TrendingUp size={15} className="text-white" />}
         subtitle="Promedio diario calculado con la fecha real de cada serie registrada"
         badge={
           <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-neutral-400 font-bold border bg-black border-white/10 p-1 rounded">
@@ -165,7 +165,7 @@ export default function FatigueAndIntensitySection({
                 onClick={() => setRpeTrendRange(days)}
                 className={`px-2.5 py-1.5 rounded transition-all cursor-pointer leading-none ${
                   rpeTrendRange === days
-                    ? "bg-[#00f0ff]/20 text-[#00f0ff] border border-[#00f0ff]/50"
+                    ? "bg-white/15 text-white border border-white/40"
                     : "hover:bg-white/5 border border-transparent"
                 }`}
               >
