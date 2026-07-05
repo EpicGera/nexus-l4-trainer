@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  parseSpecialDayJson, injectSpecialVariation, removeSpecialVariation,
+  parseSpecialDayJson, parseSpecialDayText, parseSpecialDay,
+  injectSpecialVariation, removeSpecialVariation,
   hasSpecialVariation, SPECIAL_TAB,
 } from "./specialDay";
 
@@ -44,6 +45,54 @@ describe("parseSpecialDayJson", () => {
   it("rechaza JSON inválido o sin ejercicios legibles", () => {
     expect(() => parseSpecialDayJson("no es json")).toThrow(/JSON válido/);
     expect(() => parseSpecialDayJson(JSON.stringify({ title: "vacío", variations: [{}] }))).toThrow();
+  });
+});
+
+describe("parseSpecialDayText (archivo de texto con bloques)", () => {
+  const txt = `TÍTULO: WOD Cumpleaños de Fulano
+CALENTAMIENTO
+3 rondas: 10 air squats, 10 push-ups
+METCON: AMRAP 12
+- 15 Cal Row
+- 12 Wall Balls (9kg)
+- 9 Pull-ups
+FUERZA
+Back Squat 5x5 @ 80%
+ACCESORIOS
+3x12 Curl de bíceps`;
+
+  it("reconoce encabezados, título y esquema del metcon", () => {
+    const { variation } = parseSpecialDayText(txt);
+    expect(variation.tabName).toBe(SPECIAL_TAB);
+    const metcon = variation.blocks!.find((b) => b.bucket === "metcon")!;
+    expect(metcon.timeDomain).toBe("medium"); // AMRAP 12 → clasifica, los cálculos andan
+    expect(metcon.items.join(" ")).toContain("Wall Balls");
+    expect(variation.blocks!.some((b) => b.bucket === "strength")).toBe(true);
+    expect(variation.blocks!.some((b) => b.bucket === "warmup")).toBe(true);
+  });
+
+  it("separa items por coma bajo un encabezado", () => {
+    const { variation } = parseSpecialDayText(txt);
+    const warm = variation.blocks!.find((b) => b.bucket === "warmup")!;
+    expect(warm.items.length).toBeGreaterThanOrEqual(2); // air squats + push-ups
+  });
+
+  it("una lista de movimientos sin encabezados cae a metcon (forgiving)", () => {
+    const { variation } = parseSpecialDayText("10 Thrusters\n15 Pull-ups\n20 Box Jumps");
+    const metcon = variation.blocks!.find((b) => b.bucket === "metcon")!;
+    expect(metcon.items.length).toBe(3);
+  });
+
+  it("texto vacío falla con mensaje claro", () => {
+    expect(() => parseSpecialDayText("   \n  ")).toThrow(/vac[ií]o/i);
+  });
+});
+
+describe("parseSpecialDay (auto-detecta JSON vs texto)", () => {
+  it("enruta JSON al parser JSON y texto al parser de texto", () => {
+    const json = JSON.stringify({ title: "X", variations: [{ b2_metcon: { title: "METCON", scheme: "AMRAP 10", items: ["10 Burpees"] } }] });
+    expect(parseSpecialDay(json).variation.tabName).toBe(SPECIAL_TAB);
+    expect(parseSpecialDay("METCON: EMOM 10\n10 Wall Balls").variation.tabName).toBe(SPECIAL_TAB);
   });
 });
 

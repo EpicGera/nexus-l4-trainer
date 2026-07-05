@@ -40,14 +40,14 @@ import Toast from "./components/Toast";
 import ProfileModal from "./components/ProfileModal";
 import OnboardingWizard from "./components/OnboardingWizard";
 import RecapPanel from "./components/RecapPanel";
-import { needsOnboarding, athleteProfileBrief } from "./lib/athleteProfile";
+import { needsOnboarding } from "./lib/athleteProfile";
 import { getOneRepMaxes } from "./lib/workingMax";
 import { loadSessions } from "./lib/sessionStore";
 import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
 import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
-import { parseSpecialDayJson, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation } from "./lib/specialDay";
+import { parseSpecialDay, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation } from "./lib/specialDay";
 import { getMonthlyVolumeStats } from "./lib/exportService";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -1324,12 +1324,13 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const { variation, audit } = parseSpecialDayJson(String(reader.result));
+        // acepta JSON o TEXTO PLANO (detecta el formato solo)
+        const { variation, audit } = parseSpecialDay(String(reader.result));
         const next = injectSpecialVariation(database, activeDay.id, variation);
         setDatabase(next);
         saveCachedWorkouts(next);
         const warns = audit.issues.filter((i) => i.severity !== "error").length;
-        toast(`Pestaña ESPECIAL agregada a ${activeDay.name}${warns ? ` (${warns} avisos de auditoría)` : ""} — deslizá para verla`);
+        toast(`Pestaña ESPECIAL agregada a ${activeDay.name}${warns ? ` (${warns} avisos)` : ""} — deslizá para verla`);
       } catch (err: any) {
         toast(err?.message || "No se pudo importar el día especial", "error");
       }
@@ -1345,35 +1346,6 @@ export default function App() {
     toast(`Pestaña ESPECIAL quitada de ${activeDay.name}`);
   };
 
-  // Día especial GENERADO POR IA: mismo destino (pestaña ESPECIAL), pero el
-  // contenido lo crea la IA con el perfil del atleta + evaluación como grounding.
-  const [specialAiOpen, setSpecialAiOpen] = useState(false);
-  const [specialAiFocus, setSpecialAiFocus] = useState("");
-  const [specialAiBusy, setSpecialAiBusy] = useState(false);
-  const handleGenerateSpecialDay = async () => {
-    if (!activeDay || !specialAiFocus.trim()) return;
-    setSpecialAiBusy(true);
-    try {
-      const { generateSpecialDay } = await import("./services/aiService");
-      const { evaluateAthlete } = await import("./lib/chapterCreator");
-      const dayJson = await generateSpecialDay({
-        focus: specialAiFocus.trim(),
-        profileBrief: athleteProfileBrief() || undefined,
-        evaluationSummary: evaluateAthlete().summary,
-      });
-      const { variation } = parseSpecialDayJson(dayJson);
-      const next = injectSpecialVariation(database, activeDay.id, variation);
-      setDatabase(next);
-      saveCachedWorkouts(next);
-      setSpecialAiOpen(false);
-      setSpecialAiFocus("");
-      toast(`Día ESPECIAL generado por IA para ${activeDay.name} — deslizá para verlo`);
-    } catch (err: any) {
-      toast(err?.message || "No se pudo generar el día", "error");
-    } finally {
-      setSpecialAiBusy(false);
-    }
-  };
 
   // Day share actions — STORY JPG (primary) with the "+ FOTO" attach folded in
   // as a borderless secondary. (PROGRAMA DEL DÍA / Markdown lives in the month
@@ -1622,56 +1594,25 @@ export default function App() {
                 <input
                   ref={specialFileInputRef}
                   type="file"
-                  accept=".json,application/json"
+                  accept=".json,.txt,application/json,text/plain"
                   className="hidden"
                   onChange={handleSpecialDayFile}
                 />
                 <button
-                  onClick={() =>
-                    hasSpecialVariation(database, activeDay.id)
-                      ? handleRemoveSpecialDay()
-                      : specialFileInputRef.current?.click()
-                  }
+                  onClick={() => specialFileInputRef.current?.click()}
                   className="flex items-center gap-2 px-4 py-2 bg-black border border-white/30 hover:bg-white hover:text-black text-white rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
-                  title={
-                    hasSpecialVariation(database, activeDay.id)
-                      ? "Quitar la pestaña ESPECIAL de este día"
-                      : "Subir un JSON de día suelto como pestaña ESPECIAL de este día"
-                  }
+                  title="Subir un día suelto (JSON o TXT con bloques) como pestaña ESPECIAL de este día"
                 >
-                  <span>{hasSpecialVariation(database, activeDay.id) ? "✕ ESPECIAL" : "DÍA ESPECIAL"}</span>
+                  <span>{hasSpecialVariation(database, activeDay.id) ? "CAMBIAR ESPECIAL" : "+ DÍA ESPECIAL"}</span>
                 </button>
-                {!hasSpecialVariation(database, activeDay.id) && (
+                {hasSpecialVariation(database, activeDay.id) && (
                   <button
-                    onClick={() => setSpecialAiOpen((v) => !v)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-white text-black hover:bg-neutral-200 rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
-                    title="Generar un día especial con IA usando tu perfil y evaluación"
+                    onClick={handleRemoveSpecialDay}
+                    className="flex items-center gap-2 px-4 py-2 bg-transparent border border-signal-red/50 text-signal-red hover:bg-signal-red hover:text-white rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
+                    title="Eliminar la pestaña ESPECIAL de este día"
                   >
-                    ✨ IA
+                    <span>✕ QUITAR ESPECIAL</span>
                   </button>
-                )}
-                {specialAiOpen && (
-                  <div className="w-full order-last mt-2 border border-white/15 bg-black/60 p-3 flex flex-col gap-2">
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
-                      Generar día especial con IA — respeta tu perfil (lesiones, debilidades, cardio)
-                    </span>
-                    <div className="flex gap-2">
-                      <input
-                        value={specialAiFocus}
-                        onChange={(e) => setSpecialAiFocus(e.target.value)}
-                        placeholder="Enfoque: ej. metcon largo aeróbico · fuerza de pierna · hero WOD"
-                        className="flex-grow bg-black border border-white/20 px-3 py-2 text-white font-mono text-[12px] focus:outline-none focus:border-white placeholder:text-neutral-600"
-                        onKeyDown={(e) => { if (e.key === "Enter") handleGenerateSpecialDay(); }}
-                      />
-                      <button
-                        onClick={handleGenerateSpecialDay}
-                        disabled={specialAiBusy || !specialAiFocus.trim()}
-                        className="px-4 py-2 bg-white text-black font-brutalist text-[11px] tracking-widest uppercase hover:bg-neutral-200 disabled:opacity-40 cursor-pointer shrink-0"
-                      >
-                        {specialAiBusy ? "GENERANDO…" : "GENERAR"}
-                      </button>
-                    </div>
-                  </div>
                 )}
               </>
             )}
@@ -1696,9 +1637,12 @@ export default function App() {
             transition={{ type: "spring", stiffness: 280, damping: 28 }}
             className="flex-grow flex flex-col"
           >
-            {/* RECAP DOMINICAL: cierre de semana (o de mes en el domingo de la
-                semana 4) — resumen visible en el pizarrón, exportable PNG/PDF. */}
-            {currentDayIndex === 6 && (
+            {/* RECAP: cierre de semana en el ÚLTIMO día disponible (no depende de
+                que el programa tenga domingo — si el JSON trae 5 días, aparece en
+                el último). Variante MES en el último día de la semana 4.
+                Exportable PNG/PDF. */}
+            {activeWeekPlan?.days?.length != null &&
+              currentDayIndex === activeWeekPlan.days.length - 1 && (
               <div className="px-4 md:px-8 pt-4">
                 <RecapPanel variant={currentWeek === "w4" ? "month" : "week"} week={currentWeek} />
               </div>
