@@ -107,3 +107,21 @@ OPTION A Z2: 40-60:00 Bike Erg @80-90 RPM. OPTION B Swim: 100m easy + 300m + 3:0
 OPTIONAL DAY: "40-60' Zone-2 or light CrossFit. Don't do a strength session. Guiding question:
   will what I do today negatively impact tomorrow's training? Do I care?"
 ```
+
+## Lote 2 (transcripciones 9-14) — patrones nuevos
+
+- **SUBSTITUTION & SCALING GUIDE (nuevo, destilado a facet `scaling`):** subs por
+  ratio explícito — Thruster→Double DB Thruster 1:1 / Air Squat 2:1 / Tuck Jump 1:1;
+  Row→Bike Erg 1:1, Echo 1:2, Ski 1:1.5; Run→Row 1:1.5, Echo 1:1.25, Shuttle(10m=1rep);
+  GHD Sit-Up→Weighted AbMat 1:1 / Dual Leg Raise; HSPU→Z-Press(DB) 1.5:1 / DB Push Press / Push-Up;
+  Rope Climb→Push-Up; DU→Single-Under 1.5:1 / Plate Hop 1:1 / Lateral Line Hop 1:1;
+  Muscle-Up→Heavy Pull-Up+C2B / Ring Pull-Up+Ring Dip; Bar MU→Burpee Pull-Up 1:1;
+  Bike Erg→Row/Ski/Echo; Pistol→Shuttle Run; Burpee Box Jump Over→Step Over / Broad Jump 1:1;
+  Clean→Power Clean (BB/DB).
+- **Fuerza en olas** (nuevo ejemplo del mismo facet): Strict Press 1x5@RPE6 / 1x3@RPE7 / 1x1@RPE8.
+- **Complejos de fuerza-gimnasia:** 6 sets [2 Bench + 4 Drop Push-Up]; 3 sets 5 Weighted Ring Dip @RPE7.5.
+- **Metcon con carga descendente + carry entre sets** (refuerza el patrón): For Time 42-30-18 GHD
+  Sit-Up (100ft Bear Hug Carry entre sets), rest 2:00, 30-20-10 Dual KB Deadlift 2x32/24; pesos por sexo.
+- **AMRAP con pacing repetido:** 3 sets AMRAP 5: 200/150m Row, 15 Wall Ball, 200m Run — "consistencia,
+  misma eficiencia; escalá a AMRAP 4 si no cerrás 3 sets".
+- **Rest day explícito** (Flagship 2.0): días de descanso marcados en el calendario.

@@ -10,7 +10,7 @@
 
 import { BrandKey } from "../lib/constants";
 
-export type Facet = "structure" | "strength" | "accessory" | "metcon" | "cardio" | "skill";
+export type Facet = "structure" | "strength" | "accessory" | "metcon" | "cardio" | "skill" | "scaling";
 
 export interface StyleExemplar {
   brand: BrandKey;
@@ -53,6 +53,11 @@ const HWPO: StyleExemplar[] = [
     pattern: "Complejos olímpicos y gimnasia técnica en fresco; rangos de peso guiados por RPE alto (justo bajo el max effort); tempos y resets prescritos.",
     example: "Squat Clean + Above-Knee Hang Squat Clean + Split Jerk 3x(1+1+2) @ RPE 9-9.5, Rest 2'. · Tempo Box Pike HSPU 6 sets 3-5 reps, tempo :03 abajo/:02 pausa. · EMOM 12: min 1-6 :40 Fan Bike, min 7-12 1-4 Bar Muscle-Up.",
   },
+  {
+    brand: "HWPO", facet: "scaling",
+    pattern: "Escalado que PRESERVA el estímulo con subs de ratio explícito por movimiento (no 'hacé menos'); cada skill difícil tiene su regresión y su equivalencia de máquina.",
+    example: "Subs HWPO (ratio): Row↔Ski 1:1, Row→Echo/Assault 1:1.5, Row→Run 1:1.25 · DU→Single-Under 1.5:1 / Plate Hop 1:1 · Muscle-Up→Heavy Pull-Up+C2B / Ring Pull-Up+Ring Dip · Bar MU→Burpee Pull-Up 1:1 · HSPU→Z-Press(DB) 1.5:1 / DB Push Press · GHD Sit-Up→Weighted AbMat 1:1 / Dual Leg Raise · Rope Climb→Push-Up · Handstand Walk→Bike/Ski/Bear Crawl · Pistol→Shuttle Run(10m=1) · Burpee Box Jump Over→Burpee Box Step Over 1:1. Si un movimiento no aplica al atleta, prescribí su sub manteniendo el dominio y la carga relativa.",
+  },
 ];
 
 // PRVN / MAYHEM / HAEDO: sembrar a medida que llegan transcripciones de cada escuela.
@@ -84,7 +89,7 @@ export function selectExemplars(opts: {
 
   const order: Facet[] = [
     ...(opts.preferFacets ?? []),
-    "structure", "strength", "accessory", "metcon", "cardio", "skill",
+    "structure", "strength", "accessory", "metcon", "cardio", "skill", "scaling",
   ];
   const seenFacet = new Set<Facet>();
   const brandCount: Record<string, number> = {};

@@ -8,7 +8,9 @@ describe("styleExemplars", () => {
     const hwpo = STYLE_EXEMPLARS.filter((e) => e.brand === "HWPO");
     expect(hwpo.length).toBeGreaterThanOrEqual(4);
     const facets = new Set(hwpo.map((e) => e.facet));
-    ["structure", "strength", "accessory", "metcon"].forEach((f) => expect(facets.has(f as any)).toBe(true));
+    ["structure", "strength", "accessory", "metcon", "scaling"].forEach((f) => expect(facets.has(f as any)).toBe(true));
+    // el facet de escalado lleva ratios de sub concretos (preserva el estímulo)
+    expect(hwpo.find((e) => e.facet === "scaling")?.example).toMatch(/1:1|1\.5:1|ratio/i);
     expect(loadedBrands()).toContain("HWPO");
   });
 

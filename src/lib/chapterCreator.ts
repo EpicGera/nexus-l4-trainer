@@ -190,9 +190,9 @@ export function buildChapterPrompt(req: ChapterRequest, evaluation: AthleteEvalu
       selectExemplars({
         preferFacets:
           intention === "intensificacion" || intention === "realizacion"
-            ? ["strength", "skill", "metcon"]
-            : ["structure", "strength", "accessory"],
-        max: 5,
+            ? ["strength", "skill", "metcon", "scaling"]
+            : ["structure", "strength", "accessory", "scaling"],
+        max: 6,
       }),
     ),
     "",
