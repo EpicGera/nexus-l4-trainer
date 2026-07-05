@@ -80,10 +80,16 @@ export function setWorkJ(set: LoggedSet, ex: Exercise, bw = DEFAULT_BODYWEIGHT_K
   }
 }
 
-/** Tonnage of one set (kg). Bodyweight movements use effective bodyweight load. */
-export function setVolumeKg(set: LoggedSet, ex: Exercise, bw = DEFAULT_BODYWEIGHT_KG): number {
+/**
+ * Tonnage of one set (kg) = carga EXTERNA movida.
+ * El peso corporal NO cuenta como tonelaje (inflaba gimnasia: dominadas ×
+ * peso corporal daban miles de kg falsos). Un movimiento de peso corporal
+ * CON lastre (chaleco/cinturón) sí suma ese lastre. El trabajo físico de
+ * mover el cuerpo se mide aparte en joules (setWorkJ), no acá.
+ */
+export function setVolumeKg(set: LoggedSet, ex: Exercise, _bw = DEFAULT_BODYWEIGHT_KG): number {
   const reps = set.reps ?? 0;
-  if (ex.workModel === "bodyweight") return effectiveLoadKg(set, ex, bw) * reps;
+  if (ex.workModel === "bodyweight") return (set.addedLoadKg ?? 0) * reps;
   return (set.weightKg ?? 0) * reps;
 }
 

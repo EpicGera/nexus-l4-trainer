@@ -38,6 +38,10 @@ import TelemetryBoard from "./components/TelemetryBoard";
 import ResetConfirmModal from "./components/ResetConfirmModal";
 import Toast from "./components/Toast";
 import ProfileModal from "./components/ProfileModal";
+import OnboardingWizard from "./components/OnboardingWizard";
+import { needsOnboarding } from "./lib/athleteProfile";
+import { getOneRepMaxes } from "./lib/workingMax";
+import { loadSessions } from "./lib/sessionStore";
 import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
@@ -212,6 +216,19 @@ export default function App() {
   const [showResetModal, setShowResetModal] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  // Onboarding de atleta nuevo: se auto-dispara la 1ª vez, cuando no hay
+  // señales de uso previo (sin peso, sin 1RMs, sin sesiones).
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
+    try {
+      return needsOnboarding({
+        hasBodyweight: !!localStorage.getItem("nexus_bodyweight_kg"),
+        hasOneRm: Object.keys(getOneRepMaxes()).length > 0,
+        hasSessions: loadSessions().length > 0,
+      });
+    } catch {
+      return false;
+    }
+  });
   const [profileLens, setProfileLens] = useState<"perfil" | "datos" | "logros">(
     () => (localStorage.getItem("nexus_profile_lens") as "perfil" | "datos" | "logros") || "perfil",
   );
@@ -390,10 +407,14 @@ export default function App() {
 
   const midBandColor = useMemo(() => {
     if (chapterTheme?.band) {
+      // La banda es SIEMPRE fondo oscuro + texto blanco: el titleGradient
+      // (que puede ser claro) es para texto de título, no para fondo — usarlo
+      // como bg producía blanco-sobre-blanco. Deriva un gradiente oscuro del band.
+      const band = /^#f/i.test(chapterTheme.band) ? "#141414" : chapterTheme.band;
       return {
-        bg: chapterTheme.band,
+        bg: band,
         text: "#ffffff",
-        bgStyle: { background: chapterTheme.titleGradient || chapterTheme.band },
+        bgStyle: { background: `linear-gradient(90deg, ${band} 0%, #0A0A0A 100%)` },
       };
     }
     return WEEK_MID_BAND_COLORS[currentWeek] || WEEK_MID_BAND_COLORS.w2;
@@ -1055,7 +1076,7 @@ export default function App() {
     return (
       <div
         style={{ ...midBandColor.bgStyle, color: midBandColor.text }}
-        className={`px-3 py-2.5 font-mono flex flex-col justify-center w-full min-h-[54px] uppercase select-none shadow-[inset_0_2px_4px_rgba(255,255,255,0.25)] rounded-none text-center leading-[1.05] gap-1 border-l-[6px] border-amber-400`}
+        className={`px-3 py-2.5 font-mono flex flex-col justify-center w-full min-h-[54px] uppercase select-none rounded-none text-center leading-[1.05] gap-1 border-l-[6px] border-white/60`}
       >
         <span
           className={`font-brutalist not-italic tracking-[0.01em] uppercase ${
@@ -2555,6 +2576,18 @@ export default function App() {
               </div>
             </motion.div>
           </div>
+        )}
+
+        {showOnboarding && (
+          <OnboardingWizard
+            key="onboarding"
+            onDone={() => {
+              setShowOnboarding(false);
+              window.dispatchEvent(new Event("nexus_logs_updated"));
+              toast("Punto de referencia computado — bienvenido, atleta");
+            }}
+            onSkip={() => setShowOnboarding(false)}
+          />
         )}
 
         {showProfileModal && (

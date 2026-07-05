@@ -198,6 +198,17 @@ describe("volume & skills", () => {
     expect(pv.hinge.tonnageKg).toBe(360);
   });
 
+  it("tonnage counts external load only: bodyweight reps add 0 kg, added load counts", () => {
+    // dominadas estrictas (BW puro) → 0 kg de tonelaje, pero sí cuentan reps
+    expect(work({ exerciseId: "pull-up", reps: 12 }, 80)).toBeGreaterThan(0); // joules sí
+    const strict = mkSession({ sets: [mkSet({ exerciseId: "pull-up", exerciseName: "Pull-up", reps: 12 })] });
+    expect(patternVolume([strict])["vertical-pull"].tonnageKg).toBe(0);
+    expect(patternVolume([strict])["vertical-pull"].reps).toBe(12);
+    // con lastre: solo el lastre suma al tonelaje
+    const weighted = mkSession({ sets: [mkSet({ exerciseId: "pull-up", exerciseName: "Pull-up", reps: 10, addedLoadKg: 20 })] });
+    expect(patternVolume([weighted])["vertical-pull"].tonnageKg).toBe(200);
+  });
+
   it("skillsRadar scores trained skills 0..100", () => {
     const r = skillsRadar([session]);
     expect(r.strength).toBe(100); // most-trained skill
