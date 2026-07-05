@@ -22,6 +22,7 @@ import { getBodyweightKg } from "./profileMetrics";
 import { Modality, GeneralSkill } from "../types/training";
 import { CATALOG } from "../data/exerciseCatalog";
 import { Database, DayWorkout } from "../types/workout";
+import { selectExemplars, exemplarsPromptBlock } from "../data/styleExemplars";
 
 export type BlockIntention = "acumulacion" | "intensificacion" | "realizacion" | "restauracion";
 
@@ -184,6 +185,16 @@ export function buildChapterPrompt(req: ChapterRequest, evaluation: AthleteEvalu
     req.profileBrief
       ? "PERFIL DEL ATLETA (onboarding — RESTRICCIONES Y CONTEXTO que condicionan el diseño; respetá lesiones, atacá debilidades, prescribí cardio relativo a los benchmarks, y calibrá volumen/descarga según el life-gear):\n" + req.profileBrief
       : "Perfil del atleta sin completar (onboarding pendiente): usá defaults conservadores.",
+    "",
+    exemplarsPromptBlock(
+      selectExemplars({
+        preferFacets:
+          intention === "intensificacion" || intention === "realizacion"
+            ? ["strength", "skill", "metcon"]
+            : ["structure", "strength", "accessory"],
+        max: 5,
+      }),
+    ),
     "",
     req.objective
       ? "OBJETIVO DEL ATLETA (el hilo — este capítulo debe ser el PRÓXIMO PASO hacia esto; atacá la brecha en condiciones favorables, en fresco, sin romper la periodización ni el veto salud>recuperación>adherencia):\n" + req.objective
