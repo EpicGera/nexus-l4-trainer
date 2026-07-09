@@ -32,6 +32,11 @@ interface ExportCustomizationPanelProps {
   isExporting?: boolean;
   isFullscreenPreview?: boolean;
   setIsFullscreenPreview?: (val: boolean) => void;
+  // Modo clip de video: el panel se muestra aunque no haya foto, oculta los
+  // controles de foto (filtro, quitar foto) y el export pasa a "EXPORTAR VIDEO".
+  clipMode?: boolean;
+  onExportVideo?: () => void;
+  isExportingVideo?: boolean;
 }
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
@@ -75,8 +80,11 @@ export default function ExportCustomizationPanel({
   isExporting = false,
   isFullscreenPreview,
   setIsFullscreenPreview,
+  clipMode = false,
+  onExportVideo,
+  isExportingVideo = false,
 }: ExportCustomizationPanelProps) {
-  if (!exportBgImage) return null;
+  if (!exportBgImage && !clipMode) return null;
 
   return (
     <div className="w-full col-span-full no-print bg-[#0a0a0f]/95 border-2 border-amber-500/40 p-6 mb-6 text-left flex flex-col gap-5 shadow-[0_25px_60px_rgba(0,0,0,0.85)] rounded-xl relative">
@@ -87,15 +95,17 @@ export default function ExportCustomizationPanel({
         <div className="flex items-center gap-2">
           <Camera className="text-amber-500 animate-pulse" size={18} />
           <span className="font-mono text-xs font-black tracking-widest text-amber-500 uppercase">
-            IG STORY CREATOR // TELEMETRÍA GRÁFICA V3
+            IG STORY CREATOR // {clipMode ? "EMPLAZAMIENTO SOBRE CLIP" : "TELEMETRÍA GRÁFICA V3"}
           </span>
         </div>
-        <button
-          onClick={() => setExportBgImage(null)}
-          className="text-[9px] bg-red-950/60 hover:bg-red-900 px-3 py-1.5 text-red-400 font-mono font-black uppercase transition-all tracking-widest cursor-pointer border border-red-900/50 rounded"
-        >
-          QUITAR FOTO DE FONDO
-        </button>
+        {!clipMode && (
+          <button
+            onClick={() => setExportBgImage(null)}
+            className="text-[9px] bg-red-950/60 hover:bg-red-900 px-3 py-1.5 text-red-400 font-mono font-black uppercase transition-all tracking-widest cursor-pointer border border-red-900/50 rounded"
+          >
+            QUITAR FOTO DE FONDO
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -120,19 +130,30 @@ export default function ExportCustomizationPanel({
                 </button>
               )}
             </div>
-            {onExport && (
-              <button
-                type="button"
-                onClick={onExport}
-                disabled={isExporting}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono text-[11px] font-black tracking-widest uppercase bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white rounded shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-              >
-                <Share2
-                  size={15}
-                  className={isExporting ? "animate-spin" : ""}
-                />
-                {isExporting ? "EXPORTANDO..." : "EXPORTAR STORY JPG"}
-              </button>
+            {clipMode ? (
+              onExportVideo && (
+                <button
+                  type="button"
+                  onClick={onExportVideo}
+                  disabled={isExportingVideo}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono text-[11px] font-black tracking-widest uppercase bg-signal-red hover:brightness-110 text-white rounded shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  <Share2 size={15} className={isExportingVideo ? "animate-spin" : ""} />
+                  {isExportingVideo ? "RENDERIZANDO..." : "EXPORTAR VIDEO"}
+                </button>
+              )
+            ) : (
+              onExport && (
+                <button
+                  type="button"
+                  onClick={onExport}
+                  disabled={isExporting}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono text-[11px] font-black tracking-widest uppercase bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white rounded shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  <Share2 size={15} className={isExporting ? "animate-spin" : ""} />
+                  {isExporting ? "EXPORTANDO..." : "EXPORTAR STORY JPG"}
+                </button>
+              )
             )}
           </div>
         )}
@@ -373,7 +394,8 @@ export default function ExportCustomizationPanel({
             />
           </div>
 
-          {/* Filtro de Foto de Fondo (tratamiento de la imagen) */}
+          {/* Filtro de Foto de Fondo (tratamiento de la imagen) — solo con foto */}
+          {!clipMode && (
           <div className="flex flex-col gap-2 font-condensed md:col-span-2">
             <SectionLabel>Filtro de Foto de Fondo</SectionLabel>
             <div className="grid grid-cols-4 gap-1 bg-black/80 p-1 border border-zinc-800 rounded">
@@ -438,6 +460,7 @@ export default function ExportCustomizationPanel({
               Silueta / Neón detectan personas (procesado local en el dispositivo)
             </span>
           </div>
+          )}
         </div>
       </div>
     </div>

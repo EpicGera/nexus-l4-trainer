@@ -73,25 +73,48 @@ export function useExportPanel(
   const [isExportingVideo, setIsExportingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
 
-  // Clip de video de FONDO (opcional). Guardamos el File para poder decodificar
-  // su audio, y un object URL para dibujar sus frames.
+  // Clip de video de FONDO (opcional). Guardamos el File (para decodificar su
+  // audio), un object URL en ref (para revoke) y en estado (para los previews),
+  // y la duración sondeada del clip.
   const [videoBgFile, setVideoBgFile] = useState<File | null>(null);
   const [videoBgName, setVideoBgName] = useState<string | null>(null);
+  const [videoBgUrl, setVideoBgUrl] = useState<string | null>(null);
+  const [videoBgDurationSec, setVideoBgDurationSec] = useState<number | null>(null);
   const videoBgUrlRef = useRef<string | null>(null);
+
+  // Duración efectiva del export con clip: la del clip, con tope de 15s.
+  const CLIP_MAX_SEC = 15;
+  const clipExportSec = Math.min(videoBgDurationSec ?? CLIP_MAX_SEC, CLIP_MAX_SEC);
 
   const clearVideoBg = () => {
     if (videoBgUrlRef.current) { URL.revokeObjectURL(videoBgUrlRef.current); videoBgUrlRef.current = null; }
     setVideoBgFile(null);
     setVideoBgName(null);
+    setVideoBgUrl(null);
+    setVideoBgDurationSec(null);
   };
   const handleVideoBgFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
     if (videoBgUrlRef.current) URL.revokeObjectURL(videoBgUrlRef.current);
-    videoBgUrlRef.current = URL.createObjectURL(file);
+    const url = URL.createObjectURL(file);
+    videoBgUrlRef.current = url;
     setVideoBgFile(file);
     setVideoBgName(file.name);
+    setVideoBgUrl(url);
+    setVideoBgDurationSec(null);
+    // sondear la duración del clip
+    const probe = document.createElement("video");
+    probe.preload = "metadata";
+    probe.onloadedmetadata = () => {
+      // ponytail: algunos webm (p.ej. de captureStream) reportan duración basura
+      // (0/Infinity) hasta un seek; solo aceptamos una lectura plausible.
+      if (Number.isFinite(probe.duration) && probe.duration >= 0.5) {
+        setVideoBgDurationSec(probe.duration);
+      }
+    };
+    probe.src = url;
   };
   // Limpiar el object URL al desmontar.
   useEffect(() => () => { if (videoBgUrlRef.current) URL.revokeObjectURL(videoBgUrlRef.current); }, []);
@@ -141,7 +164,8 @@ export function useExportPanel(
       const { blob, ext } = await renderStoryVideo({
         overlayPng,
         effect: videoEffect,
-        durationSec: videoDurationSec,
+        // con clip: dura lo que dura el clip (tope 15s); sin clip: selector 10/15
+        durationSec: videoBgFile ? clipExportSec : videoDurationSec,
         audio,
         videoBg: videoBgFile && videoBgUrlRef.current ? { url: videoBgUrlRef.current } : undefined,
         onProgress: setVideoProgress,
@@ -323,6 +347,9 @@ export function useExportPanel(
     handleAudioFile,
     videoBgFile,
     videoBgName,
+    videoBgUrl,
+    videoBgDurationSec,
+    clipExportSec,
     handleVideoBgFile,
     clearVideoBg,
     isExportingVideo,

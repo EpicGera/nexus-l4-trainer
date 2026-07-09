@@ -591,6 +591,9 @@ export default function App() {
     handleAudioFile,
     videoBgFile,
     videoBgName,
+    videoBgUrl,
+    videoBgDurationSec,
+    clipExportSec,
     handleVideoBgFile,
     clearVideoBg,
     isExportingVideo,
@@ -1189,11 +1192,31 @@ export default function App() {
         setExportPhotoFilter={setExportPhotoFilter}
         onExport={handleExportDayJPG}
         isExporting={isExportingJPG}
+        clipMode={videoMode && !!videoBgFile}
+        onExportVideo={handleExportDayVideo}
+        isExportingVideo={isExportingVideo}
         isFullscreenPreview={isFullscreenPreview}
         setIsFullscreenPreview={setIsFullscreenPreview}
         preview={
           shareCardProps ? (
-            <ShareCardOverlay {...shareCardProps} previewMode />
+            videoMode && videoBgUrl ? (
+              // preview WYSIWYG: el clip se reproduce detrás de la tarjeta transparente
+              <div className="relative overflow-hidden rounded">
+                <video
+                  src={videoBgUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                />
+                <div className="relative">
+                  <ShareCardOverlay {...shareCardProps} previewMode transparentBase />
+                </div>
+              </div>
+            ) : (
+              <ShareCardOverlay {...shareCardProps} previewMode />
+            )
           ) : null
         }
       />
@@ -1564,18 +1587,31 @@ export default function App() {
 
                     <div className="space-y-1.5">
                       <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
-                      <div className="grid grid-cols-2 gap-1">
-                        {([10, 15] as const).map((d) => (
-                          <button
-                            key={d}
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
-                            className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"}`}
-                          >
-                            {d}s
-                          </button>
-                        ))}
-                      </div>
+                      {videoBgFile ? (
+                        <div className="px-3 py-2 rounded-sm border border-white/15 bg-white/5 font-mono text-[10px] text-white/80">
+                          {clipExportSec}s{" "}
+                          <span className="text-white/40">
+                            ({videoBgDurationSec == null
+                              ? "duración del clip"
+                              : videoBgDurationSec > 15
+                                ? "clip recortado a 15s"
+                                : "duración del clip"})
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-1">
+                          {([10, 15] as const).map((d) => (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
+                              className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"}`}
+                            >
+                              {d}s
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -1597,7 +1633,7 @@ export default function App() {
                           <input
                             type="range"
                             min={0}
-                            max={Math.max(0, Math.floor(audioBuffer.duration - videoDurationSec))}
+                            max={Math.max(0, Math.floor(audioBuffer.duration - (videoBgFile ? clipExportSec : videoDurationSec)))}
                             value={audioOffsetSec}
                             onChange={(e) => setAudioOffsetSec(Number(e.target.value))}
                             className="w-full accent-white mt-1"
@@ -2881,22 +2917,39 @@ export default function App() {
           {/* Interactive Card Container */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             {/* The scale factor should ensure it fits perfectly within the viewport */}
-            <div className="pointer-events-auto" style={{ transform: `scale(${previewScale})`, transformOrigin: "center" }}>
-              <ShareCardOverlay {...shareCardProps} interactiveMode={true} previewMode={true} dragScale={previewScale} />
+            <div className="pointer-events-auto relative" style={{ transform: `scale(${previewScale})`, transformOrigin: "center" }}>
+              {videoMode && videoBgUrl && (
+                <video
+                  src={videoBgUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 pointer-events-none object-cover"
+                  style={{ width: "1080px", height: "1920px" }}
+                />
+              )}
+              <ShareCardOverlay
+                {...shareCardProps}
+                interactiveMode={true}
+                previewMode={true}
+                transparentBase={videoMode && !!videoBgFile}
+                dragScale={previewScale}
+              />
             </div>
           </div>
-          
+
           {/* Bottom Export Button */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
             <button
               onClick={() => {
                 setIsFullscreenPreview(false);
-                setTimeout(handleExportDayJPG, 300);
+                setTimeout(videoMode && videoBgFile ? handleExportDayVideo : handleExportDayJPG, 300);
               }}
               className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white font-mono text-sm font-black tracking-widest px-8 py-4 uppercase rounded shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all active:scale-95 cursor-pointer"
             >
               <Share2 size={18} />
-              CONFIRMAR Y EXPORTAR
+              {videoMode && videoBgFile ? "CONFIRMAR Y EXPORTAR VIDEO" : "CONFIRMAR Y EXPORTAR"}
             </button>
           </div>
         </div>

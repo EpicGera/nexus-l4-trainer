@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { muscleLoadForVariation, toHeatmapParts } from "./muscleMap";
+import { muscleLoadForVariation } from "./muscleMap";
 
 const empty = { title: "", scheme: "", items: [] as string[] };
 const dayWith = (metconItems: string[], strengthItems: string[] = []) =>
@@ -29,22 +29,5 @@ describe("muscleLoadForVariation", () => {
   it("día vacío → todo 0 (sin dividir por cero)", () => {
     const load = muscleLoadForVariation(dayWith([]));
     expect(Object.values(load).every((v) => v === 0)).toBe(true);
-  });
-});
-
-describe("toHeatmapParts (13 grupos → 8 regiones del maniquí)", () => {
-  it("día de squat enciende leg y butt por encima del resto", () => {
-    const parts = toHeatmapParts(muscleLoadForVariation(dayWith([], ["Back Squat 5x5 @ 80% WM"])));
-    expect(parts.leg).toBe(1); // quads (max) → leg
-    expect(parts.butt).toBeGreaterThan(0); // glutes → butt
-    expect(parts.leg).toBeGreaterThan(parts.chest ?? 0);
-  });
-
-  it("colapsa por MAX, no por suma (leg = max(quads,hamstrings,calves))", () => {
-    const load = muscleLoadForVariation(dayWith([], ["Back Squat 5x5 @ 80% WM"]));
-    const parts = toHeatmapParts(load);
-    // leg toma el máximo de sus grupos, nunca los suma → ≤ 1
-    expect(parts.leg).toBeLessThanOrEqual(1);
-    expect(parts.leg).toBe(Math.max(load.quads, load.hamstrings, load.calves));
   });
 });

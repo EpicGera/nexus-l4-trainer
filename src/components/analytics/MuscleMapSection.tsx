@@ -1,5 +1,5 @@
 import { Accessibility } from "lucide-react";
-import { muscleLoadForVariation, toHeatmapParts, type MuscleGroup } from "../../lib/muscleMap";
+import { muscleLoadForVariation, type MuscleGroup } from "../../lib/muscleMap";
 import BodyHeatmap from "./BodyHeatmap";
 
 interface MuscleMapSectionProps {
@@ -47,12 +47,13 @@ export default function MuscleMapSection({ activeDay, currentVariationIndex }: M
   if (!v) return null;
 
   const load = muscleLoadForVariation(v);
-  const parts = toHeatmapParts(load);
 
   const groups = Object.keys(load) as MuscleGroup[];
   const primary = groups.filter((m) => load[m] >= 0.7);
   const secondary = groups.filter((m) => load[m] >= 0.4 && load[m] < 0.7);
-  const hasData = groups.some((m) => load[m] > 0);
+  // desglose completo: todo grupo con carga > 0, orden descendente
+  const ranked = groups.filter((m) => load[m] > 0).sort((a, b) => load[b] - load[a]);
+  const hasData = ranked.length > 0;
 
   return (
     <section className="border bg-[var(--color-surface-1)] border-[var(--color-line)] rounded-sm flex flex-col text-left overflow-hidden shadow-sm">
@@ -66,7 +67,7 @@ export default function MuscleMapSection({ activeDay, currentVariationIndex }: M
 
       {/* Cuerpo del escáner: grilla + gradiente rojo sutil */}
       <div
-        className="p-6 flex flex-col items-center gap-6"
+        className="p-6 flex flex-col items-center gap-5"
         style={{
           backgroundImage: `
             repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 30px),
@@ -75,12 +76,54 @@ export default function MuscleMapSection({ activeDay, currentVariationIndex }: M
           `,
         }}
       >
-        <BodyHeatmap values={parts} baseColor={PRIMARY} className="w-full max-w-[240px] h-auto" />
+        <div className="w-full max-w-[280px] flex flex-col items-center gap-1.5">
+          <BodyHeatmap values={load} baseColor={PRIMARY} className="w-full h-auto" />
+          {/* etiquetas de vista: el asset trae frente a la izquierda, dorso a la derecha */}
+          <div className="w-full flex justify-around text-[8px] font-mono uppercase tracking-[0.2em] text-[var(--color-ink-faint)]">
+            <span>Frente</span>
+            <span>Dorso</span>
+          </div>
+        </div>
+
+        {/* leyenda de intensidad */}
+        <div className="w-full flex items-center gap-2">
+          <span className="text-[8px] font-mono uppercase tracking-widest text-[var(--color-ink-faint)]">Leve</span>
+          <div
+            className="h-1.5 flex-1 rounded-full"
+            style={{ background: `linear-gradient(to right, ${PRIMARY}2E, ${PRIMARY})` }}
+          />
+          <span className="text-[8px] font-mono uppercase tracking-widest text-[var(--color-ink-faint)]">Máximo</span>
+        </div>
 
         {hasData ? (
           <div className="w-full space-y-3">
             {primary.length > 0 && <Readout title="PRIMARY TARGETS" muscles={primary} color={PRIMARY} />}
             {secondary.length > 0 && <Readout title="SECONDARY SUPPORT" muscles={secondary} color={SECONDARY} />}
+
+            {/* Desglose completo — barra de intensidad + % por grupo */}
+            <div className="w-full pt-1">
+              <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-[var(--color-ink-faint)] mb-2">
+                Desglose completo
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {ranked.map((m) => (
+                  <div key={m} className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-[var(--color-ink-muted)] w-[68px] shrink-0 truncate">
+                      {LABELS[m]}
+                    </span>
+                    <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${Math.round(load[m] * 100)}%`, background: PRIMARY, opacity: 0.35 + 0.65 * load[m] }}
+                      />
+                    </div>
+                    <span className="text-[9px] font-mono tabular-nums text-[var(--color-ink-faint)] w-7 text-right">
+                      {Math.round(load[m] * 100)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <p className="text-[11px] font-mono text-[var(--color-ink-faint)]">Sin ejercicios cargados.</p>

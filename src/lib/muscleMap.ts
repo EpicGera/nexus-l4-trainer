@@ -7,7 +7,6 @@ import { DayVariation } from "../types/workout";
 import { Pattern } from "../types/training";
 import { resolveOrInfer } from "../data/exerciseCatalog";
 import { loggableBlockItems } from "./blockGrouping";
-import type { HeatmapPart } from "../components/analytics/BodyHeatmap";
 
 export type MuscleGroup =
   | "quads" | "hamstrings" | "glutes" | "calves"
@@ -62,29 +61,4 @@ export function muscleLoadForVariation(v: DayVariation): Record<MuscleGroup, num
   if (max === 0) return acc;
   for (const m of MUSCLE_GROUPS) acc[m] = acc[m] / max;
   return acc;
-}
-
-// Colapsa nuestros 13 grupos a las 8 regiones del maniquí bodychart_heatmap
-// (neck/chest/shoulder/arm/abs/leg/butt/back). Copia el criterio de WODFORGE:
-// se queda con el MÁX de los grupos que caen en cada región (no suma). `neck`
-// nunca se enciende porque ningún Pattern nuestro lo carga.
-const GROUP_TO_PART: Record<MuscleGroup, HeatmapPart> = {
-  quads: "leg", hamstrings: "leg", calves: "leg",
-  glutes: "butt",
-  core: "abs",
-  lower_back: "back", upper_back: "back", lats: "back",
-  chest: "chest",
-  shoulders: "shoulder",
-  biceps: "arm", triceps: "arm", forearms: "arm",
-};
-
-export function toHeatmapParts(
-  load: Record<MuscleGroup, number>,
-): Partial<Record<HeatmapPart, number>> {
-  const out: Partial<Record<HeatmapPart, number>> = {};
-  for (const m of MUSCLE_GROUPS) {
-    const part = GROUP_TO_PART[m];
-    out[part] = Math.max(out[part] ?? 0, load[m]);
-  }
-  return out;
 }
