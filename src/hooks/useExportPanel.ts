@@ -58,7 +58,10 @@ export function useExportPanel(
     (storyVariationTab && activeDay?.variations?.find((v: any) => v.tabName === storyVariationTab)) ||
     activeVariation;
   // reset al cambiar de día
-  useEffect(() => { setStoryVariationTab(null); }, [activeDay?.id]);
+  useEffect(() => {
+    setStoryVariationTab(null);
+    clearVideoBg();
+  }, [activeDay?.id]);
 
   // ── Story VIDEO (Fase A) ──
   const [videoMode, setVideoMode] = useState(false);
@@ -69,6 +72,29 @@ export function useExportPanel(
   const [audioOffsetSec, setAudioOffsetSec] = useState(0);
   const [isExportingVideo, setIsExportingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
+
+  // Clip de video de FONDO (opcional). Guardamos el File para poder decodificar
+  // su audio, y un object URL para dibujar sus frames.
+  const [videoBgFile, setVideoBgFile] = useState<File | null>(null);
+  const [videoBgName, setVideoBgName] = useState<string | null>(null);
+  const videoBgUrlRef = useRef<string | null>(null);
+
+  const clearVideoBg = () => {
+    if (videoBgUrlRef.current) { URL.revokeObjectURL(videoBgUrlRef.current); videoBgUrlRef.current = null; }
+    setVideoBgFile(null);
+    setVideoBgName(null);
+  };
+  const handleVideoBgFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (videoBgUrlRef.current) URL.revokeObjectURL(videoBgUrlRef.current);
+    videoBgUrlRef.current = URL.createObjectURL(file);
+    setVideoBgFile(file);
+    setVideoBgName(file.name);
+  };
+  // Limpiar el object URL al desmontar.
+  useEffect(() => () => { if (videoBgUrlRef.current) URL.revokeObjectURL(videoBgUrlRef.current); }, []);
 
   const handleAudioFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,11 +126,24 @@ export function useExportPanel(
         width: 1080, height: 1920, pixelRatio: 1,
         style: { transform: "scale(1)", transformOrigin: "top left", width: "1080px", height: "1920px" },
       });
+
+      // Audio: la música local manda; si no hay y hay clip, se usa el audio del clip.
+      let audio = audioBuffer ? { buffer: audioBuffer, offsetSec: audioOffsetSec } : undefined;
+      if (!audio && videoBgFile) {
+        try {
+          const ctx = new AudioContext();
+          const decoded = await ctx.decodeAudioData(await videoBgFile.arrayBuffer());
+          await ctx.close();
+          audio = { buffer: decoded, offsetSec: 0 };
+        } catch { /* clip sin pista de audio decodificable → video mudo */ }
+      }
+
       const { blob, ext } = await renderStoryVideo({
         overlayPng,
         effect: videoEffect,
         durationSec: videoDurationSec,
-        audio: audioBuffer ? { buffer: audioBuffer, offsetSec: audioOffsetSec } : undefined,
+        audio,
+        videoBg: videoBgFile && videoBgUrlRef.current ? { url: videoBgUrlRef.current } : undefined,
         onProgress: setVideoProgress,
       });
       await serviceShareVideo(blob, ext, activeDay, currentWeek);
@@ -282,6 +321,10 @@ export function useExportPanel(
     audioOffsetSec,
     setAudioOffsetSec,
     handleAudioFile,
+    videoBgFile,
+    videoBgName,
+    handleVideoBgFile,
+    clearVideoBg,
     isExportingVideo,
     videoProgress,
     handleExportDayVideo,

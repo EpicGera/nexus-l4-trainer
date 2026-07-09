@@ -14,14 +14,17 @@ import { Muxer, ArrayBufferTarget } from "mp4-muxer";
 export type StoryEffect = "kenburns" | "pulse" | "none";
 
 export interface StoryVideoOpts {
-  /** tarjeta de Story completa (1080×1920) como data URL PNG */
+  /** tarjeta de Story (1080×1920) como data URL PNG. Con `videoBg`, va con alfa. */
   overlayPng: string;
   effect: StoryEffect;
   /** duración del clip en segundos */
   durationSec: number;
   fps?: number;
-  /** audio local ya decodificado + desde qué segundo recortar */
+  /** audio ya decodificado (música local o audio del clip) + desde qué segundo */
   audio?: { buffer: AudioBuffer; offsetSec: number };
+  /** clip de video de fondo (object URL). Si está, `effect` se ignora: el
+   * movimiento lo pone el propio clip y el overlay se compone encima sin zoom. */
+  videoBg?: { url: string };
   onProgress?: (pct: number) => void;
 }
 
@@ -74,6 +77,59 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.onerror = () => reject(new Error("No se pudo cargar la imagen del overlay."));
     img.src = src;
   });
+}
+
+/**
+ * Rectángulo destino para encajar una fuente srcW×srcH dentro de dstW×dstH con
+ * `object-fit: cover` (llena el marco, recorta el excedente, centrado). Puro.
+ */
+export function coverRect(
+  srcW: number,
+  srcH: number,
+  dstW: number,
+  dstH: number,
+): { dx: number; dy: number; w: number; h: number } {
+  if (srcW <= 0 || srcH <= 0) return { dx: 0, dy: 0, w: dstW, h: dstH };
+  const scale = Math.max(dstW / srcW, dstH / srcH);
+  const w = srcW * scale;
+  const h = srcH * scale;
+  return { dx: (dstW - w) / 2, dy: (dstH - h) / 2, w, h };
+}
+
+function prepareVideo(url: string): Promise<HTMLVideoElement> {
+  return new Promise((resolve, reject) => {
+    const el = document.createElement("video");
+    el.muted = true;
+    el.playsInline = true;
+    el.preload = "auto";
+    el.src = url;
+    el.onloadeddata = () => resolve(el);
+    el.onerror = () => reject(new Error("No se pudo cargar el clip de video de fondo."));
+  });
+}
+
+/** Coloca el clip en `time` (segundos) y espera a que el frame esté listo. */
+function seekVideo(video: HTMLVideoElement, time: number): Promise<void> {
+  return new Promise((resolve) => {
+    const onSeeked = () => { video.removeEventListener("seeked", onSeeked); resolve(); };
+    video.addEventListener("seeked", onSeeked);
+    video.currentTime = time;
+  });
+}
+
+/** Fondo = frame del clip (cover-fit) + overlay PNG encima, sin transform. */
+function drawVideoFrame(
+  ctx: CanvasRenderingContext2D,
+  video: CanvasImageSource,
+  vw: number,
+  vh: number,
+  overlay: CanvasImageSource,
+): void {
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, STORY_W, STORY_H);
+  const r = coverRect(vw, vh, STORY_W, STORY_H);
+  ctx.drawImage(video, r.dx, r.dy, r.w, r.h);
+  ctx.drawImage(overlay, 0, 0, STORY_W, STORY_H);
 }
 
 /** ¿El navegador puede encodear H.264 por WebCodecs? (el camino mp4 primario) */
@@ -148,9 +204,18 @@ async function renderMp4(opts: StoryVideoOpts): Promise<Blob> {
     framerate: fps,
   });
 
+  // Clip de fondo (opcional): seek exacto por frame, loopeando si es más corto.
+  const bgVideo = opts.videoBg ? await prepareVideo(opts.videoBg.url) : null;
+  const clipDur = bgVideo?.duration || 0;
+
   const VideoFrameCtor = (globalThis as any).VideoFrame;
   for (let i = 0; i < totalFrames; i++) {
-    drawFrame(ctx, img, opts.effect, totalFrames <= 1 ? 0 : i / (totalFrames - 1));
+    if (bgVideo) {
+      await seekVideo(bgVideo, clipDur > 0 ? (i / fps) % clipDur : 0);
+      drawVideoFrame(ctx, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, img);
+    } else {
+      drawFrame(ctx, img, opts.effect, totalFrames <= 1 ? 0 : i / (totalFrames - 1));
+    }
     const frame = new VideoFrameCtor(canvas, {
       timestamp: Math.round((i * 1_000_000) / fps),
       duration: Math.round(1_000_000 / fps),
@@ -230,6 +295,14 @@ async function renderWebm(opts: StoryVideoOpts): Promise<Blob> {
   canvas.height = STORY_H;
   const ctx = canvas.getContext("2d")!;
 
+  // Clip de fondo (opcional): en tiempo real lo dejamos reproducir en loop y
+  // dibujamos su frame vigente en cada rAF (sin seeks).
+  const bgVideo = opts.videoBg ? await prepareVideo(opts.videoBg.url) : null;
+  if (bgVideo) {
+    bgVideo.loop = true;
+    try { await bgVideo.play(); } catch { /* autoplay muted debería andar */ }
+  }
+
   const stream = (canvas as any).captureStream(fps) as MediaStream;
 
   // Mezcla el audio local en un track del stream, si hay.
@@ -264,7 +337,8 @@ async function renderWebm(opts: StoryVideoOpts): Promise<Blob> {
     const tick = () => {
       const elapsed = performance.now() - t0;
       const t01 = Math.min(1, elapsed / totalMs);
-      drawFrame(ctx, img, opts.effect, t01);
+      if (bgVideo) drawVideoFrame(ctx, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, img);
+      else drawFrame(ctx, img, opts.effect, t01);
       opts.onProgress?.(Math.round(t01 * 95));
       if (elapsed >= totalMs) resolve();
       else requestAnimationFrame(tick);
@@ -274,6 +348,7 @@ async function renderWebm(opts: StoryVideoOpts): Promise<Blob> {
 
   recorder.stop();
   source?.stop();
+  bgVideo?.pause();
   await audioCtx?.close();
   const blob = await done;
   opts.onProgress?.(100);

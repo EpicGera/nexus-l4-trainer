@@ -107,6 +107,7 @@ import {
   Maximize,
   MousePointer2,
   Music,
+  Film,
 } from "lucide-react";
 
 // Firebase core & sync integration
@@ -588,6 +589,10 @@ export default function App() {
     audioOffsetSec,
     setAudioOffsetSec,
     handleAudioFile,
+    videoBgFile,
+    videoBgName,
+    handleVideoBgFile,
+    clearVideoBg,
     isExportingVideo,
     videoProgress,
     handleExportDayVideo,
@@ -1339,6 +1344,7 @@ export default function App() {
   // ── Día especial por JSON: entra como pestaña ESPECIAL del día activo ────
   const specialFileInputRef = React.useRef<HTMLInputElement | null>(null);
   const audioInputRef = React.useRef<HTMLInputElement | null>(null);
+  const videoBgInputRef = React.useRef<HTMLInputElement | null>(null);
   const toast = (message: string, kind: "success" | "error" = "success") =>
     window.dispatchEvent(new CustomEvent("nexus_toast", { detail: { message, kind, durationMs: 5000 } }));
 
@@ -1503,6 +1509,42 @@ export default function App() {
 
                 {videoMode && (
                   <div className="space-y-2.5">
+                    {/* FONDO: foto animada (default) o clip de video real */}
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Fondo</div>
+                      <input type="file" accept="video/*" className="hidden" ref={videoBgInputRef} onChange={handleVideoBgFile} />
+                      {videoBgFile ? (
+                        <div className="flex items-center gap-2 px-3 py-2.5 border border-signal-red/40 bg-signal-red/10 rounded-sm">
+                          <Film size={14} className="text-signal-red shrink-0" />
+                          <span className="truncate flex-1 font-mono text-[10px] text-white">{videoBgName}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); clearVideoBg(); }}
+                            className="text-white/50 hover:text-white cursor-pointer shrink-0"
+                            aria-label="Quitar clip de video"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); videoBgInputRef.current?.click(); }}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-white/15 bg-white/5 hover:bg-white/15 text-white rounded-sm transition-all cursor-pointer"
+                        >
+                          <Film size={14} />
+                          USAR CLIP DE VIDEO
+                        </button>
+                      )}
+                      {!videoBgFile && (
+                        <div className="text-[8px] font-mono text-white/35 leading-snug">
+                          Sin clip: se anima la foto del fondo. Con clip: la tarjeta va encima del video.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Movimiento solo aplica a la foto animada */}
+                    {!videoBgFile && (
                     <div className="space-y-1.5">
                       <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Movimiento</div>
                       <div className="grid grid-cols-3 gap-1">
@@ -1518,6 +1560,7 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+                    )}
 
                     <div className="space-y-1.5">
                       <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
@@ -1536,7 +1579,9 @@ export default function App() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Música (archivo local)</div>
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">
+                        Música (archivo local){videoBgFile && !audioBuffer ? " — reemplaza el audio del clip" : ""}
+                      </div>
                       <input type="file" accept="audio/*" className="hidden" ref={audioInputRef} onChange={handleAudioFile} />
                       <button
                         type="button"
@@ -2886,7 +2931,9 @@ export default function App() {
       })()}
 
       {/* 10. HIDDEN OFF-SCREEN CARD FOR JPG EXPORT */}
-      {shareCardProps && <ShareCardOverlay {...shareCardProps} />}
+      {shareCardProps && (
+        <ShareCardOverlay {...shareCardProps} transparentBase={videoMode && !!videoBgFile} />
+      )}
     </div>
   );
 }

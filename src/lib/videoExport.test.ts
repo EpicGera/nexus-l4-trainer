@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { effectTransform, canEncodeMp4 } from "./videoExport";
+import { effectTransform, canEncodeMp4, coverRect } from "./videoExport";
 
 describe("effectTransform", () => {
   it("kenburns: identidad en t=0, escala objetivo en t=1, monótona", () => {
@@ -32,6 +32,39 @@ describe("effectTransform", () => {
   it("acota t fuera de rango", () => {
     expect(effectTransform("kenburns", -5).scale).toBe(1);
     expect(effectTransform("kenburns", 9).scale).toBeCloseTo(1.12, 5);
+  });
+});
+
+describe("coverRect (cover-fit del clip a 1080×1920)", () => {
+  const W = 1080, H = 1920;
+  const covers = (sw: number, sh: number) => {
+    const r = coverRect(sw, sh, W, H);
+    // el rect cubre todo el marco (sin bandas) y queda centrado
+    expect(r.w).toBeGreaterThanOrEqual(W - 1e-6);
+    expect(r.h).toBeGreaterThanOrEqual(H - 1e-6);
+    expect(r.dx).toBeCloseTo((W - r.w) / 2, 6);
+    expect(r.dy).toBeCloseTo((H - r.h) / 2, 6);
+  };
+
+  it("clip landscape (16:9) cubre el marco vertical, recortando a los lados", () => {
+    covers(1920, 1080);
+    const r = coverRect(1920, 1080, W, H);
+    expect(r.h).toBeCloseTo(H, 6); // el alto encaja exacto
+    expect(r.w).toBeGreaterThan(W); // ancho excede → recorte lateral
+  });
+
+  it("clip portrait (9:16) encaja exacto en el marco", () => {
+    covers(1080, 1920);
+    const r = coverRect(1080, 1920, W, H);
+    expect(r.w).toBeCloseTo(W, 6);
+    expect(r.h).toBeCloseTo(H, 6);
+    expect(r.dx).toBeCloseTo(0, 6);
+  });
+
+  it("clip cuadrado cubre el marco", () => covers(720, 720));
+
+  it("dimensiones inválidas → rect del marco completo (sin dividir por cero)", () => {
+    expect(coverRect(0, 0, W, H)).toEqual({ dx: 0, dy: 0, w: W, h: H });
   });
 });
 

@@ -43,6 +43,10 @@ interface ShareCardOverlayProps {
   // off-screen export template (and omits the export id so html-to-image
   // keeps capturing the full-size copy).
   previewMode?: boolean;
+  // When true, the card renders with a transparent base (no photo/duotone layer)
+  // so toPng yields an alpha PNG to composite over a background video clip. The
+  // legibility gradient is kept.
+  transparentBase?: boolean;
   interactiveMode?: boolean;
   blockPositions?: { [key: string]: { x: number; y: number } };
   setBlockPositions?: React.Dispatch<React.SetStateAction<{ [key: string]: { x: number; y: number } }>>;
@@ -73,6 +77,7 @@ export default function ShareCardOverlay({
   formatItemWithTeamVolume,
   getDerivedInspiration,
   previewMode = false,
+  transparentBase = false,
   interactiveMode = false,
   blockPositions = {},
   setBlockPositions,
@@ -350,11 +355,11 @@ export default function ShareCardOverlay({
           height: "1920px",
           boxSizing: "border-box",
           fontFamily: '"Inter", sans-serif',
-          background: exportBgImage ? "#000" : "#f8fafc",
+          background: transparentBase ? "transparent" : exportBgImage ? "#000" : "#f8fafc",
         }}
       >
         {/* Background Image Layer */}
-        {exportBgImage && (
+        {!transparentBase && exportBgImage && (
           <div
             className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
             style={{
@@ -365,7 +370,7 @@ export default function ShareCardOverlay({
         )}
 
         {/* Duotone tint: accent color blended over the grayscaled photo */}
-        {exportBgImage && exportPhotoFilter === "duotone" && (
+        {!transparentBase && exportBgImage && exportPhotoFilter === "duotone" && (
           <div
             className="absolute inset-0 z-0 pointer-events-none"
             style={{
@@ -377,7 +382,7 @@ export default function ShareCardOverlay({
         )}
 
         {/* Gradient Overlay for text readability or Biomechanical Theme Base */}
-        {exportBgImage ? (
+        {exportBgImage || transparentBase ? (
           <div
             className="absolute inset-0 z-10 pointer-events-none"
             style={{
