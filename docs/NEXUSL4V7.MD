@@ -257,6 +257,14 @@ Cuando la logística y el tiempo disponible lo permiten, se habilita la opción 
 
 Esta división optimiza el entorno neuromuscular para la sesión de fuerza tras la recuperación del estímulo matutino. No obstante, Nexus mantiene la sesión única como el estándar por defecto para atletas con demandas de vida normales fuera del deporte, priorizando la adherencia diaria.
 
+### Ejecución práctica HWPO: Working Max ilustrado, accesorio como motor y metcon dosificado
+
+**Working Max en la voz HWPO.** El WMD (Capítulo 46, Parte IX) se ilustra en la práctica con un ejemplo concreto: si el 1RM histórico de un movimiento es 135 kg y $K \= 0.90$ (perfil equilibrado), el Working Max operativo es $135 \\times 0.90 \\approx 121\\text{kg}$. Programar porcentajes sobre el Working Max en lugar del 1RM histórico asegura que el atleta pueda ejecutar las series prescritas con velocidad de barra consistente, incluso en semanas de fatiga acumulada.
+
+**El accesorio como motor, no como relleno.** Complementando la premisa del Capítulo 45 (el trabajo accesorio es un estímulo primario), HWPO aporta la ejecución concreta: control de tempo explícito (por ejemplo, $2\\text{s}$ de bajada, sin pausa, $2\\text{s}$ de subida — notación "2020"), series llevadas cerca del fallo técnico con una caída esperable de una o dos repeticiones set a set, y bloques de tiempo bajo tensión ($:30$ de repeticiones máximas) en lugar de un número de reps fijo cuando el objetivo es maximizar la exposición muscular. La instrucción operativa es "no le ganes tiempo a la serie": una repetición rápida que reduce el tiempo bajo tensión traiciona la intención del bloque.
+
+**Metcon dosificado, no obligatorio.** En bloques donde la fuerza es la prioridad del día, el componente metabólico (metcon) se programa como opcional o de intensidad acotada, diseñado explícitamente para no comprometer la calidad de la sesión de fuerza ni la recuperación de cara al día siguiente. Se favorecen pesos livianos que permitan series sin quiebre (unbroken) y un ritmo de "grind" sostenible antes que la búsqueda de un tiempo mínimo a cualquier costo — la pregunta guía es si el estímulo de hoy compromete el entrenamiento de mañana.
+
 ---
 
 # PARTE V — PRINCIPIOS CF-L4 Y ÁRBOLES DE DECISIÓN
@@ -1167,8 +1175,17 @@ $$\\text{1. WARM-UP (Calentamiento específico)} \\rightarrow \\text{2. STRENGTH
 
 * **Toes-to-Bar:** $\\rightarrow$ Knee-to-Elbow (1:1) $\\rightarrow$ GHD Sit-Up (1:1) $\\rightarrow$ V-Up (1:1) $\\rightarrow$ Abmat Sit-Up (1:2).  
 * **Strict Chest-to-Bar:** $\\rightarrow$ Strict Pull-Up (1:1) $\\rightarrow$ Ring Row (1:1).  
-* **Handstand Push-Up:** $\\rightarrow$ Abmat HSPU (1:1) $\\rightarrow$ Stink Bug (1:1) $\\rightarrow$ DB Z-Press (1:1).  
-* **Bar Muscle-Up:** $\\rightarrow$ Chest-to-Bar (1:2) $\\rightarrow$ Pull-Up (1:2) $\\rightarrow$ Ring Row \+ Push-Up (1:3+3).
+* **Handstand Push-Up:** $\\rightarrow$ Abmat HSPU (1:1) $\\rightarrow$ Stink Bug (1:1) $\\rightarrow$ DB Z-Press (1:1) $\\rightarrow$ DB Push Press $\\rightarrow$ Push-Up (progresión completa, de más a menos exigente).  
+* **Bar Muscle-Up:** $\\rightarrow$ Chest-to-Bar (1:2) $\\rightarrow$ Pull-Up (1:2) $\\rightarrow$ Ring Row \+ Push-Up (1:3+3) $\\rightarrow$ Burpee Pull-Up (1:1).  
+* **GHD Sit-Up:** $\\rightarrow$ Weighted Abmat Sit-Up (1:1) $\\rightarrow$ Abmat Sit-Up sin lastre (1.5:1, más reps al quitar la carga) $\\rightarrow$ Dual Leg Raise (1:1).  
+* **Thruster:** $\\rightarrow$ Double DB Thruster (1:1) $\\rightarrow$ DB Thruster (1:1) $\\rightarrow$ Air Squat (2:1, sin carga externa duplica el volumen para igualar el estímulo).  
+* **Handstand Walk:** $\\rightarrow$ Tuck Jump (1:1) $\\rightarrow$ Run (equivalencia general de esfuerzo, sin ratio fijo).  
+* **Double-Under:** $\\rightarrow$ Single-Under (1.5:1) $\\rightarrow$ Plate Hop (1:1) $\\rightarrow$ Lateral Line Hop (1:1).  
+* **Muscle-Up (anillas):** $\\rightarrow$ Heavy Pull-Up \+ Chest-to-Bar (1:1) $\\rightarrow$ Ring Pull-Up \+ Ring Dip (1:1, escalado por componentes).  
+* **Burpee Box Jump Over:** $\\rightarrow$ Burpee Box Step Over (1:1) $\\rightarrow$ Burpee Broad Jump (1:1, sin exigencia de altura).  
+* **Squat Clean (complejo pesado):** $\\rightarrow$ Power Clean con Barra (mismo peso relativo) $\\rightarrow$ Power Clean con Mancuernas (reduce la exigencia de recepción en sentadilla completa).
+
+*Nota de fuente: los ratios de este apéndice provienen de una guía de sustitución HWPO transcrita de material escaneado; ante una duda de programación fina, priorizar el juicio clínico del coach sobre el ratio literal.*
 
 ---
 

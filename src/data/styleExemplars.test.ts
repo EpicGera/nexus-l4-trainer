@@ -9,8 +9,11 @@ describe("styleExemplars", () => {
     expect(hwpo.length).toBeGreaterThanOrEqual(4);
     const facets = new Set(hwpo.map((e) => e.facet));
     ["structure", "strength", "accessory", "metcon", "scaling"].forEach((f) => expect(facets.has(f as any)).toBe(true));
-    // el facet de escalado lleva ratios de sub concretos (preserva el estímulo)
-    expect(hwpo.find((e) => e.facet === "scaling")?.example).toMatch(/1:1|1\.5:1|ratio/i);
+    // el facet de escalado NO duplica ratios (fusionados al Apéndice G de la
+    // enciclopedia, única fuente de verdad) — referencia en vez de números propios
+    const scaling = hwpo.find((e) => e.facet === "scaling")!;
+    expect(scaling.pattern).toMatch(/Apéndice G/);
+    expect(scaling.example).not.toMatch(/\d(\.\d)?:\d/); // sin ratios tipo "1.5:1" hardcodeados
     expect(loadedBrands()).toContain("HWPO");
   });
 

@@ -125,3 +125,14 @@ OPTIONAL DAY: "40-60' Zone-2 or light CrossFit. Don't do a strength session. Gui
 - **AMRAP con pacing repetido:** 3 sets AMRAP 5: 200/150m Row, 15 Wall Ball, 200m Run — "consistencia,
   misma eficiencia; escalá a AMRAP 4 si no cerrás 3 sets".
 - **Rest day explícito** (Flagship 2.0): días de descanso marcados en el calendario.
+
+## Corrección de lectura (tabla SUB&SCALING, transcripción 9)
+
+La tabla se transcribió en OCR-lineal (columnas mezcladas). Reconstruida por
+patrón [sub, ratio, próximo-header] contra las 3 columnas anunciadas. Lectura
+correcta fusionada al **Apéndice G de la enciclopedia** (única fuente de verdad):
+GHD Sit-Up→Weighted AbMat (1:1)→AbMat sin lastre (1.5:1)→Dual Leg Raise (1:1);
+HSPU→Z-Press(DB)→DB Push Press→Push-Up (progresión, sin ratio propio en la fuente).
+El primer intento en `styleExemplars.ts` había atribuido el 1.5:1 a HSPU por error
+de lectura — corregido. El bloque de conversión de máquinas cardio (Bike Erg/Run/
+Pistol Squat) quedó fuera por ambigüedad + redundancia con el Apéndice H existente.

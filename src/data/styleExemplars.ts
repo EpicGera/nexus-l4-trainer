@@ -55,8 +55,8 @@ const HWPO: StyleExemplar[] = [
   },
   {
     brand: "HWPO", facet: "scaling",
-    pattern: "Escalado que PRESERVA el estímulo con subs de ratio explícito por movimiento (no 'hacé menos'); cada skill difícil tiene su regresión y su equivalencia de máquina.",
-    example: "Subs HWPO (ratio): Row↔Ski 1:1, Row→Echo/Assault 1:1.5, Row→Run 1:1.25 · DU→Single-Under 1.5:1 / Plate Hop 1:1 · Muscle-Up→Heavy Pull-Up+C2B / Ring Pull-Up+Ring Dip · Bar MU→Burpee Pull-Up 1:1 · HSPU→Z-Press(DB) 1.5:1 / DB Push Press · GHD Sit-Up→Weighted AbMat 1:1 / Dual Leg Raise · Rope Climb→Push-Up · Handstand Walk→Bike/Ski/Bear Crawl · Pistol→Shuttle Run(10m=1) · Burpee Box Jump Over→Burpee Box Step Over 1:1. Si un movimiento no aplica al atleta, prescribí su sub manteniendo el dominio y la carga relativa.",
+    pattern: "Escalado que PRESERVA el estímulo con subs de ratio explícito por movimiento (no 'hacé menos'); cada skill difícil tiene su regresión con equivalencia de carga/volumen relativa. Ratios completos: Apéndice G de la enciclopedia (única fuente de verdad — no dupliques números acá).",
+    example: "Patrón: cadena de 2-3 regresiones por movimiento difícil, de más a menos exigente (ej. GHD Sit-Up → Abmat con lastre → Abmat sin lastre con más reps → Dual Leg Raise). Si un movimiento no aplica al atleta (lesión, skill no dominado del perfil), prescribí su sub del Apéndice G manteniendo el dominio y la carga relativa — nunca lo saltees sin reemplazo.",
   },
 ];
 

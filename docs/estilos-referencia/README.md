@@ -6,6 +6,23 @@ lee estos archivos: consume los exemplars destilados (condensados), que se
 inyectan al prompt vía `exemplarsPromptBlock(selectExemplars(...))` en
 `buildChapterPrompt` (`src/lib/chapterCreator.ts`).
 
+## Relación con la enciclopedia (`docs/NEXUSL4V7.MD`)
+
+Dos capas distintas, no redundantes:
+- **La enciclopedia** es el grounding constitucional — prosa metodológica que
+  alimenta las TRES features de IA (generación, auditoría, chat coach) vía
+  `encyclopediaContext.ts`. Ya tiene una Parte IV dedicada a HWPO y apéndices
+  de referencia rápida (B, G, H...).
+- **`styleExemplars.ts`** es una capa más chica y concreta — solo para
+  generación de capítulos — con ejemplos de "cómo se ve escrito" (voz, formato).
+
+**Regla:** los datos NUMÉRICOS reutilizables (ratios de sustitución, tablas de
+conversión, coeficientes) van en la enciclopedia como única fuente de verdad
+(ej. Apéndice G). `styleExemplars` los referencia en vez de duplicarlos —
+evita que ambas capas diverjan con el tiempo. Ya pasó una vez: un ratio de
+HSPU quedó mal atribuido en `styleExemplars` por una lectura ambigua de la
+tabla escaneada; se corrigió al fusionar en el Apéndice G.
+
 ## Objetivo
 
 Que Nexus **aprenda cómo programa cada escuela** (HWPO, PRVN, Mayhem, HAEDO) y
