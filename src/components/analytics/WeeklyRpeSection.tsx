@@ -94,7 +94,7 @@ export default function WeeklyRpeSection({
                   data={chartData}
                   margin={{ top: 8, right: 8, left: -28, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#222" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
                   {WEEK_RPE_TARGET[currentWeek] && (
                     <ReferenceArea
                       y1={WEEK_RPE_TARGET[currentWeek].min}
@@ -109,17 +109,17 @@ export default function WeeklyRpeSection({
                   )}
                   <XAxis
                     dataKey="name"
-                    stroke="#888"
+                    stroke="#A1A1AA"
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#333" }}
+                    axisLine={{ stroke: "#3F3F46" }}
                   />
                   <YAxis
-                    stroke="#888"
+                    stroke="#A1A1AA"
                     fontSize={10}
                     domain={[0, 10]}
                     tickLine={false}
-                    axisLine={{ stroke: "#333" }}
+                    axisLine={{ stroke: "#3F3F46" }}
                     ticks={[2, 4, 6, 8, 10]}
                   />
                   <Tooltip
@@ -128,7 +128,7 @@ export default function WeeklyRpeSection({
                         const data = payload[0].payload;
                         if (!data.isReal) return null;
                         return (
-                          <div className="bg-[#0E0E11] border border-white/20 p-2 text-[10px] font-mono shadow-md text-left z-50">
+                          <div className="bg-[#0A0A0A] border border-[#3F3F46] p-2 text-[10px] font-mono shadow-md text-left z-50">
                             <p className="font-bold text-white uppercase">{data.name}</p>
                             <p style={{ color: accentColor }}>
                               RPE: <span className="text-white font-bold">{data.rpe}/10</span>
@@ -165,20 +165,20 @@ export default function WeeklyRpeSection({
                   data={distributionData}
                   margin={{ top: 8, right: 8, left: -28, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#222" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
                   <XAxis
                     dataKey="rpeName"
-                    stroke="#888"
+                    stroke="#A1A1AA"
                     fontSize={9}
                     tickLine={false}
-                    axisLine={{ stroke: "#333" }}
+                    axisLine={{ stroke: "#3F3F46" }}
                     tickFormatter={(val) => val.replace("RPE ", "")}
                   />
                   <YAxis
-                    stroke="#888"
+                    stroke="#A1A1AA"
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#333" }}
+                    axisLine={{ stroke: "#3F3F46" }}
                     allowDecimals={false}
                   />
                   <Tooltip
@@ -186,7 +186,7 @@ export default function WeeklyRpeSection({
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-[#0E0E11] border border-white/20 p-2 text-[10px] font-mono shadow-md text-left z-50">
+                          <div className="bg-[#0A0A0A] border border-[#3F3F46] p-2 text-[10px] font-mono shadow-md text-left z-50">
                             <p className="font-bold text-white uppercase">{data.rpeName}</p>
                             <p className="text-neutral-300">
                               {data.frequency} {data.frequency === 1 ? "serie" : "series"}

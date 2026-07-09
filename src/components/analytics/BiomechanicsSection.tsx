@@ -1,5 +1,6 @@
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
 import { Sparkles } from "lucide-react";
+import { CHART, radarProps } from "../../lib/chartTheme";
 
 interface BiomechanicsSectionProps {
   activeDay: any;
@@ -145,66 +146,57 @@ export default function BiomechanicsSection({
   }
 
   return (
-    <section className="p-5 border bg-zinc-950/80 border-white/5 rounded-sm flex flex-col text-left space-y-4 shadow-sm">
-      <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest flex items-center gap-2 border-b border-white/5 pb-2">
-        <Sparkles size={14} className="text-indigo-400" />
+    <section className="p-5 border bg-[var(--color-surface-1)] border-[var(--color-line)] rounded-sm flex flex-col text-left space-y-4 shadow-sm">
+      <h3 className="text-xs font-mono font-bold text-[var(--color-ink)] uppercase tracking-widest flex items-center gap-2 border-b border-[var(--color-line)] pb-2">
+        <Sparkles size={14} className="text-[var(--color-ink-muted)]" />
         DIAGNÓSTICO BIOMECÁNICO DEL DÍA (MAP DE VECTORES)
       </h3>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
-        <div className="lg:col-span-3 h-[255px] bg-black/40 border border-white/5 rounded-xs p-2 flex items-center justify-center">
+        <div className="lg:col-span-3 h-[255px] bg-[var(--color-surface-0)] border border-[var(--color-line)] rounded-xs p-2 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
-              <PolarGrid stroke="#222" />
+              <PolarGrid stroke={CHART.grid} />
               <PolarAngleAxis
                 dataKey="subject"
-                stroke="#888"
-                fontSize={8}
+                stroke={CHART.axis}
+                fontSize={11}
                 fontFamily="monospace"
               />
-              <PolarRadiusAxis angle={30} domain={[0, 10]} stroke="#333" fontSize={7} />
+              <PolarRadiusAxis angle={30} domain={[0, 10]} stroke={CHART.grid} fontSize={9} />
               <Radar
                  name="Dosis de Torque"
                  dataKey="A"
-                 stroke="#82ca9d"
-                 fill="#82ca9d"
-                 fillOpacity={0.15}
+                 {...radarProps}
               />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#09090b",
-                  borderColor: "#333",
-                  fontSize: 9,
-                  fontFamily: "monospace",
-                }}
-              />
+              <Tooltip contentStyle={CHART.tooltip} />
             </RadarChart>
           </ResponsiveContainer>
         </div>
-        <div className="lg:col-span-2 space-y-3 font-mono text-[9.5px]">
-          <div className="bg-zinc-900 border border-white/10 p-3 rounded space-y-1">
-            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest leading-none block">
+        <div className="lg:col-span-2 space-y-3 font-mono text-[11px]">
+          <div className="bg-[var(--color-surface-2)] border border-[var(--color-line)] p-3 rounded space-y-1">
+            <span className="text-[10px] font-bold text-[var(--color-ink-faint)] uppercase tracking-widest leading-none block">
               ANÁLISIS DE INTERFERENCIAS (VÍAS NEURONALES)
             </span>
-            <p className="text-neutral-300 leading-normal">
+            <p className="text-[var(--color-ink-muted)] leading-normal">
               {diagnostic}
             </p>
             {urgentAlert && (
-              <div className="bg-rose-950/40 border border-rose-500/30 p-2.5 rounded-sm text-rose-400 text-[8.5px] font-black uppercase mt-2.5 leading-normal">
+              <div className="bg-[var(--color-accent)]/15 border border-[var(--color-accent)]/40 p-2.5 rounded-sm text-[var(--color-accent-soft)] text-[10px] font-black uppercase mt-2.5 leading-normal">
                 {urgentAlert}
               </div>
             )}
           </div>
-          <div className="space-y-1 bg-black/40 p-2.5 border border-white/5 rounded">
-            <h4 className="font-extrabold text-[#39ff14] text-[8px] uppercase tracking-wider">
+          <div className="space-y-1 bg-[var(--color-surface-0)] p-2.5 border border-[var(--color-line)] rounded">
+            <h4 className="font-extrabold text-[var(--color-ink-muted)] text-[10px] uppercase tracking-wider">
               EJERCICIOS CAPTURADOS EN EL MAPEO:
             </h4>
             {exercisesList.length === 0 ? (
-              <div className="text-neutral-500 italic">Ningún ejercicio parseado hoy.</div>
+              <div className="text-[var(--color-ink-faint)] italic">Ningún ejercicio parseado hoy.</div>
             ) : (
-              <ul className="list-disc list-inside space-y-0.5 text-neutral-400">
+              <ul className="list-disc list-inside space-y-0.5 text-[var(--color-ink-muted)]">
                 {exercisesList.map((e, idx) => (
                   <li key={idx}>
-                    <span className="text-white">{e.cleanName}</span> ({e.category})
+                    <span className="text-[var(--color-ink)]">{e.cleanName}</span> ({e.category})
                   </li>
                 ))}
               </ul>

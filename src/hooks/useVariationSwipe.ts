@@ -4,8 +4,9 @@ export function useVariationSwipe(
   currentWeek: string,
   currentDayIndex: number,
   activeDayVariationsCount: number,
+  defaultIndex = 0,
 ) {
-  const [currentVariationIndex, setCurrentVariationIndex] = useState<number>(0);
+  const [currentVariationIndex, setCurrentVariationIndex] = useState<number>(defaultIndex);
 
   // Variation swipe states
   const [variationTouchStartX, setVariationTouchStartX] = useState<
@@ -67,10 +68,11 @@ export function useVariationSwipe(
     setVariationTouchEndY(null);
   };
 
-  // Reset variation index on day or week change
+  // Reset variation index on day/week change; defaultIndex cambia al
+  // inyectar/quitar la pestaña ESPECIAL y la vista salta sola a ella.
   useEffect(() => {
-    setCurrentVariationIndex(0);
-  }, [currentWeek, currentDayIndex]);
+    setCurrentVariationIndex(defaultIndex);
+  }, [currentWeek, currentDayIndex, defaultIndex]);
 
   return {
     currentVariationIndex,

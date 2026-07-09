@@ -2,6 +2,7 @@ import { useState } from "react";
 import RpeProgressionSection from "./analytics/RpeProgressionSection";
 import WeeklyRpeSection from "./analytics/WeeklyRpeSection";
 import BiomechanicsSection from "./analytics/BiomechanicsSection";
+import MuscleMapSection from "./analytics/MuscleMapSection";
 import FatigueAndIntensitySection from "./analytics/FatigueAndIntensitySection";
 import VolumeProgressionSection from "./analytics/VolumeProgressionSection";
 import AchievedStimulusSection from "./analytics/AchievedStimulusSection";
@@ -122,6 +123,10 @@ export default function RpeAnalyticsPanel({
             programa entre sistemas energéticos, dominios temporales, patrones y modalidades. Sirve para
             detectar redundancia y huecos del espectro.
           </HelpNote>
+          <MuscleMapSection
+            activeDay={activeDay}
+            currentVariationIndex={currentVariationIndex}
+          />
           <BiomechanicsSection
             activeDay={activeDay}
             currentVariationIndex={currentVariationIndex}

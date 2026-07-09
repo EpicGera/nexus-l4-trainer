@@ -46,8 +46,10 @@ import { loadSessions } from "./lib/sessionStore";
 import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
+import { ProgressBar } from "./components/ui/primitives";
+import { BUCKET_COLOR } from "./lib/buckets";
 import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
-import { parseSpecialDay, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation } from "./lib/specialDay";
+import { parseSpecialDay, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation, SPECIAL_TAB } from "./lib/specialDay";
 import { getMonthlyVolumeStats } from "./lib/exportService";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -104,6 +106,7 @@ import {
   X,
   Maximize,
   MousePointer2,
+  Music,
 } from "lucide-react";
 
 // Firebase core & sync integration
@@ -485,6 +488,9 @@ export default function App() {
   const activeWeekPlan = database[currentWeek];
   const activeDay = activeWeekPlan?.days[currentDayIndex];
 
+  // La ESPECIAL suplanta al día programado: si existe, es la pestaña por defecto.
+  const specialIdx = activeDay?.variations.findIndex((v) => v.tabName === SPECIAL_TAB) ?? -1;
+
   const {
     currentVariationIndex,
     setCurrentVariationIndex,
@@ -495,6 +501,7 @@ export default function App() {
     currentWeek,
     currentDayIndex,
     activeDay?.variations.length || 0,
+    specialIdx >= 0 ? specialIdx : 0,
   );
 
   const activeVariation =
@@ -567,6 +574,23 @@ export default function App() {
     setBlockPositions,
     previewScale,
     setPreviewScale,
+    storyVariation,
+    storyVariationTab,
+    setStoryVariationTab,
+    videoMode,
+    setVideoMode,
+    videoEffect,
+    setVideoEffect,
+    videoDurationSec,
+    setVideoDurationSec,
+    audioName,
+    audioBuffer,
+    audioOffsetSec,
+    setAudioOffsetSec,
+    handleAudioFile,
+    isExportingVideo,
+    videoProgress,
+    handleExportDayVideo,
     exportFileInputRef,
     cameraInputRef,
     handleTakePhoto,
@@ -1107,10 +1131,10 @@ export default function App() {
   // Single source of props for the story card: the hidden export template and
   // the live preview inside the editor panel stay perfectly in sync.
   const shareCardProps =
-    activeDay && activeVariation
+    activeDay && storyVariation
       ? {
           activeDay,
-          activeVariation,
+          activeVariation: storyVariation,
           currentWeek,
           exportBgImage,
           exportTheme,
@@ -1314,6 +1338,7 @@ export default function App() {
 
   // ── Día especial por JSON: entra como pestaña ESPECIAL del día activo ────
   const specialFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const audioInputRef = React.useRef<HTMLInputElement | null>(null);
   const toast = (message: string, kind: "success" | "error" = "success") =>
     window.dispatchEvent(new CustomEvent("nexus_toast", { detail: { message, kind, durationMs: 5000 } }));
 
@@ -1330,7 +1355,7 @@ export default function App() {
         setDatabase(next);
         saveCachedWorkouts(next);
         const warns = audit.issues.filter((i) => i.severity !== "error").length;
-        toast(`Pestaña ESPECIAL agregada a ${activeDay.name}${warns ? ` (${warns} avisos)` : ""} — deslizá para verla`);
+        toast(`Pestaña ESPECIAL activa en ${activeDay.name}${warns ? ` (${warns} avisos)` : ""} — hoy entrenás esto`);
       } catch (err: any) {
         toast(err?.message || "No se pudo importar el día especial", "error");
       }
@@ -1399,6 +1424,32 @@ export default function App() {
                 ref={cameraInputRef}
                 onChange={handleBgImageUpload}
               />
+              {/* Selector explícito de variación para la Story (incl. ESPECIAL) */}
+              {activeDay.variations.length > 1 && (
+                <div className="space-y-1.5">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Día a compartir</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeDay.variations.map((v) => {
+                      const sel = (storyVariationTab ?? activeVariation?.tabName) === v.tabName;
+                      const isSpecial = v.tabName === SPECIAL_TAB;
+                      return (
+                        <button
+                          key={v.tabName}
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setStoryVariationTab(v.tabName); }}
+                          className={`px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${
+                            sel
+                              ? isSpecial ? "bg-signal-red text-white border-signal-red" : "bg-white text-black border-white"
+                              : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"
+                          }`}
+                        >
+                          {v.tabName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -1430,6 +1481,100 @@ export default function App() {
                   Detectando personas y aplicando efecto…
                 </div>
               )}
+
+              {/* ── VIDEO (Fase A): movimiento + música local ─────────────── */}
+              <div className="space-y-2.5 border-t border-white/10 pt-3">
+                <div className="grid grid-cols-2 gap-1 bg-black/60 p-1 border border-white/10 rounded-sm">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setVideoMode(false); }}
+                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${!videoMode ? "bg-white text-black" : "text-white/60 hover:bg-white/5"}`}
+                  >
+                    Foto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setVideoMode(true); }}
+                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${videoMode ? "bg-white text-black" : "text-white/60 hover:bg-white/5"}`}
+                  >
+                    Video
+                  </button>
+                </div>
+
+                {videoMode && (
+                  <div className="space-y-2.5">
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Movimiento</div>
+                      <div className="grid grid-cols-3 gap-1">
+                        {(["kenburns", "pulse", "none"] as const).map((fx) => (
+                          <button
+                            key={fx}
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setVideoEffect(fx); }}
+                            className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"}`}
+                          >
+                            {fx === "kenburns" ? "Zoom" : fx === "pulse" ? "Pulso" : "Estático"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
+                      <div className="grid grid-cols-2 gap-1">
+                        {([10, 15] as const).map((d) => (
+                          <button
+                            key={d}
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
+                            className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"}`}
+                          >
+                            {d}s
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Música (archivo local)</div>
+                      <input type="file" accept="audio/*" className="hidden" ref={audioInputRef} onChange={handleAudioFile} />
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-white/15 bg-white/5 hover:bg-white/15 text-white rounded-sm transition-all cursor-pointer"
+                      >
+                        <Music size={14} />
+                        <span className="truncate max-w-[70%]">{audioName || "ELEGIR TEMA"}</span>
+                      </button>
+                      {audioBuffer && (
+                        <label className="block text-[9px] font-mono text-white/50 uppercase tracking-widest">
+                          Empezar en: {audioOffsetSec}s
+                          <input
+                            type="range"
+                            min={0}
+                            max={Math.max(0, Math.floor(audioBuffer.duration - videoDurationSec))}
+                            value={audioOffsetSec}
+                            onChange={(e) => setAudioOffsetSec(Number(e.target.value))}
+                            className="w-full accent-white mt-1"
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); void handleExportDayVideo(); }}
+                      disabled={isExportingVideo}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-widest font-extrabold uppercase bg-signal-red hover:brightness-110 text-white rounded-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Share2 size={15} className={isExportingVideo ? "animate-spin" : ""} />
+                      {isExportingVideo ? `RENDERIZANDO ${videoProgress}%` : "EXPORTAR VIDEO"}
+                    </button>
+                    {isExportingVideo && <ProgressBar value={videoProgress / 100} />}
+                  </div>
+                )}
+              </div>
+
               {renderExportCustomizationPanel()}
             </div>
           )}
@@ -1572,7 +1717,7 @@ export default function App() {
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white border border-transparent rounded shadow-sm hover:shadow-sm active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
               title="Exportar reporte consolidado de toda la semana de entrenamiento actual a PDF con distribución de RPE"
             >
-              <FileText size={14} className=" text-[#00f0ff]" />
+              <FileText size={14} className=" text-[#DC2626]" />
               <span>EXPORTAR SEMANA</span>
             </button>
 
@@ -1861,7 +2006,7 @@ export default function App() {
                           <span
                             className={`text-[7px] px-1 py-0.5 rounded font-mono font-black tracking-tighter ${
                               isActive
-                                ? "bg-black/40 text-[#00f0ff] border border-[#00f0ff]/35"
+                                ? "bg-black/40 text-[#DC2626] border border-[#DC2626]/35"
                                 : "bg-white/5 text-neutral-400 border border-transparent"
                             }`}
                           >
@@ -1931,19 +2076,16 @@ export default function App() {
                     {activeVariation.blocks?.length ? (() => {
                       const flexBlocks = activeVariation.blocks!;
                       const active = flexBlocks.find((b) => b.key === activeFlexKey) || flexBlocks[0];
-                      const BUCKET_COLOR: Record<string, string> = {
-                        warmup: "#1F51FF", strength: "#ff0055", metcon: "#00f0ff", accessories: "#a124ff",
-                      };
                       return (
                         <>
                           <aside className="w-full lg:w-72 shrink-0 space-y-3 no-print">
-                            <div className="text-[10px] font-mono tracking-widest text-[#00f0ff] uppercase pb-2 mb-3 flex justify-between items-center">
+                            <div className="text-[10px] font-mono tracking-widest text-[#DC2626] uppercase pb-2 mb-3 flex justify-between items-center">
                               <span>// SESIÓN DE ENTRENAMIENTO</span>
                               <span>[{flexBlocks.length} BLOQUES]</span>
                             </div>
                             <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3">
                               {flexBlocks.map((b) => {
-                                const c = BUCKET_COLOR[b.bucket] || "#1F51FF";
+                                const c = BUCKET_COLOR[b.bucket] || "#71717A";
                                 const isOn = active.key === b.key;
                                 return (
                                   <button
@@ -1987,7 +2129,7 @@ export default function App() {
                     <>
                     {/* SIDEBAR DE BLOQUES EN COMPUTADORAS / BARRA DE TABS EN MÓVILES */}
                     <aside className="w-full lg:w-72 shrink-0 space-y-3 no-print">
-                      <div className="text-[10px] font-mono tracking-widest text-[#00f0ff] uppercase pb-2 mb-3 flex justify-between items-center">
+                      <div className="text-[10px] font-mono tracking-widest text-[#DC2626] uppercase pb-2 mb-3 flex justify-between items-center">
                         <span>// SESIÓN DE ENTRENAMIENTO</span>
                         <span>[4 BLOQUES]</span>
                       </div>
@@ -2048,13 +2190,13 @@ export default function App() {
                           onClick={() => setActiveBlockTab("strength")}
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "strength"
-                              ? "border-[#ff0055] bg-[#ff0055]/15 text-white shadow-sm"
+                              ? "border-[#FAFAFA] bg-[#FAFAFA]/15 text-white shadow-sm"
                               : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
                             <span
-                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "strength" ? "text-[#ff0055]" : "text-neutral-300 group-hover:text-white"}`}
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "strength" ? "text-[#FAFAFA]" : "text-neutral-300 group-hover:text-white"}`}
                             >
                               02. FUERZA / OLY
                             </span>
@@ -2076,7 +2218,7 @@ export default function App() {
                                   className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
                                   title={getCompactSidebarText(item)}
                                 >
-                                  <span className="w-1 h-1 rounded-full bg-[#ff0055] shrink-0 " />
+                                  <span className="w-1 h-1 rounded-full bg-[#FAFAFA] shrink-0 " />
                                   <span className="truncate">
                                     {getCompactSidebarText(item)}
                                   </span>
@@ -2091,7 +2233,7 @@ export default function App() {
                           </div>
 
                           {activeBlockTab === "strength" && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#ff0055]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FAFAFA]" />
                           )}
                         </button>
 
@@ -2099,13 +2241,13 @@ export default function App() {
                           onClick={() => setActiveBlockTab("metcon")}
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "metcon"
-                              ? "border-[#00f0ff] bg-[#00f0ff]/15 text-white shadow-sm"
+                              ? "border-[#DC2626] bg-[#DC2626]/15 text-white shadow-sm"
                               : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
                             <span
-                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "metcon" ? "text-[#00f0ff]" : "text-neutral-300 group-hover:text-white"}`}
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "metcon" ? "text-[#DC2626]" : "text-neutral-300 group-hover:text-white"}`}
                             >
                               03. METCON / WOD
                             </span>
@@ -2127,7 +2269,7 @@ export default function App() {
                                   className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
                                   title={getCompactSidebarText(item)}
                                 >
-                                  <span className="w-1 h-1 rounded-full bg-[#00f0ff] shrink-0 " />
+                                  <span className="w-1 h-1 rounded-full bg-[#DC2626] shrink-0 " />
                                   <span className="truncate">
                                     {getCompactSidebarText(item)}
                                   </span>
@@ -2142,7 +2284,7 @@ export default function App() {
                           </div>
 
                           {activeBlockTab === "metcon" && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#00f0ff]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#DC2626]" />
                           )}
                         </button>
 
@@ -2150,13 +2292,13 @@ export default function App() {
                           onClick={() => setActiveBlockTab("accessories")}
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "accessories"
-                              ? "border-[#a124ff] bg-[#a124ff]/15 text-white shadow-sm"
+                              ? "border-[#A1A1AA] bg-[#A1A1AA]/15 text-white shadow-sm"
                               : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
                             <span
-                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "accessories" ? "text-[#a124ff]" : "text-neutral-300 group-hover:text-white"}`}
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "accessories" ? "text-[#A1A1AA]" : "text-neutral-300 group-hover:text-white"}`}
                             >
                               04. ACCESORIOS / ACC
                             </span>
@@ -2178,7 +2320,7 @@ export default function App() {
                                   className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
                                   title={getCompactSidebarText(item)}
                                 >
-                                  <span className="w-1 h-1 rounded-full bg-[#a124ff] shrink-0 " />
+                                  <span className="w-1 h-1 rounded-full bg-[#A1A1AA] shrink-0 " />
                                   <span className="truncate">
                                     {getCompactSidebarText(item)}
                                   </span>
@@ -2193,7 +2335,7 @@ export default function App() {
                           </div>
 
                           {activeBlockTab === "accessories" && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#a124ff]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#A1A1AA]" />
                           )}
                         </button>
                       </div>

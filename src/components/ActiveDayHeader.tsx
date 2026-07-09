@@ -73,49 +73,21 @@ export default function ActiveDayHeader({
         animate={
           isIntroGlitching
             ? {
-                x: [0, -25, 20, -15, 15, -8, 8, -4, 4, 0],
-                y: [0, 5, -5, 3, -3, 0],
-                skewX: [0, 20, -20, 15, -15, 8, -8, 0],
-                scale: [1, 1.12, 0.9, 1.05, 1],
-                filter: [
-                  "hue-rotate(90deg) brightness(2)",
-                  "hue-rotate(-45deg) brightness(0.8)",
-                  "hue-rotate(180deg) brightness(1.5)",
-                  "hue-rotate(0deg) brightness(1)",
-                ],
-                color: [
-                  "#ffffff",
-                  "#00f0ff",
-                  "#ff007f",
-                  "#00f0ff",
-                  "#ffffff",
-                ],
+                // entrada sobria: un zoom rápido, sin glitch de color ni skew
+                scale: [1.06, 1],
+                opacity: [0, 1],
+                color: "#ffffff",
               }
             : dayTitleAlertTrigger
               ? {
-                  x: [0, -12, 12, -12, 12, -6, 6, -3, 3, 0],
-                  scale: [1, 1.15, 0.95, 1.1, 1],
-                  rotate: [0, -3, 3, -3, 3, -1, 1, 0],
-                  filter: [
-                    "brightness(1)",
-                    "brightness(2)",
-                    "brightness(0.8)",
-                    "brightness(1.8)",
-                    "brightness(1)",
-                  ],
-                  color: [
-                    "#ffffff",
-                    "#00f0ff",
-                    "#ff007f",
-                    "#00f0ff",
-                    "#ffffff",
-                  ],
+                  // alerta contundente pero adulta: micro-shake + flash rojo señal
+                  x: [0, -6, 6, -4, 4, 0],
+                  scale: [1, 1.04, 1],
+                  color: ["#ffffff", "#DC2626", "#ffffff"],
                   textShadow: [
-                    "0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 40px #1F51FF, 0 0 6px #000",
-                    "0 0 25px #ff007f, 0 0 50px #ff007f, 0 0 80px #1F51FF, 0 0 6px #000",
-                    "0 0 5px #1F51FF, 0 0 10px #1F51FF, 0 0 20px #00f0ff, 0 0 6px #000",
-                    "0 0 35px #ffffff, 0 0 60px #00f0ff, 0 0 100px #00f0ff, 0 0 6px #000",
-                    "0 0 15px #00f0ff, 0 0 30px #00f0ff, 0 0 50px #1F51FF, 0 0 6px #000",
+                    "0 0 8px rgba(0,0,0,0.6)",
+                    "0 0 16px rgba(220,38,38,0.6), 0 0 6px #000",
+                    "0 0 8px rgba(0,0,0,0.6)",
                   ],
                 }
               : {

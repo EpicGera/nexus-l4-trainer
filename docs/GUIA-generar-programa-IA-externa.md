@@ -408,8 +408,13 @@ REQUISITOS:
 ## Archivo de DÍA SUELTO (pestaña ESPECIAL)
 
 Además del programa completo, la app acepta un JSON de UN día para agregarlo
-como pestaña ESPECIAL del día activo (botón "DÍA ESPECIAL"). Mismo contrato de
-bloques; el original queda intacto y el wizard/cálculos lo toman igual.
+como pestaña ESPECIAL del día activo (botón "DÍA ESPECIAL"). El día especial
+**suplanta** al programado (pasa a ser la pestaña por defecto y lo que se loguea);
+el original queda intacto y el wizard/cálculos lo toman igual.
+
+> 📄 **Para generar un día especial hay una guía dedicada y más estricta:**
+> [`GUIA-dia-especial.md`](./GUIA-dia-especial.md). Usá esa (evita que la IA
+> devuelva un programa completo en vez de un día).
 
 ```json
 {

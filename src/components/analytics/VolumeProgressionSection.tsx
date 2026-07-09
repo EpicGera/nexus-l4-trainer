@@ -165,20 +165,20 @@ export default function VolumeProgressionSection({
                   data={chartData}
                   margin={{ top: 15, right: 5, left: -10, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#222" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
                   <XAxis
                     dataKey="name"
-                    stroke="#888"
+                    stroke="#A1A1AA"
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#333" }}
+                    axisLine={{ stroke: "#3F3F46" }}
                   />
                   <YAxis
                     yAxisId="left"
-                    stroke="#888"
+                    stroke="#A1A1AA"
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#333" }}
+                    axisLine={{ stroke: "#3F3F46" }}
                   />
                   <YAxis
                     yAxisId="right"
@@ -187,12 +187,12 @@ export default function VolumeProgressionSection({
                     fontSize={10}
                     domain={[0, 10]}
                     tickLine={false}
-                    axisLine={{ stroke: "#333" }}
+                    axisLine={{ stroke: "#3F3F46" }}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#09090b",
-                      borderColor: "#333",
+                      backgroundColor: "#0A0A0A",
+                      borderColor: "#3F3F46",
                       fontSize: 11,
                       fontFamily: "monospace",
                     }}

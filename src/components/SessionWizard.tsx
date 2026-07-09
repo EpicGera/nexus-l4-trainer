@@ -660,6 +660,7 @@ export default function SessionWizard({
       id: `sess_${dayId}_${now}`,
       date: logDate,
       dayId,
+      variationTab: variation.tabName,
       completed: true,
       durationMin: toNum(durationMin),
       sessionRpe: srpe,
@@ -1210,7 +1211,10 @@ export default function SessionWizard({
             {stations.length > 0 && (
               <span className="text-emerald-400">{loggedCount}/{stations.length} reg.</span>
             )}
-            <span className="ml-auto truncate max-w-[40%]">{dayName}</span>
+            <span className="ml-auto truncate max-w-[40%]">
+              {variation.tabName === "ESPECIAL" && <span className="text-signal-red">ESPECIAL · </span>}
+              {dayName}
+            </span>
           </div>
           <ProgressBar value={progress} />
         </div>

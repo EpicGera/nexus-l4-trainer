@@ -104,6 +104,57 @@ describe("backfillMetconDerivedSets (retroactivo)", () => {
   });
 });
 
+describe("variationForSession (día especial suplanta)", () => {
+  beforeEach(() => localStorage.clear());
+
+  // Día con RX + ESPECIAL; distinto metcon en cada variación.
+  const lane = (items: string[], scheme: string) => ({
+    title: "METCON", scheme, items,
+  });
+  const empty = { title: "", scheme: "", items: [] };
+  const dbTwoVars = {
+    w1: {
+      days: [{
+        id: "w1d1", name: "LUNES", title: "X",
+        variations: [
+          { tabName: "RX", warmup: empty, strength: empty, accessories: empty,
+            metcon: lane(["15 Cal Row"], "AMRAP 10 MIN") },
+          { tabName: "ESPECIAL", warmup: empty, strength: empty, accessories: empty,
+            metcon: lane(["12 Burpees"], "AMRAP 10 MIN") },
+        ],
+      }],
+    },
+  } as any;
+
+  const sess = (variationTab?: string): TrainingSession => ({
+    id: "sess_w1d1", date: "2026-06-20", dayId: "w1d1", completed: true,
+    durationMin: 20, sessionRpe: 8, variationTab,
+    metcon: { format: "amrap", scaling: "rx", rounds: 3 },
+    sets: [],
+  });
+
+  it("backfillea contra la variación ESPECIAL cuando la sesión la registra", () => {
+    saveSession(sess("ESPECIAL"));
+    expect(backfillMetconDerivedSets(dbTwoVars)).toBe(1);
+    const s = getSessionForDay("w1d1")!;
+    expect(s.sets.find((x) => x.exerciseName === "Burpees")?.reps).toBe(36); // 12 × 3
+    expect(s.sets.find((x) => x.exerciseName === "Row")).toBeUndefined(); // no cruza con RX
+  });
+
+  it("sin variationTab usa variations[0] (RX) — comportamiento heredado", () => {
+    saveSession(sess(undefined));
+    expect(backfillMetconDerivedSets(dbTwoVars)).toBe(1);
+    const s = getSessionForDay("w1d1")!;
+    expect(s.sets.find((x) => x.exerciseName === "Row")?.calories).toBe(45); // 15 × 3
+  });
+
+  it("variationTab inexistente (ESPECIAL borrada) → no toca la sesión", () => {
+    saveSession(sess("ESPECIAL_BORRADA"));
+    expect(backfillMetconDerivedSets(dbTwoVars)).toBe(0);
+    expect(getSessionForDay("w1d1")!.sets).toHaveLength(0);
+  });
+});
+
 describe("repairMetconSnapshots (fix retro de clasificación)", () => {
   beforeEach(() => localStorage.clear());
 

@@ -24,7 +24,7 @@ interface ExportCustomizationPanelProps {
   setExportCardHeightLimit: (height: number) => void;
   exportPhotoFilter: "none" | "vibrant" | "grayscale" | "sepia" | "duotone" | "silueta" | "neon";
   setExportPhotoFilter: (
-    f: "none" | "vibrant" | "grayscale" | "sepia" | "duotone",
+    f: "none" | "vibrant" | "grayscale" | "sepia" | "duotone" | "silueta" | "neon",
   ) => void;
   // Live preview of the story card (scaled-down ShareCardOverlay)
   preview?: React.ReactNode;

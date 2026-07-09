@@ -37,6 +37,44 @@ function finalizeDay(dayObj: any): { variation: DayVariation; audit: AuditResult
   return { variation: v, audit };
 }
 
+/**
+ * Las IAs externas suelen devolver un PROGRAMA (canónico `{schemaVersion,weeks:[]}`
+ * o legacy `{w1:{days:[]}}`) o un array de días, aunque se les pida un día suelto.
+ * Desanida esas formas a un ÚNICO día; si traen N>1 días, error accionable (no
+ * mis-anida silenciosamente). Cualquier otra forma pasa tal cual a finalizeDay.
+ */
+function unwrapDayCandidate(raw: any): any {
+  const oneOrThrow = (days: any[], what: string): any => {
+    const valid = days.filter((d) => d && typeof d === "object");
+    if (valid.length === 1) return valid[0];
+    throw new Error(
+      `El archivo es un ${what} de ${valid.length} días. Para la pestaña ESPECIAL exportá UN solo día (ver docs/GUIA-dia-especial.md).`,
+    );
+  };
+
+  // Array de días → 1 o error.
+  if (Array.isArray(raw)) return oneOrThrow(raw, "array");
+
+  if (raw && typeof raw === "object") {
+    // Canónico: { schemaVersion, weeks: [{ days: [...] }] }
+    if (Array.isArray(raw.weeks)) {
+      const days = raw.weeks.flatMap((w: any) => (Array.isArray(w?.days) ? w.days : []));
+      return oneOrThrow(days, "programa canónico");
+    }
+    // Legacy: { w1: { days: [...] } } o { w1: [...] } — con ≥1 clave de semana.
+    const weekKeys = Object.keys(raw).filter((k) => /^w\d+$/i.test(k));
+    if (weekKeys.length) {
+      const days = weekKeys.flatMap((k) => {
+        const wk = raw[k];
+        return Array.isArray(wk) ? wk : Array.isArray(wk?.days) ? wk.days : [];
+      });
+      return oneOrThrow(days, "programa");
+    }
+  }
+
+  return raw; // ya es un día suelto (o basura que finalizeDay reporta con claridad)
+}
+
 export function parseSpecialDayJson(text: string): { variation: DayVariation; audit: AuditResult } {
   let raw: any;
   try {
@@ -44,10 +82,11 @@ export function parseSpecialDayJson(text: string): { variation: DayVariation; au
   } catch {
     throw new Error("El archivo no es JSON válido.");
   }
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+  const day = unwrapDayCandidate(raw);
+  if (!day || typeof day !== "object" || Array.isArray(day)) {
     throw new Error("El JSON debe ser un objeto de día (con variations o bloques bN_...).");
   }
-  return finalizeDay(raw);
+  return finalizeDay(day);
 }
 
 // ── Parser de TEXTO PLANO ────────────────────────────────────────────────────

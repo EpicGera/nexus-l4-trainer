@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   parseSpecialDayJson, parseSpecialDayText, parseSpecialDay,
   injectSpecialVariation, removeSpecialVariation,
@@ -48,6 +50,37 @@ describe("parseSpecialDayJson", () => {
   });
 });
 
+describe("parseSpecialDayJson — desanida formas que devuelve la IA (unwrapDayCandidate)", () => {
+  const oneDay = {
+    title: "DÍA X",
+    variations: [{ b2_metcon: { title: "METCON", scheme: "AMRAP 10", items: ["10 Burpees"] } }],
+  };
+
+  it("acepta un programa canónico {schemaVersion, weeks:[]} de UN día", () => {
+    const prog = JSON.stringify({ schemaVersion: "1.0", weeks: [{ days: [oneDay] }] });
+    expect(parseSpecialDayJson(prog).variation.tabName).toBe(SPECIAL_TAB);
+  });
+
+  it("acepta un programa legacy {w1:{days:[]}} de UN día", () => {
+    const prog = JSON.stringify({ w1: { days: [oneDay] } });
+    expect(parseSpecialDayJson(prog).variation.tabName).toBe(SPECIAL_TAB);
+  });
+
+  it("acepta un array de UN día", () => {
+    expect(parseSpecialDayJson(JSON.stringify([oneDay])).variation.tabName).toBe(SPECIAL_TAB);
+  });
+
+  it("rechaza un programa de N>1 días con mensaje accionable", () => {
+    const prog = JSON.stringify({ w1: { days: [oneDay, oneDay] } });
+    expect(() => parseSpecialDayJson(prog)).toThrow(/UN solo día/);
+  });
+
+  it("rechaza N>1 días en canónico y en array", () => {
+    expect(() => parseSpecialDayJson(JSON.stringify({ weeks: [{ days: [oneDay, oneDay] }] }))).toThrow(/UN solo día/);
+    expect(() => parseSpecialDayJson(JSON.stringify([oneDay, oneDay]))).toThrow(/UN solo día/);
+  });
+});
+
 describe("parseSpecialDayText (archivo de texto con bloques)", () => {
   const txt = `TÍTULO: WOD Cumpleaños de Fulano
 CALENTAMIENTO
@@ -85,6 +118,25 @@ ACCESORIOS
 
   it("texto vacío falla con mensaje claro", () => {
     expect(() => parseSpecialDayText("   \n  ")).toThrow(/vac[ií]o/i);
+  });
+});
+
+describe("docs/GUIA-dia-especial.md — los ejemplos JSON de la guía parsean", () => {
+  // Extrae cada bloque ```json de la guía y verifica que la app lo acepte.
+  // Si alguien edita la guía y rompe un ejemplo, CI lo caza.
+  const md = readFileSync(join(__dirname, "../../docs/GUIA-dia-especial.md"), "utf8");
+  const blocks = [...md.matchAll(/```json\n([\s\S]*?)```/g)].map((m) => m[1]);
+
+  it("la guía tiene al menos 3 ejemplos JSON (bendecido + A + B)", () => {
+    expect(blocks.length).toBeGreaterThanOrEqual(3);
+  });
+
+  blocks.forEach((block, i) => {
+    it(`ejemplo #${i + 1} de la guía es un día especial válido`, () => {
+      const { variation, audit } = parseSpecialDayJson(block);
+      expect(audit.ok).toBe(true);
+      expect(variation.tabName).toBe(SPECIAL_TAB);
+    });
   });
 });
 

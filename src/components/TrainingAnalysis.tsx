@@ -445,9 +445,9 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         <div style={{ width: "100%", height: 240 }}>
           <ResponsiveContainer>
             <RadarChart data={data.radarData} outerRadius="72%">
-              <PolarGrid stroke="rgba(255,255,255,0.12)" />
-              <PolarAngleAxis dataKey="skill" tick={{ fill: "#a1a1aa", fontSize: 10, fontFamily: "monospace" }} />
-              <Radar dataKey="v" stroke="#00C8FF" fill="#00C8FF" fillOpacity={0.35} />
+              <PolarGrid stroke="#27272A" />
+              <PolarAngleAxis dataKey="skill" tick={{ fill: "#A1A1AA", fontSize: 11, fontFamily: "monospace" }} />
+              <Radar dataKey="v" stroke="#FAFAFA" fill="#FAFAFA" fillOpacity={0.1} />
             </RadarChart>
           </ResponsiveContainer>
         </div>

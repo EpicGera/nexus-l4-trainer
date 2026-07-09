@@ -222,6 +222,8 @@ export interface TrainingSession {
   readiness?: Readiness;
   metcon?: MetconResult;
   notes?: string;
+  /** tabName de la variación entrenada (p.ej. "ESPECIAL"). Ausente en sesiones viejas → asumir variations[0]. */
+  variationTab?: string;
   /**
    * Embedded for the in-app model (localStorage). The Firestore mapping stores
    * these under sessions/{id}/sets/{setId} — a persistence detail.

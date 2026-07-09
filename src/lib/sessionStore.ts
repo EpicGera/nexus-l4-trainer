@@ -4,7 +4,7 @@
 // re-doing a day overwrites. See docs/BLUEPRINT-modelo-atleta.md §3.3.
 
 import { TrainingSession, LoggedSet } from "../types/training";
-import { Database } from "../types/workout";
+import { Database, DayWorkout, DayVariation } from "../types/workout";
 import { resolveOrInfer } from "../data/exerciseCatalog";
 import { energyForExercise } from "./blockMeta";
 import { expandMetconWork } from "./metconWork";
@@ -91,8 +91,6 @@ export function bridgeLegacyLogs(session: TrainingSession): void {
  * de que el wizard emitiera sets derivados (prescripción × rondas reales)
  * ganan sus cantidades REALES mirando el bloque metcon del programa activo.
  * Idempotente: una sesión que ya tiene sets del metcon no se toca.
- * ponytail: usa la primera variación del día (RX) — la sesión no registra cuál
- * se entrenó; si algún día se guarda la variación, afinar acá.
  */
 export function backfillMetconDerivedSets(db: Database): number {
   const sessions = loadSessions();
@@ -106,7 +104,7 @@ export function backfillMetconDerivedSets(db: Database): number {
     const parsed = parseDayId(session.dayId);
     if (!parsed) continue;
     const day = db[`w${parsed.week}`]?.days?.find((d) => d.id === session.dayId);
-    const v = day?.variations?.[0];
+    const v = variationForSession(day, session);
     if (!v) continue;
     const metconBlocks = v.blocks?.filter((b) => b.bucket === "metcon") ?? [];
     const items = metconBlocks.length ? metconBlocks.flatMap((b) => b.items) : v.metcon?.items ?? [];
@@ -175,7 +173,7 @@ export function repairMetconSnapshots(db: Database): number {
     const parsed = parseDayId(session.dayId);
     if (!parsed) continue;
     const day = db[`w${parsed.week}`]?.days?.find((d) => d.id === session.dayId);
-    const block = day?.variations?.[0]?.blocks?.find((b) => b.bucket === "metcon");
+    const block = variationForSession(day, session)?.blocks?.find((b) => b.bucket === "metcon");
     if (!block) continue;
 
     const wantEs = block.energySystem;
@@ -203,6 +201,20 @@ export function repairMetconSnapshots(db: Database): number {
     }
   }
   return touched;
+}
+
+/**
+ * Variación contra la que se comparan/reparan los datos de una sesión:
+ * la que registra session.variationTab; sesiones viejas sin el campo →
+ * variations[0] (RX); tabName que ya no existe (ESPECIAL borrada) → null (skip).
+ */
+function variationForSession(
+  day: DayWorkout | undefined,
+  session: TrainingSession,
+): DayVariation | null {
+  if (!day?.variations?.length) return null;
+  if (!session.variationTab) return day.variations[0];
+  return day.variations.find((v) => v.tabName === session.variationTab) ?? null;
 }
 
 const num = (v: unknown): number | null => {

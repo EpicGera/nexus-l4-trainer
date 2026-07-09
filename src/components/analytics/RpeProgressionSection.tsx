@@ -149,7 +149,7 @@ export default function RpeProgressionSection({
       {/* 1. THE CYCLE — single, complete definition */}
       <SectionCard
         title="CICLO DE INTENSIDAD (RPE OBJETIVO)"
-        icon={<Zap size={15} className="text-[#39ff14]" />}
+        icon={<Zap size={15} className="text-[#A1A1AA]" />}
         subtitle="Tu mapa de 4 semanas: a qué esfuerzo apuntar en cada fase y por qué"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">

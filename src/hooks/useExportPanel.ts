@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { toPng } from "html-to-image";
 import { Capacitor } from "@capacitor/core";
 import { AthleteState } from "../types/workout";
 import { applyPersonFx } from "../lib/personFx";
+import { renderStoryVideo, type StoryEffect } from "../lib/videoExport";
 
 export type PhotoFilter = "none" | "vibrant" | "grayscale" | "sepia" | "duotone" | "silueta" | "neon";
 import {
@@ -10,9 +12,11 @@ import {
   handleBatchPDFExport as serviceBatchPDFExport,
   handleGenerateMonthlyReportPDF as serviceGenerateMonthlyReportPDF,
   handleExportDayJPG as serviceExportDayJPG,
+  handleShareVideo as serviceShareVideo,
   handleExportLocalHistory as serviceExportLocalHistory,
   handleExportLocalHistoryCSV as serviceExportLocalHistoryCSV,
   handleExportDayMarkdown as serviceExportDayMarkdown,
+  emitToast,
 } from "../lib/exportService";
 
 export function useExportPanel(
@@ -46,6 +50,71 @@ export function useExportPanel(
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
   const [blockPositions, setBlockPositions] = useState<{ [key: string]: { x: number; y: number } }>({});
   const [previewScale, setPreviewScale] = useState(1);
+
+  // Selector explícito de variación para la Story: null = seguir la pestaña
+  // activa; si el usuario elige ESPECIAL, la Story sale de ese día.
+  const [storyVariationTab, setStoryVariationTab] = useState<string | null>(null);
+  const storyVariation =
+    (storyVariationTab && activeDay?.variations?.find((v: any) => v.tabName === storyVariationTab)) ||
+    activeVariation;
+  // reset al cambiar de día
+  useEffect(() => { setStoryVariationTab(null); }, [activeDay?.id]);
+
+  // ── Story VIDEO (Fase A) ──
+  const [videoMode, setVideoMode] = useState(false);
+  const [videoEffect, setVideoEffect] = useState<StoryEffect>("kenburns");
+  const [videoDurationSec, setVideoDurationSec] = useState<10 | 15>(10);
+  const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
+  const [audioName, setAudioName] = useState<string | null>(null);
+  const [audioOffsetSec, setAudioOffsetSec] = useState(0);
+  const [isExportingVideo, setIsExportingVideo] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+
+  const handleAudioFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const arrayBuf = await file.arrayBuffer();
+      const ctx = new AudioContext();
+      const decoded = await ctx.decodeAudioData(arrayBuf);
+      await ctx.close();
+      setAudioBuffer(decoded);
+      setAudioName(file.name);
+      setAudioOffsetSec(0);
+    } catch {
+      emitToast("❌ No se pudo leer el audio (formato no soportado).", "error");
+    }
+  };
+
+  const handleExportDayVideo = async () => {
+    if (!activeDay || !storyVariation) return;
+    setIsExportingVideo(true);
+    setVideoProgress(0);
+    try {
+      try { await (document as any).fonts?.ready; } catch { /* captura igual */ }
+      await new Promise((r) => setTimeout(r, 300));
+      const node = document.getElementById("nexus-share-card-temp");
+      if (!node) { emitToast("❌ No se encontró la plantilla de exportación.", "error"); return; }
+      const overlayPng = await toPng(node, {
+        width: 1080, height: 1920, pixelRatio: 1,
+        style: { transform: "scale(1)", transformOrigin: "top left", width: "1080px", height: "1920px" },
+      });
+      const { blob, ext } = await renderStoryVideo({
+        overlayPng,
+        effect: videoEffect,
+        durationSec: videoDurationSec,
+        audio: audioBuffer ? { buffer: audioBuffer, offsetSec: audioOffsetSec } : undefined,
+        onProgress: setVideoProgress,
+      });
+      await serviceShareVideo(blob, ext, activeDay, currentWeek);
+    } catch (err: any) {
+      emitToast("❌ Error al generar el video: " + (err?.message ?? String(err)), "error", 8000);
+    } finally {
+      setIsExportingVideo(false);
+      setVideoProgress(0);
+    }
+  };
 
   useEffect(() => {
     const updateScale = () => {
@@ -141,8 +210,8 @@ export function useExportPanel(
   };
 
   const handleExportDayJPG = () => {
-    if (!activeDay || !activeVariation) return;
-    serviceExportDayJPG(activeDay, activeVariation, currentWeek, setIsExportingJPG);
+    if (!activeDay || !storyVariation) return;
+    serviceExportDayJPG(activeDay, storyVariation, currentWeek, setIsExportingJPG);
   };
 
   const handleExportDayMarkdown = () => {
@@ -199,6 +268,23 @@ export function useExportPanel(
     setBlockPositions,
     previewScale,
     setPreviewScale,
+    storyVariation,
+    storyVariationTab,
+    setStoryVariationTab,
+    videoMode,
+    setVideoMode,
+    videoEffect,
+    setVideoEffect,
+    videoDurationSec,
+    setVideoDurationSec,
+    audioName,
+    audioBuffer,
+    audioOffsetSec,
+    setAudioOffsetSec,
+    handleAudioFile,
+    isExportingVideo,
+    videoProgress,
+    handleExportDayVideo,
     exportFileInputRef,
     handleMonthTextExport,
     handleExportGoogleSheets,

@@ -63,38 +63,27 @@ export interface DayVisual {
   glow: string;
 }
 
+// Estética adulta: escala de grises con UN acento (rojo señal solo para boss).
+// El tipo de día se comunica por el chip textual del subheader, no por glow de
+// color. Bandas sutiles y un solo layer de sombra (máx 12px).
+const GRAY_BAND =
+  "radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 45%, rgba(10,10,10,0.98) 95%)";
+const GRAY_GLOW = "0 0 10px rgba(0,0,0,0.6)";
+
 const VISUALS: Record<Exclude<DayType, "default">, Omit<DayVisual, "type">> = {
   boss: {
-    band: "radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(239,68,68,0.55) 0%, rgba(127,29,29,0.5) 45%, rgba(14,14,17,0.98) 95%)",
-    accent: "#ef4444",
-    glow: "0 0 16px #ef4444, 0 0 34px #b91c1c, 0 0 60px #7f1d1d, 0 0 6px #000",
+    band: "radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(220,38,38,0.35) 0%, rgba(127,29,29,0.30) 45%, rgba(10,10,10,0.98) 95%)",
+    accent: "#DC2626",
+    glow: "0 0 12px rgba(220,38,38,0.55), 0 0 6px #000",
   },
-  team: {
-    band: "radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(34,197,94,0.5) 0%, rgba(20,83,45,0.5) 45%, rgba(14,14,17,0.98) 95%)",
-    accent: "#22c55e",
-    glow: "0 0 16px #22c55e, 0 0 34px #15803d, 0 0 60px #14532d, 0 0 6px #000",
-  },
-  volume: {
-    band: "radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(251,146,60,0.55) 0%, rgba(124,45,18,0.5) 45%, rgba(14,14,17,0.98) 95%)",
-    accent: "#fb923c",
-    glow: "0 0 16px #fb923c, 0 0 34px #ea580c, 0 0 60px #7c2d12, 0 0 6px #000",
-  },
-  recovery: {
-    band: "radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(45,212,191,0.4) 0%, rgba(15,118,110,0.4) 45%, rgba(14,14,17,0.98) 95%)",
-    accent: "#2dd4bf",
-    glow: "0 0 12px #2dd4bf, 0 0 26px #0d9488, 0 0 6px #000",
-  },
+  team: { band: GRAY_BAND, accent: "#FAFAFA", glow: GRAY_GLOW },
+  volume: { band: GRAY_BAND, accent: "#FAFAFA", glow: GRAY_GLOW },
+  recovery: { band: GRAY_BAND, accent: "#A1A1AA", glow: GRAY_GLOW },
 };
 
-/** Resolve the visual for a day, falling back to the chapter accent. */
+/** Resolve the visual for a day, falling back to a neutral mono band. */
 export function dayVisual(title: string, chapter: ChapterTheme, blockText = ""): DayVisual {
   const type = detectDayType(title, blockText);
   if (type !== "default") return { type, ...VISUALS[type] };
-  const a = chapter.accent;
-  return {
-    type,
-    band: `radial-gradient(circle at var(--mx,50%) var(--my,50%), ${a}88 0%, ${chapter.band}cc 45%, rgba(14,14,17,0.98) 95%)`,
-    accent: a,
-    glow: `0 0 15px ${a}, 0 0 32px ${chapter.band}, 0 0 6px #000`,
-  };
+  return { type, band: GRAY_BAND, accent: chapter.accent, glow: GRAY_GLOW };
 }

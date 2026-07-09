@@ -15,11 +15,13 @@ describe("dayTheme (Fase 2)", () => {
     expect(detectDayType("Día de Fuerza normal")).toBe("default");
   });
 
-  it("boss=red, team=green, volume=orange gradients", () => {
+  it("paleta adulta: boss=rojo señal, resto mono; default = acento del capítulo", () => {
     const ch = THEME_PALETTES[0];
-    expect(dayVisual("BOSS FIGHT", ch).accent).toBe("#ef4444");
-    expect(dayVisual("Team WOD parejas", ch).accent).toBe("#22c55e");
-    expect(dayVisual("Resistencia Bruta volumen", ch).accent).toBe("#fb923c");
+    // boss conserva el rojo (único acento); el resto pasa a mono (sin verde/naranja)
+    expect(dayVisual("BOSS FIGHT", ch).accent).toBe("#DC2626");
+    expect(dayVisual("Team WOD parejas", ch).accent).toBe("#FAFAFA");
+    expect(dayVisual("Resistencia Bruta volumen", ch).accent).toBe("#FAFAFA");
+    expect(dayVisual("El Camino (Recuperación)", ch).accent).toBe("#A1A1AA");
     // default uses the chapter accent
     expect(dayVisual("Lunes de Fuerza", ch).accent).toBe(ch.accent);
   });

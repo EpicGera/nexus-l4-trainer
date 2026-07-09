@@ -794,6 +794,72 @@ export const handleExportDayJPG = async (
   }
 };
 
+// --- Story VIDEO share (Fase A) ---
+// Recibe el blob ya renderizado (mp4/webm) y lo comparte con el MISMO patrón
+// nativo/web que la Story JPG. webm no siempre lo acepta Instagram → aviso.
+export const handleShareVideo = async (
+  blob: Blob,
+  ext: "mp4" | "webm",
+  activeDay: DayWorkout,
+  currentWeek: string,
+) => {
+  const safeDayName = sanitizeForFilename(activeDay.name).toLowerCase();
+  const safeTitleName = sanitizeForFilename(activeDay.title);
+  const filename = `Nexus_L4_${currentWeek.toUpperCase()}_${safeDayName}_${safeTitleName}.${ext}`;
+  const mime = ext === "mp4" ? "video/mp4" : "video/webm";
+  const shareTitle = `Nexus L4 — ${activeDay.title}`;
+  const shareText = `¡Mi sesión de hoy en Nexus L4!\n${activeDay.name} · ${activeDay.title}`;
+
+  try {
+    if (Capacitor.isNativePlatform()) {
+      // blob → base64 sin cargar dos veces en memoria (archivos de ~10-15 MB).
+      const base64Data: string = await new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onerror = () => reject(new Error("No se pudo leer el video."));
+        fr.onloadend = () => resolve(String(fr.result).split(",")[1]);
+        fr.readAsDataURL(blob);
+      });
+      const writeResult = await Filesystem.writeFile({
+        path: filename,
+        data: base64Data,
+        directory: Directory.Cache,
+      });
+      try {
+        await Share.share({ title: shareTitle, text: shareText, url: writeResult.uri, dialogTitle: "Compartir video de Nexus L4" });
+      } catch (shareErr: any) {
+        if (!/cancel/i.test(shareErr?.message ?? "")) {
+          await Filesystem.writeFile({ path: filename, data: base64Data, directory: Directory.Documents, recursive: true });
+          emitToast(`✅ Video guardado en Documentos/${filename}`, "success", 8000);
+        }
+      }
+      if (ext === "webm") emitToast("ℹ️ Video en formato webm: Instagram puede no aceptarlo — compartilo por WhatsApp.", "info", 9000);
+      return;
+    }
+
+    // ── WEB ──
+    const file = new File([blob], filename, { type: mime });
+    if (typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, files: [file] });
+        return;
+      } catch (error: any) {
+        if (error?.name === "AbortError") return;
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    emitToast(`✅ Video descargado: ${filename}`, "success");
+  } catch (error: any) {
+    emitToast("❌ Error al compartir el video: " + (error?.message ?? String(error)), "error", 8000);
+  }
+};
+
 // --- Daily Markdown Export ---
 export const handleExportDayMarkdown = (
   activeDay: DayWorkout,
