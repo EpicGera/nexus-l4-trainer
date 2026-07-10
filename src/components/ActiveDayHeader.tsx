@@ -2,10 +2,11 @@ import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { getActiveChapter, THEME_PALETTES } from "../lib/chapterStore";
 import { dayVisual, fontFamilyFor } from "../lib/dayTheme";
+import { DayStatus } from "../lib/storageKeys";
 
 interface ActiveDayHeaderProps {
   activeDay: any;
-  completedDays: Record<string, boolean>;
+  completedDays: Record<string, DayStatus>;
   headerHeight: number;
   mousePos: { x: number; y: number };
   setMousePos: (pos: { x: number; y: number }) => void;
@@ -111,15 +112,24 @@ export default function ActiveDayHeader({
         }
       >
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 py-1.5 px-4 h-full">
-          {/* STATUS INDICATOR (GREEN/RED) */}
+          {/* STATUS INDICATOR: verde=completado · gris tachado=perdido · acento=pendiente */}
           <div className="flex items-center gap-2.5 shrink-0 select-none">
             <span
               className="w-3.5 h-3.5 rounded-full border border-white/25 transition-all duration-500 shrink-0 shadow-sm"
-              style={{ backgroundColor: completedDays[activeDay.id] ? "#10b981" : dv.accent }}
+              style={{
+                backgroundColor:
+                  completedDays[activeDay.id] === "completed"
+                    ? "#10b981"
+                    : completedDays[activeDay.id] === "missed"
+                      ? "#525252"
+                      : dv.accent,
+              }}
               title={
-                completedDays[activeDay.id]
+                completedDays[activeDay.id] === "completed"
                   ? "¡Entrenamiento Completado!"
-                  : "Entrenamiento Incompleto"
+                  : completedDays[activeDay.id] === "missed"
+                    ? "Día perdido — cerrado sin registro"
+                    : "Entrenamiento Incompleto"
               }
             />
           </div>

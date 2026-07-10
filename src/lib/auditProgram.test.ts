@@ -155,4 +155,25 @@ describe("auditProgram", () => {
   it("a single unreadable station among many readable ones still imports (ok:true)", () => {
     expect(auditProgram(realDay).ok).toBe(true);
   });
+
+  it("warns (not errors) when a week has far fewer days than the others (truncated AI output)", () => {
+    const fullWeek = () => ({
+      days: Array.from({ length: 6 }, (_, i) => ({
+        id: `d${i + 1}`,
+        variations: [{ tabName: "RX", b3_metcon: { title: "03. METCON", scheme: "AMRAP 12", items: ["15 Wall Balls @ 60% WM"] } }],
+      })),
+    });
+    const prog: any = { w1: fullWeek(), w2: fullWeek(), w3: fullWeek(), w4: { days: [fullWeek().days[0]] } };
+    const r = auditProgram(prog);
+    expect(r.ok).toBe(true); // importable, but flagged
+    const trunc = r.issues.filter((i) => /truncad/i.test(i.message));
+    expect(trunc.length).toBe(1);
+    expect(trunc[0].where).toBe("w4");
+    expect(trunc[0].severity).toBe("warning");
+  });
+
+  it("does not warn about day-count for a symmetric program", () => {
+    const r = auditProgram(realDay); // single week → no cross-week comparison
+    expect(r.issues.some((i) => /truncad/i.test(i.message))).toBe(false);
+  });
 });

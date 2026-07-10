@@ -10,8 +10,21 @@
 //     el caller avisa que se comparta por WhatsApp.
 
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
+import { detectBeats } from "./beatDetect";
 
 export type StoryEffect = "kenburns" | "pulse" | "none";
+
+/** Efectos opcionales, combinables, dibujados por frame sobre el canvas. */
+export interface StoryFx {
+  /** destello blanco en cada beat de la música (requiere audio) */
+  beatFlash?: boolean;
+  /** sacudida de cámara en cada beat (requiere audio) */
+  beatShake?: boolean;
+  /** partículas de polvo de hielo / stardust con glow */
+  stardust?: boolean;
+  /** aberración cromática + scanlines estilo cámara 70s */
+  retro70s?: boolean;
+}
 
 export interface StoryVideoOpts {
   /** tarjeta de Story (1080×1920) como data URL PNG. Con `videoBg`, va con alfa. */
@@ -25,7 +38,128 @@ export interface StoryVideoOpts {
   /** clip de video de fondo (object URL). Si está, `effect` se ignora: el
    * movimiento lo pone el propio clip y el overlay se compone encima sin zoom. */
   videoBg?: { url: string };
+  /** efectos visuales opcionales (destellos, shake, stardust, glitch 70s) */
+  fx?: StoryFx;
   onProgress?: (pct: number) => void;
+}
+
+// ── Efectos por frame ────────────────────────────────────────────────────────
+const FLASH_DUR = 0.15; // s que dura el destello tras un beat
+const SHAKE_PX = 12; // amplitud máxima del shake
+const STARDUST_N = 80; // partículas de polvo de hielo
+const frac = (x: number) => x - Math.floor(x);
+const hash = (n: number) => frac(Math.sin(n) * 43758.5453);
+
+/** Alpha del destello en tSec dado los tiempos de beat. Puro y testeable. */
+export function flashAlpha(tSec: number, beats: number[]): number {
+  let a = 0;
+  for (const b of beats) {
+    const dt = tSec - b;
+    if (dt >= 0 && dt <= FLASH_DUR) a = Math.max(a, 0.6 * (1 - dt / FLASH_DUR));
+  }
+  return a;
+}
+
+/** Desplazamiento del shake en tSec (determinista por beat). Puro y testeable. */
+export function shakeOffset(tSec: number, beats: number[]): { dx: number; dy: number } {
+  for (let i = 0; i < beats.length; i++) {
+    const dt = tSec - beats[i];
+    if (dt >= 0 && dt <= FLASH_DUR) {
+      const decay = 1 - dt / FLASH_DUR;
+      const ang = hash(i * 12.9898) * Math.PI * 2;
+      return { dx: Math.cos(ang) * SHAKE_PX * decay, dy: Math.sin(ang) * SHAKE_PX * decay };
+    }
+  }
+  return { dx: 0, dy: 0 };
+}
+
+/** Campo de partículas de polvo de hielo (función pura de t → sin estado). */
+function drawStardust(ctx: CanvasRenderingContext2D, tSec: number): void {
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < STARDUST_N; i++) {
+    const rx = hash(i * 127.1);
+    const ry = hash(i * 311.7);
+    const rs = hash(i * 74.7);
+    const x = rx * STORY_W;
+    const drift = 20 + rs * 60; // px/s hacia arriba
+    let y = (ry * STORY_H - drift * tSec) % STORY_H;
+    if (y < 0) y += STORY_H;
+    const twinkle = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(tSec * (1 + rs * 3) * Math.PI * 2 + i));
+    ctx.globalAlpha = twinkle;
+    ctx.fillStyle = i % 3 === 0 ? "#BFEFFF" : "#FFFFFF";
+    ctx.shadowColor = "#BFEFFF";
+    ctx.shadowBlur = 6 + rs * 8;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.2 + rs * 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/** Glitch de color 70s: aberración cromática + scanlines + jitter ocasional.
+ * Sin getImageData (inviable a 1080×1920×30fps) — todo drawImage/composite. */
+function drawRetro70s(ctx: CanvasRenderingContext2D, scratch: HTMLCanvasElement, tSec: number): void {
+  const sctx = scratch.getContext("2d")!;
+  sctx.clearRect(0, 0, STORY_W, STORY_H);
+  sctx.drawImage(ctx.canvas, 0, 0); // snapshot del frame actual
+  const off = 4 + 2 * Math.sin(tSec * 3); // aberración que "respira"
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  ctx.globalAlpha = 0.5;
+  ctx.filter = "brightness(1.1) sepia(1) saturate(6) hue-rotate(-30deg)"; // fantasma rojo
+  ctx.drawImage(scratch, -off, 0);
+  ctx.filter = "brightness(1.1) sepia(1) saturate(6) hue-rotate(140deg)"; // fantasma cian
+  ctx.drawImage(scratch, off, 0);
+  ctx.restore();
+  // scanlines
+  ctx.save();
+  ctx.globalAlpha = 0.08;
+  ctx.fillStyle = "#000";
+  for (let y = 0; y < STORY_H; y += 4) ctx.fillRect(0, y, STORY_W, 2);
+  ctx.restore();
+  // jitter horizontal ocasional (banda desplazada), determinista por frame
+  const frame = Math.floor(tSec * 30);
+  if (frame % 40 === 0) {
+    const bandY = hash(frame) * (STORY_H - 120);
+    ctx.drawImage(scratch, 0, bandY, STORY_W, 60, 30, bandY, STORY_W, 60);
+  }
+}
+
+/** Aplica los overlays de efecto sobre el frame ya dibujado (bg + overlay). */
+function applyFx(
+  ctx: CanvasRenderingContext2D,
+  tSec: number,
+  fx: StoryFx,
+  beats: number[],
+  scratch: HTMLCanvasElement | null,
+): void {
+  if (fx.retro70s && scratch) drawRetro70s(ctx, scratch, tSec);
+  if (fx.stardust) drawStardust(ctx, tSec);
+  if (fx.beatFlash) {
+    const a = flashAlpha(tSec, beats);
+    if (a > 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = a;
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, STORY_W, STORY_H);
+      ctx.restore();
+    }
+  }
+}
+
+/** ¿Hay que correr detección de beats para estos efectos? */
+function fxNeedsBeats(fx?: StoryFx): boolean {
+  return !!fx && (!!fx.beatFlash || !!fx.beatShake);
+}
+
+/** Canvas 1080×1920 (scratch para el glitch 70s). */
+function makeStoryCanvas(): HTMLCanvasElement {
+  const c = document.createElement("canvas");
+  c.width = STORY_W;
+  c.height = STORY_H;
+  return c;
 }
 
 export const STORY_W = 1080;
@@ -208,14 +342,25 @@ async function renderMp4(opts: StoryVideoOpts): Promise<Blob> {
   const bgVideo = opts.videoBg ? await prepareVideo(opts.videoBg.url) : null;
   const clipDur = bgVideo?.duration || 0;
 
+  // Efectos: beats (una vez, offline) + canvas scratch para el glitch 70s.
+  const beats = fxNeedsBeats(opts.fx) && audio ? detectBeats(audio.buffer, audio.offsetSec, opts.durationSec) : [];
+  const scratch = opts.fx?.retro70s ? makeStoryCanvas() : null;
+
   const VideoFrameCtor = (globalThis as any).VideoFrame;
   for (let i = 0; i < totalFrames; i++) {
+    const tSec = i / fps;
+    const shake = opts.fx?.beatShake ? shakeOffset(tSec, beats) : { dx: 0, dy: 0 };
+    if (shake.dx || shake.dy) { ctx.fillStyle = "#000"; ctx.fillRect(0, 0, STORY_W, STORY_H); }
+    ctx.save();
+    if (shake.dx || shake.dy) ctx.translate(shake.dx, shake.dy);
     if (bgVideo) {
       await seekVideo(bgVideo, clipDur > 0 ? (i / fps) % clipDur : 0);
       drawVideoFrame(ctx, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, img);
     } else {
       drawFrame(ctx, img, opts.effect, totalFrames <= 1 ? 0 : i / (totalFrames - 1));
     }
+    ctx.restore();
+    if (opts.fx) applyFx(ctx, tSec, opts.fx, beats, scratch);
     const frame = new VideoFrameCtor(canvas, {
       timestamp: Math.round((i * 1_000_000) / fps),
       duration: Math.round(1_000_000 / fps),
@@ -328,6 +473,10 @@ async function renderWebm(opts: StoryVideoOpts): Promise<Blob> {
     recorder.onstop = () => resolve(new Blob(chunks, { type: "video/webm" }));
   });
 
+  // Mismos efectos que el camino mp4 (todo es función pura de tSec).
+  const beats = fxNeedsBeats(opts.fx) && opts.audio ? detectBeats(opts.audio.buffer, opts.audio.offsetSec, opts.durationSec) : [];
+  const scratch = opts.fx?.retro70s ? makeStoryCanvas() : null;
+
   recorder.start();
   if (source && audioCtx) source.start(0, opts.audio!.offsetSec);
 
@@ -337,8 +486,15 @@ async function renderWebm(opts: StoryVideoOpts): Promise<Blob> {
     const tick = () => {
       const elapsed = performance.now() - t0;
       const t01 = Math.min(1, elapsed / totalMs);
+      const tSec = elapsed / 1000;
+      const shake = opts.fx?.beatShake ? shakeOffset(tSec, beats) : { dx: 0, dy: 0 };
+      if (shake.dx || shake.dy) { ctx.fillStyle = "#000"; ctx.fillRect(0, 0, STORY_W, STORY_H); }
+      ctx.save();
+      if (shake.dx || shake.dy) ctx.translate(shake.dx, shake.dy);
       if (bgVideo) drawVideoFrame(ctx, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, img);
       else drawFrame(ctx, img, opts.effect, t01);
+      ctx.restore();
+      if (opts.fx) applyFx(ctx, tSec, opts.fx, beats, scratch);
       opts.onProgress?.(Math.round(t01 * 95));
       if (elapsed >= totalMs) resolve();
       else requestAnimationFrame(tick);

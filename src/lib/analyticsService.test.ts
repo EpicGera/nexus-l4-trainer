@@ -43,7 +43,16 @@ describe('analyticsService - computeChartData', () => {
     expect(data[0]).toEqual({ name: 'LUN', rpe: 7.0, isReal: true });
 
     // Other days have no data — stay null, never invented
-    expect(data[1]).toEqual({ name: 'MAR', rpe: null, isReal: false });
+    expect(data[1]).toEqual({ name: 'MAR', rpe: null, isReal: false, isMissed: false });
+  });
+
+  it('marks a missed day as rpe 0 / isMissed (closes the chart gap, no fabricated RPE)', () => {
+    // Miércoles (w1d3) marcado perdido en la clave bare; sin logs.
+    localStorage.setItem('w1d3', 'missed');
+    const data = computeChartData('w1', 1);
+    expect(data[2]).toEqual({ name: 'MIÉ', rpe: 0, isReal: false, isMissed: true });
+    // Los demás días pendientes siguen null (hueco), no 0.
+    expect(data[3]).toEqual({ name: 'JUE', rpe: null, isReal: false, isMissed: false });
   });
 
   it('should format average RPE to 1 decimal place', () => {
@@ -81,7 +90,7 @@ describe('analyticsService - computeChartData', () => {
     ]));
 
     const data = computeChartData('w1', 1);
-    expect(data[0]).toEqual({ name: 'LUN', rpe: null, isReal: false });
+    expect(data[0]).toEqual({ name: 'LUN', rpe: null, isReal: false, isMissed: false });
   });
 
   it('should aggregate logs from multiple keys for the same day', () => {

@@ -126,6 +126,14 @@ export default function WeeklyRpeSection({
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
+                        if (data.isMissed) {
+                          return (
+                            <div className="bg-[#0A0A0A] border border-[#3F3F46] p-2 text-[10px] font-mono shadow-md text-left z-50">
+                              <p className="font-bold text-white uppercase">{data.name}</p>
+                              <p className="text-neutral-400">Día perdido — sin registro</p>
+                            </div>
+                          );
+                        }
                         if (!data.isReal) return null;
                         return (
                           <div className="bg-[#0A0A0A] border border-[#3F3F46] p-2 text-[10px] font-mono shadow-md text-left z-50">
@@ -145,14 +153,24 @@ export default function WeeklyRpeSection({
                     stroke={accentColor}
                     strokeWidth={2}
                     connectNulls={false}
-                    dot={{ r: 4, stroke: accentColor, strokeWidth: 1.5, fill: "#000" }}
+                    dot={(props: any) => {
+                      const { cx, cy, key, payload } = props;
+                      if (cx == null || cy == null) return <g key={key} />;
+                      // Día perdido: punto hueco gris en 0 (cierra el hueco de la
+                      // línea sin fingir un RPE). Día real: punto de acento.
+                      return payload?.isMissed ? (
+                        <circle key={key} cx={cx} cy={cy} r={4} fill="none" stroke="#71717A" strokeWidth={1.5} strokeDasharray="2 1.5" />
+                      ) : (
+                        <circle key={key} cx={cx} cy={cy} r={4} fill="#000" stroke={accentColor} strokeWidth={1.5} />
+                      );
+                    }}
                     activeDot={{ r: 5, fill: accentColor }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <p className="text-[10px] font-mono text-neutral-500 leading-relaxed">
-              Los días sin punto no tienen registros — el gráfico no rellena huecos.
+              Los días sin punto no tienen registros. Un punto gris hueco en 0 es un día marcado como perdido.
             </p>
           </div>
 

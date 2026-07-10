@@ -8,10 +8,14 @@
  * (empty states), not this service.
  */
 
+import { readDayStatus } from "./storageKeys";
+
 export interface ChartDayData {
   name: string;
   rpe: number | null;
   isReal: boolean;
+  /** Día marcado como perdido: se grafica en 0 (cierra el hueco), no como null. */
+  isMissed?: boolean;
 }
 
 export interface RpeDistributionItem {
@@ -113,10 +117,21 @@ export function computeChartData(currentWeek: string, logsVersion: number): Char
     }
 
     const hasRealLogs = rpeCount > 0;
+    if (hasRealLogs) {
+      return {
+        name: dayName,
+        rpe: parseFloat((rpeSum / rpeCount).toFixed(1)),
+        isReal: true,
+      };
+    }
+    // Sin logs: un día perdido se grafica en 0 (cierra el hueco de la línea en
+    // vez de saltarlo); un día simplemente pendiente sigue siendo null.
+    const isMissed = readDayStatus(localStorage.getItem(dayId)) === "missed";
     return {
       name: dayName,
-      rpe: hasRealLogs ? parseFloat((rpeSum / rpeCount).toFixed(1)) : null,
-      isReal: hasRealLogs,
+      rpe: isMissed ? 0 : null,
+      isReal: false,
+      isMissed,
     };
   });
 }

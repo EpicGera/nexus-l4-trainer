@@ -145,10 +145,12 @@ export function auditProgram(raw: unknown): AuditResult {
 
   const normalized = JSON.parse(JSON.stringify(raw)); // deep copy for safe fixes
   let totalLoggableItems = 0;
+  const daysPerWeek: Record<string, number> = {};
 
   for (const wk of weekKeys) {
     stats.weeks++;
     const days = daysOf(normalized[wk]);
+    daysPerWeek[wk] = days.length;
     days.forEach((day: any, di: number) => {
       stats.days++;
       const dayId = day?.id || `${wk.toLowerCase()}d${di + 1}`;
@@ -210,6 +212,24 @@ export function auditProgram(raw: unknown): AuditResult {
         }
       });
     });
+  }
+
+  // Semana truncada: una semana con muchos menos días que las demás delata una
+  // salida de IA cortada por longitud (el bug donde la w4 deload quedó con 1 día).
+  // Warning, no error: hay bloques legítimamente asimétricos, pero el aviso queda
+  // visible en el toast de instalación en vez de "desaparecer" una semana entera.
+  const dayCounts = Object.values(daysPerWeek);
+  if (dayCounts.length > 1) {
+    const maxDays = Math.max(...dayCounts);
+    for (const [wk, n] of Object.entries(daysPerWeek)) {
+      if (maxDays >= 3 && n < maxDays - 1) {
+        issues.push({
+          severity: "warning",
+          where: wk,
+          message: `${wk} tiene ${n} día(s) y otras semanas tienen hasta ${maxDays} — ¿salida de IA truncada? Revisá que la semana esté completa antes de entrenar.`,
+        });
+      }
+    }
   }
 
   if (totalLoggableItems === 0) {

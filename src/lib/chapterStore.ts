@@ -19,7 +19,7 @@
 //   Consulting an inactive chapter reads its snapshot/archive without switching.
 
 import { Database } from "../types/workout";
-import { STORAGE_KEYS } from "./storageKeys";
+import { STORAGE_KEYS, type DayStatus, readDayStatus } from "./storageKeys";
 import {
   getProgramStartDate,
   setProgramStartDate,
@@ -50,7 +50,9 @@ interface ChaptersIndex {
 
 interface AthleteDataBlob {
   sessions: string | null; // raw nexus_sessions_v1 JSON
-  completed: Record<string, boolean>; // bare day keys
+  // Bare day keys → valor crudo ("true" | "missed"). Archivos viejos guardaban
+  // `true` booleano; applyAthleteData lo normaliza al restaurar.
+  completed: Record<string, string | boolean>;
   logs: Record<string, string>; // nexus_logs_* key → value
   /** ancla de calendario del capítulo (nexus_program_start_date); undefined en archivos viejos */
   startDate?: string | null;
@@ -122,7 +124,10 @@ function collectActiveAthleteData(): AthleteDataBlob {
     const k = localStorage.key(i);
     if (!k) continue;
     if (isCompletedDayKey(k)) {
-      if (localStorage.getItem(k) === "true") blob.completed[k] = true;
+      // Guardar el valor crudo ("true" o "missed") para preservar los días
+      // perdidos al cambiar de capítulo; "false"/ausente no se archivan.
+      const v = localStorage.getItem(k);
+      if (v === "true" || v === "missed") blob.completed[k] = v;
     } else if (k.startsWith(LOG_PREFIX)) {
       const v = localStorage.getItem(k);
       if (v != null) blob.logs[k] = v;
@@ -153,7 +158,11 @@ function applyAthleteData(blob: AthleteDataBlob | null): void {
   try {
     if (blob.sessions != null) localStorage.setItem(LIVE_SESSIONS, blob.sessions);
     Object.keys(blob.completed || {}).forEach((k) => {
-      if (blob.completed[k]) localStorage.setItem(k, "true");
+      const v = blob.completed[k];
+      // Compat: archivos viejos guardaban `true` booleano → "true" (completado);
+      // los nuevos guardan el string crudo ("true" | "missed").
+      if (v === true || v === "true") localStorage.setItem(k, "true");
+      else if (v === "missed") localStorage.setItem(k, "missed");
     });
     Object.entries(blob.logs || {}).forEach(([k, v]) => localStorage.setItem(k, v));
     // cada capítulo conserva su propio ancla de calendario; los archivos
@@ -338,15 +347,22 @@ export function getChapterSessionsRaw(id: string): string | null {
   return readArchive(id)?.sessions ?? null;
 }
 
-/** Read a chapter's completed-day map (live when active, archive otherwise). */
-export function getChapterCompleted(id: string): Record<string, boolean> {
+/** Read a chapter's completed-day map (live when active, archive otherwise).
+ * Devuelve el estado por día ("completed" | "missed"); días pendientes se omiten. */
+export function getChapterCompleted(id: string): Record<string, DayStatus> {
+  const out: Record<string, DayStatus> = {};
+  const put = (k: string, raw: string | boolean) => {
+    const s = readDayStatus(raw === true ? "true" : raw === false ? null : raw);
+    if (s) out[k] = s;
+  };
   if (id === getActiveChapterId()) {
-    const out: Record<string, boolean> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && isCompletedDayKey(k) && localStorage.getItem(k) === "true") out[k] = true;
+      if (k && isCompletedDayKey(k)) put(k, localStorage.getItem(k) ?? "");
     }
     return out;
   }
-  return readArchive(id)?.completed ?? {};
+  const arch = readArchive(id)?.completed ?? {};
+  Object.entries(arch).forEach(([k, v]) => put(k, v));
+  return out;
 }

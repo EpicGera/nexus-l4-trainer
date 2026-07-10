@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { effectTransform, canEncodeMp4, coverRect } from "./videoExport";
+import { effectTransform, canEncodeMp4, coverRect, flashAlpha, shakeOffset } from "./videoExport";
 
 describe("effectTransform", () => {
   it("kenburns: identidad en t=0, escala objetivo en t=1, monótona", () => {
@@ -65,6 +65,34 @@ describe("coverRect (cover-fit del clip a 1080×1920)", () => {
 
   it("dimensiones inválidas → rect del marco completo (sin dividir por cero)", () => {
     expect(coverRect(0, 0, W, H)).toEqual({ dx: 0, dy: 0, w: W, h: H });
+  });
+});
+
+describe("flashAlpha (destello por beat)", () => {
+  const beats = [1.0, 3.0];
+  it("máximo (0.6) justo en el beat, decae a 0 en 150ms", () => {
+    expect(flashAlpha(1.0, beats)).toBeCloseTo(0.6, 5);
+    expect(flashAlpha(1.075, beats)).toBeCloseTo(0.3, 2); // mitad de la ventana
+    expect(flashAlpha(1.15, beats)).toBeCloseTo(0, 5);
+  });
+  it("0 lejos de cualquier beat y antes del beat", () => {
+    expect(flashAlpha(2.0, beats)).toBe(0);
+    expect(flashAlpha(0.9, beats)).toBe(0); // el destello no se adelanta al beat
+  });
+  it("sin beats → siempre 0", () => {
+    expect(flashAlpha(1.0, [])).toBe(0);
+  });
+});
+
+describe("shakeOffset (sacudida por beat)", () => {
+  const beats = [1.0];
+  it("determinista: mismo tSec → mismo offset", () => {
+    expect(shakeOffset(1.0, beats)).toEqual(shakeOffset(1.0, beats));
+  });
+  it("dentro de la amplitud (≤12px) y decae a 0 fuera de la ventana", () => {
+    const at = shakeOffset(1.0, beats);
+    expect(Math.hypot(at.dx, at.dy)).toBeLessThanOrEqual(12 + 1e-9);
+    expect(shakeOffset(2.0, beats)).toEqual({ dx: 0, dy: 0 });
   });
 });
 

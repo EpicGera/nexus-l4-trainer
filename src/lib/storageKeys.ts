@@ -22,6 +22,15 @@ export const parseDayId = (dayId: string): { week: number; day: number } | null 
   return m ? { week: Number(m[1]), day: Number(m[2]) } : null;
 };
 
+/**
+ * Estado de un día: "completed" (registrado), "missed" (perdido, cerrado sin
+ * datos) o false (pendiente). Persistido en la clave bare `w1d1` como
+ * "true" | "missed"; cualquier otro valor se lee como pendiente.
+ */
+export type DayStatus = "completed" | "missed" | false;
+export const readDayStatus = (raw: string | null): DayStatus =>
+  raw === "true" ? "completed" : raw === "missed" ? "missed" : false;
+
 // Auto-follow week/day (the "sync tiempo real" toggle) is a per-DEVICE UI
 // preference. The l4_ prefix keeps it out of cloud roaming (nexus_* keys sync
 // across devices); reads fall back to the legacy nexus_ key it used to

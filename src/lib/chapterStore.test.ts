@@ -37,7 +37,7 @@ describe("chapterStore — snapshot/restore", () => {
 
     // c1's archive still holds its data
     expect(getChapterSessionsRaw("c1")).toBe("[\"s1\"]");
-    expect(getChapterCompleted("c1")).toEqual({ w1d1: true, w1d2: true });
+    expect(getChapterCompleted("c1")).toEqual({ w1d1: "completed", w1d2: "completed" });
     expect(viewChapterProgram("c1")!.w1.days[0].title).toBe("ANDARIEL");
   });
 

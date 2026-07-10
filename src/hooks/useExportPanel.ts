@@ -3,7 +3,8 @@ import { toPng } from "html-to-image";
 import { Capacitor } from "@capacitor/core";
 import { AthleteState } from "../types/workout";
 import { applyPersonFx } from "../lib/personFx";
-import { renderStoryVideo, type StoryEffect } from "../lib/videoExport";
+import { renderStoryVideo, type StoryEffect, type StoryFx } from "../lib/videoExport";
+import type { DayStatus } from "../lib/storageKeys";
 
 export type PhotoFilter = "none" | "vibrant" | "grayscale" | "sepia" | "duotone" | "silueta" | "neon";
 import {
@@ -22,7 +23,7 @@ import {
 export function useExportPanel(
   athlete: AthleteState,
   currentWeek: string,
-  completedDays: Record<string, boolean>,
+  completedDays: Record<string, DayStatus>,
   activeDay: any,
   activeVariation: any,
 ) {
@@ -66,6 +67,10 @@ export function useExportPanel(
   // ── Story VIDEO (Fase A) ──
   const [videoMode, setVideoMode] = useState(false);
   const [videoEffect, setVideoEffect] = useState<StoryEffect>("kenburns");
+  // Efectos opcionales combinables (destellos/shake por beat, stardust, glitch 70s).
+  const [videoFx, setVideoFx] = useState<StoryFx>({});
+  const toggleVideoFx = (k: keyof StoryFx) =>
+    setVideoFx((prev) => ({ ...prev, [k]: !prev[k] }));
   const [videoDurationSec, setVideoDurationSec] = useState<10 | 15>(10);
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
   const [audioName, setAudioName] = useState<string | null>(null);
@@ -161,6 +166,13 @@ export function useExportPanel(
         } catch { /* clip sin pista de audio decodificable → video mudo */ }
       }
 
+      // Los efectos de beat necesitan audio: si no hay, se ignoran silenciosamente.
+      const fx: StoryFx = {
+        beatFlash: videoFx.beatFlash && !!audio,
+        beatShake: videoFx.beatShake && !!audio,
+        stardust: videoFx.stardust,
+        retro70s: videoFx.retro70s,
+      };
       const { blob, ext } = await renderStoryVideo({
         overlayPng,
         effect: videoEffect,
@@ -168,6 +180,7 @@ export function useExportPanel(
         durationSec: videoBgFile ? clipExportSec : videoDurationSec,
         audio,
         videoBg: videoBgFile && videoBgUrlRef.current ? { url: videoBgUrlRef.current } : undefined,
+        fx,
         onProgress: setVideoProgress,
       });
       await serviceShareVideo(blob, ext, activeDay, currentWeek);
@@ -338,6 +351,8 @@ export function useExportPanel(
     setVideoMode,
     videoEffect,
     setVideoEffect,
+    videoFx,
+    toggleVideoFx,
     videoDurationSec,
     setVideoDurationSec,
     audioName,

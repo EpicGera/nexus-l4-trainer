@@ -7,7 +7,7 @@ import { getAccessToken, requestSheetsAccess, clearAccessToken } from "./firebas
 import { exportToGoogleSheets } from "./sheets";
 import { loadCachedWorkouts, getDefaultProgram } from "./sheetImport";
 import { cleanExerciseLabel, getCleanExerciseName } from "./historyUtils";
-import { parseDayId } from "./storageKeys";
+import { parseDayId, type DayStatus } from "./storageKeys";
 import { parseLoggedNumber, parseLoggedWeightKg } from "./logParse";
 import { AthleteState, DayWorkout, DayVariation } from "../types/workout";
 
@@ -262,7 +262,7 @@ export const getMonthlyVolumeStats = () => {
 // --- Weekly PDF Export ---
 export const handleBatchPDFExport = (
   currentWeek: string,
-  completedDays: Record<string, boolean>
+  completedDays: Record<string, DayStatus>
 ) => {
   const activeWeekPlan = (loadCachedWorkouts() || getDefaultProgram())[currentWeek];
   if (!activeWeekPlan) return;
@@ -333,7 +333,7 @@ export const handleBatchPDFExport = (
     weeklyData.push({
       dayCode: dayId,
       dayName: day.name,
-      isCompleted: !!completedDays[dayId],
+      isCompleted: completedDays[dayId] === "completed",
       logs: dayLogsForThisDay,
       originalDayData: day,
     });

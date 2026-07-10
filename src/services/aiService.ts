@@ -55,7 +55,9 @@ async function callClaude(opts: GenOpts): Promise<string> {
     },
     body: JSON.stringify({
       model: CLAUDE_MODEL,
-      max_tokens: 4096,
+      // Un capítulo = JSON de 4 semanas × 7 días × 4 bloques; 4096 truncaba la
+      // cola (la semana 4 salía con 1 día). Haiku 4.5 admite salidas largas.
+      max_tokens: opts.json ? 16384 : 4096,
       temperature: opts.temperature ?? 0.7,
       system: opts.system + (opts.json ? "\n\nRespondé ÚNICAMENTE con JSON válido, sin markdown ni texto extra." : ""),
       messages,
@@ -63,6 +65,11 @@ async function callClaude(opts: GenOpts): Promise<string> {
   });
   if (!res.ok) throw new Error(`Claude ${res.status}: ${await res.text()}`);
   const data = await res.json();
+  // Salida truncada por límite de tokens → el JSON queda incompleto (última
+  // semana con pocos días). Fallar claro en vez de parsear una cola rota.
+  if (data?.stop_reason === "max_tokens") {
+    throw new Error("La respuesta de la IA se cortó por longitud (salida truncada). Reintentá o pedí menos días por semana.");
+  }
   return Array.isArray(data?.content)
     ? data.content.filter((c: any) => c.type === "text").map((c: any) => c.text).join("")
     : "";
@@ -83,7 +90,8 @@ async function generateText(opts: GenOpts): Promise<string | null> {
       config: {
         systemInstruction: opts.system,
         temperature: opts.temperature ?? 0.7,
-        ...(opts.json ? { responseMimeType: "application/json" } : {}),
+        // Sin techo explícito el JSON del capítulo se truncaba (semana 4 con 1 día).
+        ...(opts.json ? { responseMimeType: "application/json", maxOutputTokens: 32768 } : {}),
       },
     });
     return response.text || "";

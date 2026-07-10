@@ -115,7 +115,7 @@ import {
 import { auth, googleProvider, googleSignIn, getAccessToken } from "./lib/firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { pushAllLocalToCloud } from "./lib/syncEngine";
-import { getAutoFollow, setAutoFollow } from "./lib/storageKeys";
+import { getAutoFollow, setAutoFollow, DayStatus, readDayStatus } from "./lib/storageKeys";
 import { pushAthleteStats } from "./lib/athleteStats";
 import { exportToGoogleSheets } from "./lib/sheets";
 
@@ -387,16 +387,16 @@ export default function App() {
     );
   });
 
-  // Completed state tracking
-  const [completedDays, setCompletedDays] = useState<Record<string, boolean>>(
+  // Completed state tracking. Tres estados por día: "completed" (registrado),
+  // "missed" (día perdido, cerrado sin datos) o ausente (pendiente). Persistido
+  // en la clave bare `w1d1` como "true" | "missed" (rueda por el sync engine).
+  const [completedDays, setCompletedDays] = useState<Record<string, DayStatus>>(
     () => {
-      const result: Record<string, boolean> = {};
+      const result: Record<string, DayStatus> = {};
       ["w1", "w2", "w3", "w4"].forEach((week) => {
         for (let d = 1; d <= 7; d++) {
           const dayId = `${week}d${d}`;
-          const saved = localStorage.getItem(dayId);
-          // Fresh installs start with nothing completed — progress is earned.
-          result[dayId] = saved === "true";
+          result[dayId] = readDayStatus(localStorage.getItem(dayId));
         }
       });
       return result;
@@ -471,8 +471,10 @@ export default function App() {
       const next = { ...prev };
       Object.values(database).forEach((week) => {
         week.days.forEach((day) => {
-          if (day.isCompleted && !next[day.id]) {
-            next[day.id] = true;
+          // Un día con RPE registrado en la hoja está completado — pisa incluso
+          // un "missed" previo (había datos reales, estaba mal marcado perdido).
+          if (day.isCompleted && next[day.id] !== "completed") {
+            next[day.id] = "completed";
             try {
               localStorage.setItem(day.id, "true");
             } catch {
@@ -589,6 +591,8 @@ export default function App() {
     setVideoMode,
     videoEffect,
     setVideoEffect,
+    videoFx,
+    toggleVideoFx,
     videoDurationSec,
     setVideoDurationSec,
     audioName,
@@ -674,11 +678,11 @@ export default function App() {
       }
 
       // Reload completed days with the same defaults as the initial mount
-      const completed: Record<string, boolean> = {};
+      const completed: Record<string, DayStatus> = {};
       ["w1", "w2", "w3", "w4"].forEach((week) => {
         for (let d = 1; d <= 7; d++) {
           const dayId = `${week}d${d}`;
-          completed[dayId] = localStorage.getItem(dayId) === "true";
+          completed[dayId] = readDayStatus(localStorage.getItem(dayId));
         }
       });
       setCompletedDays(completed);
@@ -859,8 +863,8 @@ export default function App() {
 
   const markDayComplete = (dayId: string) => {
     setCompletedDays((prev) => {
-      if (prev[dayId]) return prev;
-      const nextMap = { ...prev, [dayId]: true };
+      if (prev[dayId] === "completed") return prev;
+      const nextMap: Record<string, DayStatus> = { ...prev, [dayId]: "completed" };
       setTimeout(() => {
         setConfettiTrigger((v) => v + 1);
         localStorage.setItem(dayId, "true");
@@ -869,7 +873,7 @@ export default function App() {
         let totalCompleted = 0;
         Object.keys(database).forEach((week) => {
           database[week].days.forEach((day) => {
-            if (nextMap[day.id]) totalCompleted++;
+            if (nextMap[day.id] === "completed") totalCompleted++;
           });
         });
         if (totalCompleted >= 1) checkAndUnlockAchievement("first_day");
@@ -877,11 +881,33 @@ export default function App() {
 
         let weekCount = 0;
         for (let d = 1; d <= 7; d++) {
-          if (nextMap[`${currentWeek}d${d}`]) weekCount++;
+          if (nextMap[`${currentWeek}d${d}`] === "completed") weekCount++;
         }
         if (weekCount === 7) checkAndUnlockAchievement("perfect_week");
       }, 0);
       return nextMap;
+    });
+  };
+
+  // Día perdido: cerrar un día que no se entrenó, sin generar datos. Cierra el
+  // hueco en los gráficos (punto en 0 en vez de salto) y no suma XP ni %.
+  const markDayMissed = (dayId: string) => {
+    setCompletedDays((prev) => {
+      if (prev[dayId] === "missed") return prev;
+      localStorage.setItem(dayId, "missed");
+      window.dispatchEvent(new Event("nexus_logs_updated"));
+      return { ...prev, [dayId]: "missed" };
+    });
+  };
+
+  // Deshacer "perdido" → vuelve a pendiente (nunca toca un día ya completado).
+  const unmarkDayMissed = (dayId: string) => {
+    setCompletedDays((prev) => {
+      if (prev[dayId] !== "missed") return prev;
+      localStorage.setItem(dayId, "false");
+      window.dispatchEvent(new Event("nexus_logs_updated"));
+      const { [dayId]: _drop, ...rest } = prev;
+      return { ...rest, [dayId]: false };
     });
   };
 
@@ -890,7 +916,7 @@ export default function App() {
     let totalCompleted = 0;
     Object.keys(database).forEach((week) => {
       database[week].days.forEach((day) => {
-        if (completedDays[day.id]) {
+        if (completedDays[day.id] === "completed") {
           totalCompleted++;
         }
       });
@@ -908,7 +934,7 @@ export default function App() {
   const weeklyCompletionInfo = useMemo(() => {
     let completedCount = 0;
     for (let d = 1; d <= 7; d++) {
-      if (completedDays[`${currentWeek}d${d}`]) {
+      if (completedDays[`${currentWeek}d${d}`] === "completed") {
         completedCount++;
       }
     }
@@ -966,7 +992,7 @@ export default function App() {
   // Reset progress handlers
   const handleConfirmReset = () => {
     localStorage.clear();
-    const resetting: Record<string, boolean> = {};
+    const resetting: Record<string, DayStatus> = {};
     ["w1", "w2", "w3", "w4"].forEach((week) => {
       for (let d = 1; d <= 7; d++) {
         const dayId = `${week}d${d}`;
@@ -1592,6 +1618,41 @@ export default function App() {
                     </div>
                     )}
 
+                    {/* Efectos combinables — se aplican al exportar (no en el
+                        preview). Destellos/Shake requieren música o audio del clip. */}
+                    {(() => {
+                      const hasAudioSource = !!audioBuffer || !!videoBgFile;
+                      const fxButtons: { k: "beatFlash" | "beatShake" | "stardust" | "retro70s"; label: string; needsAudio: boolean }[] = [
+                        { k: "beatFlash", label: "Destellos", needsAudio: true },
+                        { k: "beatShake", label: "Shake", needsAudio: true },
+                        { k: "stardust", label: "Stardust", needsAudio: false },
+                        { k: "retro70s", label: "Glitch 70s", needsAudio: false },
+                      ];
+                      return (
+                        <div className="space-y-1.5">
+                          <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Efectos (al exportar)</div>
+                          <div className="grid grid-cols-2 gap-1">
+                            {fxButtons.map(({ k, label, needsAudio }) => {
+                              const disabled = needsAudio && !hasAudioSource;
+                              const on = !!videoFx[k];
+                              return (
+                                <button
+                                  key={k}
+                                  type="button"
+                                  disabled={disabled}
+                                  title={disabled ? "Elegí música (o usá un clip con audio) para sincronizar con los beats" : undefined}
+                                  onClick={(e) => { e.stopPropagation(); toggleVideoFx(k); }}
+                                  className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all ${disabled ? "opacity-40 cursor-not-allowed bg-[#18181B] text-[#52525B] border-[#27272A]" : on ? "bg-cyan-400 text-black border-cyan-400 cursor-pointer" : "bg-[#18181B] text-[#A1A1AA] border-[#3F3F46] hover:bg-[#27272A] cursor-pointer"}`}
+                                >
+                                  {label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     <div className="space-y-1.5">
                       <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
                       {videoBgFile ? (
@@ -1775,52 +1836,10 @@ export default function App() {
             })}
           </div>
 
-          {/* EXPORT ROW */}
+          {/* EXPORT ROW — solo acciones contextuales del DÍA ACTIVO. Las
+              exportaciones (TXT mes, Sync Sheets, PDF semana, Programa del día,
+              Guía IA) viven en la solapa Perfil & Bio → Datos & Nube. */}
           <div className="flex gap-2 w-full sm:w-auto h-full items-center justify-start sm:justify-end shrink-0">
-            {/* TEXT EXPORT TRIGGER */}
-            <button
-              onClick={handleMonthTextExport}
-              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-zinc-800 to-zinc-900 hover:from-zinc-700 hover:to-zinc-800 text-white border border-transparent rounded shadow-sm hover:shadow-sm active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
-              title="Exportar programa completo del mes a archivo de texto (TXT) para auditar"
-            >
-              <FileText size={14} className="text-zinc-400" />
-              <span className="hidden sm:inline">TXT MES</span>
-            </button>
-
-            {/* GOOGLE SHEETS EXPORT TRIGGER */}
-            <button
-              onClick={handleExportGoogleSheets}
-              disabled={isExportingSheets}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-white border border-transparent rounded shadow-sm hover:shadow-sm active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
-              title="Sincronizar programación y resultados con Google Sheets"
-            >
-              <Upload size={14} className={isExportingSheets ? 'animate-bounce text-[#a7f3d0]' : 'text-[#a7f3d0]'} />
-              <span>{isExportingSheets ? 'SINC. SHEETS...' : 'SYNC SHEETS'}</span>
-            </button>
-
-            {/* BATCH WEEK PDF EXPORT TRIGGER */}
-            <button
-              id="btn-quick-pdf"
-              onClick={handleBatchPDFExport}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white border border-transparent rounded shadow-sm hover:shadow-sm active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
-              title="Exportar reporte consolidado de toda la semana de entrenamiento actual a PDF con distribución de RPE"
-            >
-              <FileText size={14} className=" text-[#DC2626]" />
-              <span>EXPORTAR SEMANA</span>
-            </button>
-
-            {/* DAY MARKDOWN EXPORT (moved here, renamed) */}
-            {activeDay && (
-              <button
-                onClick={handleExportDayMarkdown}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-700 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 text-white rounded shadow-sm active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
-                title="Exportar el programa del día actual a Markdown para el coach"
-              >
-                <FileText size={14} className="text-indigo-200" />
-                <span>PROGRAMA DEL DÍA</span>
-              </button>
-            )}
-
             {/* DÍA ESPECIAL: subir JSON de día suelto como pestaña extra del día activo */}
             {activeDay && (
               <>
@@ -1837,24 +1856,6 @@ export default function App() {
                   title="Subir un día suelto (JSON o TXT con bloques) como pestaña ESPECIAL de este día"
                 >
                   <span>{hasSpecialVariation(database, activeDay.id) ? "CAMBIAR ESPECIAL" : "+ DÍA ESPECIAL"}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    const blob = new Blob([guiaDiaEspecial], { type: "text/markdown;charset=utf-8" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "GUIA-dia-especial.md";
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#18181B] border border-[#3F3F46] hover:bg-[#27272A] text-[#A1A1AA] hover:text-white rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
-                  title="Descargar la guía para pedirle a una IA externa (ChatGPT/Claude/Gemini) un día especial en el formato correcto"
-                >
-                  <FileText size={14} />
-                  <span>GUÍA IA</span>
                 </button>
                 {hasSpecialVariation(database, activeDay.id) && (
                   <button
@@ -1913,20 +1914,59 @@ export default function App() {
                   id="dayNav"
                   className="flex gap-2 overflow-x-auto py-3 scrollbar-hide text-xl"
                 >
-                  {activeWeekPlan?.days.map((day, idx) => {
-                    const isCompleted = completedDays[day.id];
+                  {/* Siempre 7 chips (L→D): un día que el JSON no trae se muestra
+                      como chip fantasma clickeable (día vacío) para conservar la
+                      correlatividad de la semana. */}
+                  {Array.from({
+                    length: Math.max(7, activeWeekPlan?.days.length ?? 0),
+                  }).map((_, idx) => {
+                    const day = activeWeekPlan?.days[idx];
                     const isActive = idx === currentDayIndex;
+                    const label =
+                      ["L", "M", "M", "J", "V", "S", "D"][idx] ??
+                      day?.name.charAt(0) ??
+                      "·";
+
+                    // Día no programado: chip fantasma (punteado, tenue).
+                    if (!day) {
+                      return (
+                        <button
+                          key={`empty-${idx}`}
+                          className={`px-5 py-2.5 rounded-none font-brutalist text-lg tracking-[0.2em] transition-all cursor-pointer border border-dashed border-white/20 ${
+                            isActive
+                              ? "text-white/80 bg-white/5"
+                              : "text-white/30 hover:text-white/60 hover:bg-white/5"
+                          }`}
+                          onClick={() => {
+                            setSyncWithRealTime(false);
+                            setAutoFollow(false);
+                            setCurrentDayIndex(idx);
+                          }}
+                        >
+                          {label}
+                        </button>
+                      );
+                    }
+
+                    const isCompleted = completedDays[day.id] === "completed";
+                    const isMissed = completedDays[day.id] === "missed";
 
                     let statusClass =
                       "text-white/70 hover:bg-[#27272A] hover:text-white bg-[#18181B]";
                     let activeStyle = {};
-                    if (isCompleted) {
+                    if (isMissed) {
+                      statusClass =
+                        "text-neutral-500 line-through hover:text-neutral-300 bg-[#18181B]";
+                    } else if (isCompleted) {
                       statusClass =
                         "text-emerald-300 hover:bg-emerald-500/10 hover:text-emerald-100 bg-emerald-500/5";
                     }
                     if (isActive) {
                       if (isCompleted) {
                         statusClass = "bg-emerald-500 text-black font-black";
+                      } else if (isMissed) {
+                        statusClass =
+                          "bg-neutral-700 text-neutral-300 line-through font-black";
                       } else {
                         statusClass = "text-black font-black shadow-md";
                         activeStyle = {
@@ -1947,14 +1987,30 @@ export default function App() {
                           setCurrentDayIndex(idx);
                         }}
                       >
-                        {["L", "M", "M", "J", "V", "S", "D"][idx] ??
-                          day.name.charAt(0)}
+                        {label}
                       </button>
                     );
                   })}
                 </div>
               </div>
             </div>
+
+            {/* Día seleccionado que el programa no trae: estado explícito en
+                vez de una pantalla en blanco (coherencia de la semana). */}
+            {!activeDay && activeWeekPlan && (
+              <div className="px-4 md:px-8 py-16 text-center">
+                <div className="mx-auto max-w-lg border border-dashed border-[#3F3F46] bg-pure-black/60 p-8">
+                  <p className="font-brutalist text-3xl md:text-4xl tracking-widest text-white/60 uppercase">
+                    Día vacío
+                  </p>
+                  <p className="mt-3 font-mono text-[11px] md:text-xs text-neutral-500 uppercase leading-relaxed">
+                    El programa de este capítulo no trae este día. Importá un
+                    programa que lo incluya, o usá <span className="text-white/70">+ DÍA ESPECIAL</span> sobre
+                    otro día para agregar un entrenamiento suelto.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* 3. HERO WHITEBOARD HEADER */}
             {activeDay && (
@@ -2667,7 +2723,7 @@ export default function App() {
                 setDatabase(db);
                 setCurrentVariationIndex(0);
                 setCompletedDays(() => {
-                  const fresh: Record<string, boolean> = {};
+                  const fresh: Record<string, DayStatus> = {};
                   ["w1", "w2", "w3", "w4"].forEach((w) => {
                     for (let d = 1; d <= 7; d++) fresh[`${w}d${d}`] = false;
                   });
@@ -2685,6 +2741,100 @@ export default function App() {
                   .catch((e) => console.error("tagChapterInspiration failed:", e));
               }}
             />
+
+            {/* EXPORTACIONES & UTILIDADES — reubicadas desde la barra de menú.
+                Cada acción con su descripción de qué hace y cuándo usarla. */}
+            <section className="mt-4 p-5 border border-[#3F3F46] bg-pure-black/95 text-left" data-purpose="exports-panel">
+              <label className="text-[10px] font-mono font-black tracking-widest text-white uppercase flex items-center gap-1.5">
+                <FileText size={11} /> EXPORTACIONES & UTILIDADES
+              </label>
+              <p className="mt-1 text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+                Sacá tu programación y tus registros fuera de la app: texto, PDF, Google Sheets o Markdown.
+              </p>
+
+              <div className="mt-4 space-y-4">
+                {/* TXT MES */}
+                <div className="pt-3 border-t border-[#27272A]">
+                  <button
+                    onClick={handleMonthTextExport}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-zinc-600 text-zinc-200 hover:bg-zinc-200 hover:text-pure-black font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> TXT DEL MES
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+                    Descarga el mes completo (4 semanas) como texto plano. Ideal para archivar o pegar en un editor / IA.
+                  </p>
+                </div>
+
+                {/* SYNC SHEETS */}
+                <div className="pt-3 border-t border-[#27272A]">
+                  <button
+                    onClick={handleExportGoogleSheets}
+                    disabled={isExportingSheets}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-emerald-600/60 text-emerald-300 hover:bg-emerald-500 hover:text-pure-black disabled:opacity-50 disabled:cursor-not-allowed font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <Upload size={12} className={isExportingSheets ? "animate-bounce" : ""} />
+                    {isExportingSheets ? "SINCRONIZANDO..." : "SYNC GOOGLE SHEETS"}
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+                    Sube programación y resultados a tu Google Sheet vinculado. Backup en la nube y base para análisis externo.
+                  </p>
+                </div>
+
+                {/* EXPORTAR SEMANA (PDF) */}
+                <div className="pt-3 border-t border-[#27272A]">
+                  <button
+                    id="btn-quick-pdf"
+                    onClick={handleBatchPDFExport}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-blue-600/60 text-blue-300 hover:bg-blue-500 hover:text-pure-black font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> EXPORTAR SEMANA (PDF)
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+                    PDF consolidado de los 7 días de la semana activa, con la distribución de RPE. Para imprimir o compartir.
+                  </p>
+                </div>
+
+                {/* PROGRAMA DEL DÍA (Markdown) */}
+                <div className="pt-3 border-t border-[#27272A]">
+                  <button
+                    onClick={handleExportDayMarkdown}
+                    disabled={!activeDay}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-indigo-500/60 text-indigo-300 hover:bg-indigo-500 hover:text-pure-black disabled:opacity-40 disabled:cursor-not-allowed font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> PROGRAMA DEL DÍA (MD)
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+                    {activeDay
+                      ? "Markdown del día activo, listo para llevar a una IA o editor."
+                      : "Seleccioná un día en el pizarrón para exportarlo."}
+                  </p>
+                </div>
+
+                {/* GUÍA IA */}
+                <div className="pt-3 border-t border-[#27272A]">
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([guiaDiaEspecial], { type: "text/markdown;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "GUIA-dia-especial.md";
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-[#3F3F46] text-[#A1A1AA] hover:bg-[#27272A] hover:text-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> GUÍA IA (DÍA ESPECIAL)
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+                    Descarga la guía para pedirle a una IA externa (ChatGPT / Claude / Gemini) un día especial en el formato que la app importa.
+                  </p>
+                </div>
+              </div>
+            </section>
 
             {/* 1RM BRZYCKI CALIBRATOR TOOL */}
             <section className="mt-4">
@@ -2961,6 +3111,32 @@ export default function App() {
           >
             {existingSession ? "✎ EDITAR INCURSIÓN" : "⚔ INCURSIÓN"}
           </button>
+          {/* Cerrar un día que no se entrenó: lo marca perdido (sin datos) para
+              que no quede pendiente eternamente y cierre el hueco en gráficos.
+              Oculto si el día ya está completado. */}
+          {completedDays[activeDay.id] !== "completed" && (
+            completedDays[activeDay.id] === "missed" ? (
+              <button
+                onClick={() => unmarkDayMissed(activeDay.id)}
+                title="Deshacer: volver a día pendiente"
+                className="fixed bottom-[4.5rem] left-5 z-[90] no-print bg-transparent border border-neutral-600 text-neutral-400 hover:text-white hover:border-white font-brutalist text-[10px] tracking-widest uppercase px-3 py-2 rounded-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+              >
+                ⟲ PERDIDO · DESHACER
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (window.confirm(`¿Marcar ${activeDay.name} como día perdido? Se cierra sin registrar datos (no suma XP ni % de la semana).`)) {
+                    markDayMissed(activeDay.id);
+                  }
+                }}
+                title="No entrené este día: cerrarlo como perdido"
+                className="fixed bottom-[4.5rem] left-5 z-[90] no-print bg-transparent border border-neutral-700 text-neutral-500 hover:text-neutral-300 hover:border-neutral-500 font-brutalist text-[10px] tracking-widest uppercase px-3 py-2 rounded-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+              >
+                ✕ DÍA PERDIDO
+              </button>
+            )
+          )}
           <SessionWizard
             open={wizardOpen}
             onClose={() => setWizardOpen(false)}
