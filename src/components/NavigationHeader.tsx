@@ -87,7 +87,7 @@ export default function NavigationHeader({
   return (
     <header
       ref={headerRef}
-      className="app-header fixed top-0 left-0 right-0 z-50 bg-[#0A0A0E]/95 border-b-2 border-white/10 no-print backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.85)] select-none"
+      className="app-header fixed top-0 left-0 right-0 z-50 bg-[#0A0A0E]/95 border-b-2 border-[#3F3F46] no-print backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.85)] select-none"
       style={{
         paddingTop: "env(safe-area-inset-top, 0px)",
       }}
@@ -140,7 +140,7 @@ export default function NavigationHeader({
             </span>
           </div>
 
-          <div className="flex items-center gap-1 bg-white/5 px-1.5 sm:px-3 py-0.5 rounded shrink-0 hidden md:flex">
+          <div className="flex items-center gap-1 bg-[#18181B] px-1.5 sm:px-3 py-0.5 rounded shrink-0 hidden md:flex">
             <span className="text-[8.5px] sm:text-[10px] font-mono shrink-0">
               {syncWithRealTime ? (
                 <span className="text-white font-bold flex items-center gap-1">
@@ -198,8 +198,8 @@ export default function NavigationHeader({
               onClick={() => setActiveSheet(index)}
               className={`flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 rounded transition-all duration-300 relative cursor-pointer outline-none focus:outline-none ${
                 isActive
-                  ? "bg-white/10 text-white font-black"
-                  : "text-neutral-500 hover:text-white hover:bg-white/5"
+                  ? "bg-[#27272A] text-white font-black"
+                  : "text-neutral-500 hover:text-white hover:bg-[#18181B]"
               }`}
             >
               <div className="flex items-center gap-1 sm:gap-1.5 justify-center">
@@ -228,7 +228,7 @@ export default function NavigationHeader({
       </div>
 
       {/* Sheet Interactive Progress Indicator */}
-      <div className="w-full h-[3px] bg-white/5 relative overflow-hidden">
+      <div className="w-full h-[3px] bg-[#18181B] relative overflow-hidden">
         <motion.div
           className="absolute top-0 bottom-0 left-0 shadow-sm"
           initial={false}

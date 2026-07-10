@@ -5,8 +5,9 @@
 import { loadSessions } from "./sessionStore";
 import { estimate1RM } from "./trainingEngine";
 import { getOneRepMaxes } from "./workingMax";
-import { WEEK_RPE_TARGET } from "./constants";
+import { WEEK_RPE_TARGET, INTENTION_RPE_BAND } from "./constants";
 import type { TrainingSession } from "../types/training";
+import type { BlockIntention } from "../types/workout";
 
 export type LiftPerf = "bajo" | "banda" | "sobre"; // below / in / above target band
 export type MetconPerf = "arraso" | "completo" | "dnf";
@@ -123,8 +124,13 @@ function findPrs(sessions: TrainingSession[]): PrCandidate[] {
   return out;
 }
 
-export function puntajeNexus(week: string): NexusScore {
-  const target = WEEK_RPE_TARGET[week] || { min: 6, max: 8 };
+export function puntajeNexus(
+  week: string,
+  opts: { intention?: BlockIntention } = {},
+): NexusScore {
+  // Banda por INTENCIÓN del capítulo si está declarada/inferida; si no, el layout
+  // fijo w1–w4. Así la autorregulación deja de depender del número de semana.
+  const target = (opts.intention && INTENTION_RPE_BAND[opts.intention]) || WEEK_RPE_TARGET[week] || { min: 6, max: 8 };
   const targetMid = Math.round(((target.min + target.max) / 2) * 10) / 10;
   const sessions = sessionsForWeek(week);
 

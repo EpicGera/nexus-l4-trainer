@@ -152,7 +152,7 @@ export default function WarriorScreen({
   return (
     <div className="space-y-5 pb-12">
       {/* ═══ RANK CARD ═══ */}
-      <section className="relative overflow-hidden border-2 border-white/10 bg-gradient-to-br from-[#0D0D14] via-[#111118] to-[#0A0A10] p-5">
+      <section className="relative overflow-hidden border-2 border-[#3F3F46] bg-gradient-to-br from-[#0D0D14] via-[#111118] to-[#0A0A10] p-5">
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -287,7 +287,7 @@ export default function WarriorScreen({
       </section>
 
       {/* ═══ ATTRIBUTES RADAR ═══ */}
-      <section className="border-2 border-white/10 bg-[#0D0D14] p-4">
+      <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
         <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
           <Zap size={14} className="text-amber-400" />
           ATRIBUTOS DEL GUERRERO
@@ -348,7 +348,7 @@ export default function WarriorScreen({
 
       {/* ═══ TOP PRs — "HABILIDADES" ═══ */}
       {topPRs.length > 0 && (
-        <section className="border-2 border-white/10 bg-[#0D0D14] p-4">
+        <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
           <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
             <Trophy size={14} className="text-amber-400" />
             HABILIDADES MÁXIMAS (PRs)
@@ -393,7 +393,7 @@ export default function WarriorScreen({
 
       {/* ═══ WEEKLY VOLUME — "PODER SEMANAL" ═══ */}
       {weeklyVolume.length > 0 && (
-        <section className="border-2 border-white/10 bg-[#0D0D14] p-4">
+        <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
           <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
             <Flame size={14} className="text-orange-400" />
             PODER SEMANAL (VOLUMEN KG)
@@ -441,7 +441,7 @@ export default function WarriorScreen({
       )}
 
       {/* ═══ ACHIEVEMENTS — "INSIGNIAS" ═══ */}
-      <section className="border-2 border-white/10 bg-[#0D0D14] p-4">
+      <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
         <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
           <Star size={14} className="text-yellow-400" />
           INSIGNIAS ({unlockedAchievements.length}/{achievementData.length})
@@ -452,7 +452,7 @@ export default function WarriorScreen({
               key={a.id}
               className={`relative border p-3 text-center transition-all ${
                 a.unlocked
-                  ? "border-white/15 bg-white/[0.03]"
+                  ? "border-[#3F3F46] bg-white/[0.03]"
                   : "border-white/5 bg-white/[0.01] opacity-30 grayscale"
               }`}
             >

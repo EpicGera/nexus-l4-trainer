@@ -23,10 +23,10 @@ export default function EnrichmentToggle({ value, onChange, compact = false }: E
   const barCount = value ? 3 : 1;
 
   return (
-    <div className={`${compact ? "" : "bg-black/30 border border-white/10 rounded-sm p-3"}`}>
+    <div className={`${compact ? "" : "bg-black/30 border border-[#3F3F46] rounded-sm p-3"}`}>
       {/* Segmented control */}
       <div
-        className="relative flex rounded-sm overflow-hidden border border-white/10"
+        className="relative flex rounded-sm overflow-hidden border border-[#3F3F46]"
         style={{ height: compact ? 28 : 34 }}
       >
         {/* Sliding highlight */}

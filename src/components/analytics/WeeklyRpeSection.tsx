@@ -214,7 +214,7 @@ export default function WeeklyRpeSection({
 
       {/* Honest day-vs-prior-cycles comparison */}
       {comparison && comparison.hasCurrentReal && (
-        <div className="mt-5 bg-black/50 border border-white/10 p-4 rounded-sm space-y-3">
+        <div className="mt-5 bg-black/50 border border-[#3F3F46] p-4 rounded-sm space-y-3">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-white/5 pb-2">
             <span className={TXT.label}>HOY VS. MISMO DÍA EN OTRAS SEMANAS</span>
             <Pill
@@ -241,7 +241,7 @@ export default function WeeklyRpeSection({
                     {comparison.currentAvg}
                   </div>
                 </div>
-                <div className="border-l border-r border-white/10">
+                <div className="border-l border-r border-[#3F3F46]">
                   <div className={TXT.label}>CICLOS PREVIOS</div>
                   <div className="text-2xl font-brutalist font-black text-neutral-400">
                     {comparison.priorAvg}

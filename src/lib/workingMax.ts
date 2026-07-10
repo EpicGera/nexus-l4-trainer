@@ -85,6 +85,39 @@ export function setWmAdjustFactor(exerciseId: string, factor: number): void {
   }
 }
 
+// ── Registro de autorregulación aplicada ─────────────────────────────────────
+// Sin esto, la propuesta se recomputaba de los mismos RPE históricos inmutables
+// y reaparecía por siempre (el bug "siempre queda un ajuste por aplicar"). Guarda
+// qué {semana:lift} ya se procesó (aplicado u omitido) para excluirlo.
+const AUTOREG_KEY = "nexus_autoreg_applied";
+
+const autoregId = (week: string, exerciseId: string) => `${week}:${exerciseId}`;
+
+function getAutoregApplied(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(AUTOREG_KEY);
+    const o = raw ? JSON.parse(raw) : {};
+    return o && typeof o === "object" && !Array.isArray(o) ? o : {};
+  } catch {
+    return {};
+  }
+}
+
+export function isAutoregApplied(week: string, exerciseId: string): boolean {
+  return !!getAutoregApplied()[autoregId(week, exerciseId)];
+}
+
+/** Marca un ajuste como procesado (aplicado u omitido) para esa semana+lift. */
+export function markAutoregApplied(week: string, exerciseId: string): void {
+  const all = getAutoregApplied();
+  all[autoregId(week, exerciseId)] = new Date().toISOString();
+  try {
+    localStorage.setItem(AUTOREG_KEY, JSON.stringify(all));
+  } catch {
+    /* storage restricted — ignore */
+  }
+}
+
 export function getOneRepMaxes(): Record<string, number> {
   try {
     const raw = localStorage.getItem(ONE_RM_KEY);

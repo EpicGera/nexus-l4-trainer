@@ -159,10 +159,14 @@ export default function BiomechanicsSection({
               <PolarAngleAxis
                 dataKey="subject"
                 stroke={CHART.axis}
-                fontSize={11}
-                fontFamily="monospace"
+                tick={{ fill: CHART.tick.fill, fontSize: 11, fontFamily: "monospace" }}
               />
-              <PolarRadiusAxis angle={30} domain={[0, 10]} stroke={CHART.grid} fontSize={9} />
+              <PolarRadiusAxis
+                angle={30}
+                domain={[0, 10]}
+                stroke={CHART.grid}
+                tick={{ fill: CHART.tick.fill, fontSize: 9 }}
+              />
               <Radar
                  name="Dosis de Torque"
                  dataKey="A"

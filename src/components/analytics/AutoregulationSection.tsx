@@ -3,9 +3,13 @@ import { Gauge } from "lucide-react";
 import { puntajeNexus } from "../../lib/nexusScore";
 import { proposeAdjustments, Adjustment } from "../../lib/autoregulate";
 import { evaluateAthlete } from "../../lib/chapterCreator";
-import { getWmAdjustFactor, setWmAdjustFactor, setOneRepMax } from "../../lib/workingMax";
+import {
+  getWmAdjustFactor, setWmAdjustFactor, setOneRepMax,
+  isAutoregApplied, markAutoregApplied,
+} from "../../lib/workingMax";
 import { emitToast } from "../../lib/exportService";
 import { SectionCard, StatBox, Pill, NexusButton, EmptyState, TXT } from "../ui/primitives";
+import type { BlockIntention } from "../../types/workout";
 
 const PERF_TONE: Record<string, "good" | "neutral" | "warn" | "danger"> = {
   bajo: "good", banda: "neutral", sobre: "warn", arraso: "good", completo: "neutral", dnf: "danger",
@@ -19,7 +23,13 @@ const PERF_ES: Record<string, string> = {
  * semana vs la prescripción y propone ajustar el Working Max de la próxima — el
  * atleta confirma (nunca automático). Vive en la lente "Intensidad".
  */
-export default function AutoregulationSection({ currentWeek }: { currentWeek: string }) {
+export default function AutoregulationSection({
+  currentWeek,
+  intention,
+}: {
+  currentWeek: string;
+  intention?: BlockIntention;
+}) {
   const [refresh, setRefresh] = useState(0);
 
   // Recompute when new sets are logged anywhere in the app — without this the
@@ -31,13 +41,19 @@ export default function AutoregulationSection({ currentWeek }: { currentWeek: st
   }, []);
 
   const { score, result } = useMemo(() => {
-    const sc = puntajeNexus(currentWeek);
+    const sc = puntajeNexus(currentWeek, { intention });
     const evalA = evaluateAthlete();
     return { score: sc, result: proposeAdjustments(sc, { acwr: evalA.acwr }) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentWeek, refresh]);
+  }, [currentWeek, intention, refresh]);
 
-  const actionable = result.adjustments.filter((a) => a.deltaPct !== 0 || a.kind === "pr-bump");
+  // Excluye lo ya procesado esta semana (aplicado u omitido). El pr-bump se
+  // auto-limpia con su propio gate e1rm, así que no se filtra por marca.
+  const actionable = result.adjustments.filter(
+    (a) =>
+      (a.deltaPct !== 0 || a.kind === "pr-bump") &&
+      (a.kind === "pr-bump" || !isAutoregApplied(currentWeek, a.exerciseId)),
+  );
 
   const applyAll = () => {
     let n = 0;
@@ -48,10 +64,17 @@ export default function AutoregulationSection({ currentWeek }: { currentWeek: st
       } else if (a.kind === "wm-up" || a.kind === "wm-down") {
         const cur = getWmAdjustFactor(a.exerciseId);
         setWmAdjustFactor(a.exerciseId, cur * (1 + a.deltaPct / 100));
+        markAutoregApplied(currentWeek, a.exerciseId); // consumido → no reaparece
         n++;
       }
     }
     emitToast(`✅ ${n} ajuste(s) aplicado(s). Las cargas % WM de la próxima semana ya los reflejan.`, "success", 7000);
+    setRefresh((r) => r + 1);
+  };
+
+  // Descartar un ajuste sin aplicarlo (lo marca procesado para esta semana).
+  const skip = (a: Adjustment) => {
+    markAutoregApplied(currentWeek, a.exerciseId);
     setRefresh((r) => r + 1);
   };
 
@@ -105,6 +128,16 @@ export default function AutoregulationSection({ currentWeek }: { currentWeek: st
                   <li key={i} className="text-[11px] font-mono text-neutral-300 flex items-start gap-2">
                     <AdjustTag a={a} />
                     <span className="flex-1 leading-snug">{a.reason}</span>
+                    {a.kind !== "pr-bump" && (
+                      <button
+                        type="button"
+                        onClick={() => skip(a)}
+                        className="shrink-0 text-[9px] font-mono uppercase tracking-wider text-[var(--color-ink-faint)] hover:text-[var(--color-ink)] border border-[#3F3F46] hover:border-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-sm transition-colors cursor-pointer"
+                        title="Descartar este ajuste (no reaparecerá esta semana)"
+                      >
+                        OMITIR
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

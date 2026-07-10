@@ -142,7 +142,7 @@ export default function ProfileModal({
         <h3 className="text-3xl sm:text-4xl font-brutalist tracking-widest text-pure-white leading-tight text-center relative z-10">
           PERFIL DE RENDIMIENTO L4
         </h3>
-        <p className="text-center font-bold text-neutral-400 text-[10px] sm:text-xs tracking-[0.2em] uppercase border-b border-white/10 pb-5 mb-5 text-electric-blue/80 relative z-10">
+        <p className="text-center font-bold text-neutral-400 text-[10px] sm:text-xs tracking-[0.2em] uppercase border-b border-[#3F3F46] pb-5 mb-5 text-electric-blue/80 relative z-10">
           SISTEMA DE CONFIGURACIÓN DE BIOMECÁNICA DE ATLETA
         </p>
 
@@ -161,7 +161,7 @@ export default function ProfileModal({
                   identity: e.target.value.toUpperCase(),
                 })
               }
-              className="w-full bg-[#111113] border border-white/10 p-2.5 sm:p-3 text-white text-sm uppercase font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+              className="w-full bg-[#111113] border border-[#3F3F46] p-2.5 sm:p-3 text-white text-sm uppercase font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               placeholder="EJ: GERA & FLOR"
             />
           </div>
@@ -177,7 +177,7 @@ export default function ProfileModal({
               onChange={(e) =>
                 setTempAthlete({ ...tempAthlete, level: e.target.value })
               }
-              className="w-full bg-[#111113] border border-white/10 p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700 mb-2"
+              className="w-full bg-[#111113] border border-[#3F3F46] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700 mb-2"
               placeholder="EJ: PRVN ELITE // LVL 4 ⚡"
             />
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
@@ -229,7 +229,7 @@ export default function ProfileModal({
                       condition: preset.condition,
                     })
                   }
-                  className={`text-[9px] font-mono bg-white/5 text-neutral-300 px-2 py-1.5 border border-white/10 transition-all cursor-pointer ${preset.color} hover:bg-white/10 active:scale-95 text-left leading-tight`}
+                  className={`text-[9px] font-mono bg-[#18181B] text-neutral-300 px-2 py-1.5 border border-[#3F3F46] transition-all cursor-pointer ${preset.color} hover:bg-[#27272A] active:scale-95 text-left leading-tight`}
                 >
                   {preset.name}
                 </button>
@@ -238,7 +238,7 @@ export default function ProfileModal({
           </div>
 
           {/* CALENDARIO DEL PROGRAMA — start date for "ACOPLAR HOY" */}
-          <div className="border-t border-white/10 pt-4 space-y-2 mt-4">
+          <div className="border-t border-[#3F3F46] pt-4 space-y-2 mt-4">
             <span className="text-xs sm:text-sm font-brutalist text-electric-blue block tracking-widest uppercase flex items-center gap-2">
               <span className="h-1 w-1 bg-electric-blue rounded-full"></span>
               CALENDARIO DEL PROGRAMA
@@ -255,13 +255,13 @@ export default function ProfileModal({
                 type="date"
                 value={programStart}
                 onChange={(e) => updateProgramStart(e.target.value)}
-                className="bg-[#111113] border border-white/10 p-2.5 text-white text-sm font-mono focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all [color-scheme:dark]"
+                className="bg-[#111113] border border-[#3F3F46] p-2.5 text-white text-sm font-mono focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all [color-scheme:dark]"
               />
               {programStart && (
                 <button
                   type="button"
                   onClick={() => updateProgramStart("")}
-                  className="text-[9px] font-mono uppercase tracking-wider border border-white/15 text-neutral-400 hover:text-white hover:border-white/30 px-3 py-2.5 transition-all cursor-pointer"
+                  className="text-[9px] font-mono uppercase tracking-wider border border-[#3F3F46] text-neutral-400 hover:text-white hover:border-white/30 px-3 py-2.5 transition-all cursor-pointer"
                 >
                   Limpiar
                 </button>
@@ -284,7 +284,7 @@ export default function ProfileModal({
                     restriction: e.target.value,
                   })
                 }
-                className="w-full bg-[#111113] border border-white/10 p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] border border-[#3F3F46] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
             </div>
             <div className="space-y-1 group">
@@ -300,13 +300,13 @@ export default function ProfileModal({
                     condition: e.target.value,
                   })
                 }
-                className="w-full bg-[#111113] border border-white/10 p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] border border-[#3F3F46] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
             </div>
           </div>
 
           {/* LOOT EQUIPO */}
-          <div className="border-t border-white/10 pt-4 space-y-3 mt-4">
+          <div className="border-t border-[#3F3F46] pt-4 space-y-3 mt-4">
             <span className="text-xs sm:text-sm font-brutalist text-electric-blue block tracking-widest uppercase flex items-center gap-2">
               <span className="h-1 w-1 bg-electric-blue rounded-full"></span>
               EQUIPAMIENTO / ACCESORIOS DE ENTRENAMIENTO [CF-L4]
@@ -328,7 +328,7 @@ export default function ProfileModal({
                     },
                   })
                 }
-                className="w-full bg-[#111113] border border-white/10 p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] border border-[#3F3F46] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
               <div className="flex flex-wrap gap-1 pt-1">
                 {[
@@ -347,7 +347,7 @@ export default function ProfileModal({
                         },
                       })
                     }
-                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-white/10 text-neutral-300 px-1.5 py-1"
+                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-[#3F3F46] text-neutral-300 px-1.5 py-1"
                   >
                     {item.split(" (")[0]}
                   </button>
@@ -371,7 +371,7 @@ export default function ProfileModal({
                     },
                   })
                 }
-                className="w-full bg-[#111113] border border-white/10 p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] border border-[#3F3F46] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
               <div className="flex flex-wrap gap-1 pt-1">
                 {[
@@ -390,7 +390,7 @@ export default function ProfileModal({
                         },
                       })
                     }
-                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-white/10 text-neutral-300 px-1.5 py-1"
+                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-[#3F3F46] text-neutral-300 px-1.5 py-1"
                   >
                     {item.split(" (")[0]}
                   </button>
@@ -414,7 +414,7 @@ export default function ProfileModal({
                     },
                   })
                 }
-                className="w-full bg-[#111113] border border-white/10 p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] border border-[#3F3F46] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
               <div className="flex flex-wrap gap-1 pt-1">
                 {[
@@ -433,7 +433,7 @@ export default function ProfileModal({
                         },
                       })
                     }
-                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-white/10 text-neutral-300 px-1.5 py-1"
+                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-[#3F3F46] text-neutral-300 px-1.5 py-1"
                   >
                     {item.split(" (")[0]}
                   </button>
@@ -443,7 +443,7 @@ export default function ProfileModal({
           </div>
 
           {/* MARCAS DE FUERZA (1RM) → WORKING MAX */}
-          <div className="border-t border-white/10 pt-4 space-y-3 mt-4">
+          <div className="border-t border-[#3F3F46] pt-4 space-y-3 mt-4">
             <span className="text-xs sm:text-sm font-brutalist text-electric-blue block tracking-widest uppercase flex items-center gap-2">
               <span className="h-1 w-1 bg-electric-blue rounded-full"></span>
               MARCAS DE FUERZA (1RM) // WORKING MAX
@@ -474,7 +474,7 @@ export default function ProfileModal({
                       title={opt.hint}
                       onClick={() => setTempAthlete({ ...tempAthlete, kCoefficient: opt.k })}
                       className={`py-1.5 text-[10px] font-mono font-black uppercase tracking-wider transition-all cursor-pointer ${
-                        active ? "bg-electric-blue text-pure-black" : "bg-[#111113] border border-white/10 text-neutral-400 hover:text-white"
+                        active ? "bg-electric-blue text-pure-black" : "bg-[#111113] border border-[#3F3F46] text-neutral-400 hover:text-white"
                       }`}
                     >
                       {opt.label}
@@ -515,7 +515,7 @@ export default function ProfileModal({
                         step="2.5"
                         value={orm ?? ""}
                         onChange={(e) => updateOneRm(lift.id, e.target.value)}
-                        className="w-full bg-[#111113] border border-white/10 p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                        className="w-full bg-[#111113] border border-[#3F3F46] p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
                         placeholder="—"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-neutral-600 pointer-events-none">
@@ -569,7 +569,7 @@ export default function ProfileModal({
                             value={val ?? ""}
                             onChange={(e) => updateOneRm(id, e.target.value)}
                             placeholder="—"
-                            className="w-full bg-[#111113] border border-white/10 p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                            className="w-full bg-[#111113] border border-[#3F3F46] p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
                           />
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-neutral-600 pointer-events-none">kg</span>
                         </div>
@@ -597,7 +597,7 @@ export default function ProfileModal({
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addMovement(); } }}
                   placeholder="Agregar movimiento (ej. KB Swing)"
                   spellCheck={false}
-                  className="flex-1 bg-[#111113] border border-white/10 p-2 text-white text-xs focus:border-electric-blue focus:outline-none placeholder:text-neutral-700"
+                  className="flex-1 bg-[#111113] border border-[#3F3F46] p-2 text-white text-xs focus:border-electric-blue focus:outline-none placeholder:text-neutral-700"
                 />
                 <button
                   type="button"
@@ -611,7 +611,7 @@ export default function ProfileModal({
           </div>
 
           {/* SECCIÓN DE LOGROS ADQUIRIDOS (GAMIFICACIÓN) */}
-          <div className="border-t border-white/10 pt-4 space-y-3 mt-4">
+          <div className="border-t border-[#3F3F46] pt-4 space-y-3 mt-4">
             <span className="text-xs sm:text-sm font-brutalist text-amber-400 block tracking-widest uppercase flex items-center gap-2">
               <Trophy size={14} className="text-amber-400 shrink-0" />
               LOGROS Y TROFEOS DE RENDIMIENTO ({unlockedAchievements.length} / {MASTER_ACHIEVEMENTS.length})
@@ -684,7 +684,7 @@ export default function ProfileModal({
           </div>
 
           {/* COLOR DE ACENTO DE TEMÁTICA CLÍNICA */}
-          <div className="border-t border-white/10 pt-4 space-y-3 mt-4">
+          <div className="border-t border-[#3F3F46] pt-4 space-y-3 mt-4">
             <span className="text-xs sm:text-sm font-brutalist text-electric-blue block tracking-widest uppercase flex items-center gap-2">
               <span className="h-1 w-1 bg-electric-blue rounded-full"></span>
               COLOR DE ACENTO PRINCIPAL DEL SISTEMA
@@ -744,10 +744,10 @@ export default function ProfileModal({
                     setCustomAccentColor(opt.id);
                     localStorage.setItem("nexus_custom_accent_color", opt.id);
                   }}
-                  className={`text-[9px] font-mono p-1.5 border hover:bg-white/5 transition-all cursor-pointer text-left flex flex-col justify-between h-[45px] ${
+                  className={`text-[9px] font-mono p-1.5 border hover:bg-[#18181B] transition-all cursor-pointer text-left flex flex-col justify-between h-[45px] ${
                     customAccentColor === opt.id
-                      ? `${opt.borderActive} bg-white/10 font-bold`
-                      : "border-white/10 text-neutral-300"
+                      ? `${opt.borderActive} bg-[#27272A] font-bold`
+                      : "border-[#3F3F46] text-neutral-300"
                   }`}
                 >
                   <span className={`block truncate w-full ${opt.colorText}`}>{opt.name}</span>
@@ -760,7 +760,7 @@ export default function ProfileModal({
           </div>
 
           {/* ESTILO Y GRÁFICAS DE FONDO */}
-          <div className="border-t border-white/10 pt-4 space-y-3 mt-4">
+          <div className="border-t border-[#3F3F46] pt-4 space-y-3 mt-4">
             <div className="flex items-center justify-between">
               <span className="text-xs sm:text-sm font-brutalist text-electric-blue block tracking-widest uppercase flex items-center gap-2">
                 <span className="h-1 w-1 bg-electric-blue rounded-full"></span>
@@ -841,7 +841,7 @@ export default function ProfileModal({
                           localStorage.setItem("nexus_bg_metcon", preset.metcon);
                           localStorage.setItem("nexus_bg_accessories", preset.accessories);
                         }}
-                        className="text-[9px] font-mono bg-white/5 border border-white/10 text-neutral-300 p-1.5 hover:bg-electric-blue/10 hover:border-electric-blue duration-150 transition-all text-left flex flex-col justify-between h-[52px] cursor-pointer"
+                        className="text-[9px] font-mono bg-[#18181B] border border-[#3F3F46] text-neutral-300 p-1.5 hover:bg-electric-blue/10 hover:border-electric-blue duration-150 transition-all text-left flex flex-col justify-between h-[52px] cursor-pointer"
                       >
                         <span className="font-bold text-white block truncate w-full">{preset.name}</span>
                         <span className="text-[7.5px] text-neutral-500 line-clamp-2 leading-tight">
@@ -864,7 +864,7 @@ export default function ProfileModal({
                         setWarmupBg(e.target.value);
                         localStorage.setItem("nexus_bg_warmup", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-white/10 p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] border border-[#3F3F46] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -878,7 +878,7 @@ export default function ProfileModal({
                         setStrengthBg(e.target.value);
                         localStorage.setItem("nexus_bg_strength", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-white/10 p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] border border-[#3F3F46] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -892,7 +892,7 @@ export default function ProfileModal({
                         setMetconBg(e.target.value);
                         localStorage.setItem("nexus_bg_metcon", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-white/10 p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] border border-[#3F3F46] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -906,7 +906,7 @@ export default function ProfileModal({
                         setAccessoriesBg(e.target.value);
                         localStorage.setItem("nexus_bg_accessories", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-white/10 p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] border border-[#3F3F46] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                 </div>
@@ -927,7 +927,7 @@ export default function ProfileModal({
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-6 relative z-10 mt-2 border-t border-white/10">
+        <div className="flex flex-col sm:flex-row gap-3 pt-6 relative z-10 mt-2 border-t border-[#3F3F46]">
           <button
             className="flex-1 text-black font-brutalist py-3 sm:py-4 px-4 text-xs sm:text-sm tracking-widest transition-all cursor-pointer uppercase font-bold flex items-center justify-center gap-2 group relative overflow-hidden bg-electric-blue hover:bg-[#00F0FF]"
             onClick={() => {
@@ -942,7 +942,7 @@ export default function ProfileModal({
             <span className="relative z-10">ACTUALIZAR PERFIL BIOMECÁNICO</span>
           </button>
           <button
-            className="w-full sm:w-auto bg-transparent border border-white/20 text-neutral-400 font-brutalist py-3 px-6 text-xs sm:text-sm tracking-wider hover:bg-white/5 hover:text-white hover:border-white/40 transition-all cursor-pointer font-bold"
+            className="w-full sm:w-auto bg-transparent border border-white/20 text-neutral-400 font-brutalist py-3 px-6 text-xs sm:text-sm tracking-wider hover:bg-[#18181B] hover:text-white hover:border-white/40 transition-all cursor-pointer font-bold"
             onClick={onClose}
           >
             CERRAR

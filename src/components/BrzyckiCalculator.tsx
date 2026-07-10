@@ -219,10 +219,10 @@ export default function BrzyckiCalculator() {
   }, [calculatedResult]);
 
   return (
-    <div className="p-5 border border-white/10 bg-pure-black/95 relative overflow-hidden" id="brzycki-calibrator-tool">
+    <div className="p-5 border border-[#3F3F46] bg-pure-black/95 relative overflow-hidden" id="brzycki-calibrator-tool">
       <div className="absolute top-0 right-0 p-3 select-none pointer-events-none opacity-5 font-brutalist text-6xl text-white">1RM</div>
       
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-b border-white/10 pb-4 mb-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-b border-[#3F3F46] pb-4 mb-4">
         <div className="space-y-1">
           <h4 className="text-xl font-brutalist tracking-wider text-pure-white flex items-center gap-2">
             <Calculator className="text-[#00F0FF] animate-pulse" size={20} />
@@ -235,7 +235,7 @@ export default function BrzyckiCalculator() {
         
         <button
           onClick={() => setShowFormulaInfo(!showFormulaInfo)}
-          className="text-[9px] font-mono text-neutral-400 hover:text-[#00F0FF] border border-white/10 hover:border-[#00F0FF]/30 px-2.5 py-1 flex items-center gap-1 transition-all cursor-pointer bg-neutral-950/40"
+          className="text-[9px] font-mono text-neutral-400 hover:text-[#00F0FF] border border-[#3F3F46] hover:border-[#00F0FF]/30 px-2.5 py-1 flex items-center gap-1 transition-all cursor-pointer bg-neutral-950/40"
         >
           <HelpCircle size={11} />
           <span>FÓRMULA & BIOMECÁNICA</span>
@@ -254,7 +254,7 @@ export default function BrzyckiCalculator() {
               <p>
                 La <strong className="text-white">Fórmula de Brzycki</strong> es una de las metodologías indirectas más validadas en ciencias de la fuerza para estimar la capacidad neuromuscular de 1 repetición máxima sin la necesidad de testear cargas de fallo absoluto en frío.
               </p>
-              <div className="p-2.5 bg-black border border-white/10 font-mono text-center text-[11px] text-[#00f0ff] rounded">
+              <div className="p-2.5 bg-black border border-[#3F3F46] font-mono text-center text-[11px] text-[#00f0ff] rounded">
                 1RM Estimado = Peso Levantado / (1.0278 - (0.0278 × Repeticiones))
               </div>
               <div className="flex gap-2 items-start text-[10px] mt-1 text-amber-400 font-mono">
@@ -282,7 +282,7 @@ export default function BrzyckiCalculator() {
               <select
                 value={selectedExerciseName}
                 onChange={(e) => setSelectedExerciseName(e.target.value)}
-                className="w-full bg-black text-white border border-white/15 rounded px-2 h-9 font-mono text-xs focus:outline-none focus:border-[#00F0FF] transition-colors cursor-pointer"
+                className="w-full bg-black text-white border border-[#3F3F46] rounded px-2 h-9 font-mono text-xs focus:outline-none focus:border-[#00F0FF] transition-colors cursor-pointer"
               >
                 <option value="custom">-- INTRODUCIR CARGA MANUAL --</option>
                 {exercises.length === 0 ? (
@@ -318,7 +318,7 @@ export default function BrzyckiCalculator() {
                     setCustomWeight(e.target.value);
                     setSelectedExerciseName('custom'); // revert dropdown to manual on edit
                   }}
-                  className="w-full bg-black text-white border border-white/10 rounded px-2 h-9 font-mono text-center text-sm focus:outline-none focus:border-[#00F0FF] transition-colors"
+                  className="w-full bg-black text-white border border-[#3F3F46] rounded px-2 h-9 font-mono text-center text-sm focus:outline-none focus:border-[#00F0FF] transition-colors"
                 />
               </div>
 
@@ -336,7 +336,7 @@ export default function BrzyckiCalculator() {
                     setCustomReps(e.target.value);
                     setSelectedExerciseName('custom'); // revert dropdown to manual on edit
                   }}
-                  className="w-full bg-black text-white border border-white/10 rounded px-2 h-9 font-mono text-center text-sm focus:outline-none focus:border-[#00F0FF] transition-colors"
+                  className="w-full bg-black text-white border border-[#3F3F46] rounded px-2 h-9 font-mono text-center text-sm focus:outline-none focus:border-[#00F0FF] transition-colors"
                 />
               </div>
             </div>
@@ -388,7 +388,7 @@ export default function BrzyckiCalculator() {
                     </p>
                   </div>
 
-                  <div className="flex flex-col items-center justify-center p-2 border border-white/10 rounded bg-black/60 min-w-[130px] font-mono text-center">
+                  <div className="flex flex-col items-center justify-center p-2 border border-[#3F3F46] rounded bg-black/60 min-w-[130px] font-mono text-center">
                     {calculatedResult.repsWarning ? (
                       <>
                         <span className="text-[7.5px] font-black text-rose-400 block tracking-tight uppercase">FISIOLOGÍA L4 APRETADA</span>
@@ -441,7 +441,7 @@ export default function BrzyckiCalculator() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="border border-dashed border-white/10 rounded-sm p-6 flex flex-col items-center justify-center text-center gap-3 bg-neutral-950/20 h-full w-full justify-self-center my-auto min-h-[220px]"
+                className="border border-dashed border-[#3F3F46] rounded-sm p-6 flex flex-col items-center justify-center text-center gap-3 bg-neutral-950/20 h-full w-full justify-self-center my-auto min-h-[220px]"
               >
                 <Dumbbell size={32} className="text-neutral-600 " />
                 <div className="space-y-1">

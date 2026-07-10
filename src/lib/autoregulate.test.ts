@@ -1,6 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { proposeAdjustments } from "./autoregulate";
+import { isAutoregApplied, markAutoregApplied } from "./workingMax";
+import { puntajeNexus } from "./nexusScore";
 import type { NexusScore, LiftScore } from "./nexusScore";
+import type { TrainingSession } from "../types/training";
 
 const lift = (over: Partial<LiftScore>): LiftScore => ({
   exerciseId: "back-squat", name: "Back Squat", avgRpe: 6, sets: 3, targetMid: 7.5, rpeDelta: -1.5, perf: "bajo", ...over,
@@ -47,5 +50,49 @@ describe("proposeAdjustments", () => {
       { acwr: 1.0 },
     );
     expect(r.adjustments[0]).toMatchObject({ kind: "pr-bump", newOneRmKg: 85 });
+  });
+});
+
+// El bug "siempre queda un ajuste": tras aplicar/omitir, el mismo ajuste NO
+// debe volver a considerarse (la marca por semana+lift lo consume).
+describe("marca de autorregulación aplicada (fix del bucle)", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("un lift sin marca es accionable; tras marcarlo, se excluye", () => {
+    expect(isAutoregApplied("w2", "back-squat")).toBe(false);
+    markAutoregApplied("w2", "back-squat");
+    expect(isAutoregApplied("w2", "back-squat")).toBe(true);
+    // otra semana no queda afectada
+    expect(isAutoregApplied("w3", "back-squat")).toBe(false);
+
+    // El filtro de la sección: (deltaPct!=0) && !isAutoregApplied(week, id)
+    const adjustments = proposeAdjustments(score({ lifts: [lift({})] }), { acwr: 1.0 }).adjustments;
+    const actionable = adjustments.filter(
+      (a) => a.deltaPct !== 0 && !isAutoregApplied("w2", a.exerciseId),
+    );
+    expect(actionable.length).toBe(0); // ya consumido → no reaparece
+  });
+});
+
+describe("puntajeNexus usa la banda por INTENCIÓN cuando se declara", () => {
+  beforeEach(() => localStorage.clear());
+
+  const seed = (rpe: number) => {
+    const session: TrainingSession = {
+      id: "s", date: "2026-07-10", dayId: "w2d1", programWeek: "w2", completed: true,
+      durationMin: 40, sessionRpe: rpe,
+      sets: [{ id: "1", exerciseId: "back-squat", exerciseName: "Back Squat", weightKg: 100,
+        isBodyweight: false, addedLoadKg: null, reps: 5, distanceM: null, calories: null,
+        timeSec: null, rpe, rir: null, tempo: null, setType: "working", ts: 0 }],
+    };
+    localStorage.setItem("nexus_sessions_v1", JSON.stringify([session]));
+  };
+
+  it("RPE 7 es 'banda' en intensificación (7-9) pero 'sobre' en la fija w2 (7-8)", () => {
+    seed(7);
+    // banda por intención (7-9) → mid 8 → RPE 7 queda 'bajo/banda', no 'sobre'
+    const byIntention = puntajeNexus("w2", { intention: "intensificacion" });
+    expect(byIntention.lifts[0].targetMid).toBe(8);
+    expect(byIntention.lifts[0].perf).not.toBe("sobre");
   });
 });

@@ -52,7 +52,7 @@ export default function ActiveDayHeader({
   return (
     <motion.div
       ref={rootRef}
-      className="sticky z-[60] w-full overflow-hidden select-none border-y border-white/10 py-3 flex items-center justify-center transition-all duration-300 bg-zinc-950/85 backdrop-blur-md mb-6"
+      className="sticky z-[60] w-full overflow-hidden select-none border-y border-[#3F3F46] py-3 flex items-center justify-center transition-all duration-300 bg-zinc-950/85 backdrop-blur-md mb-6"
       whileHover={{ scale: 1.03 }}
       style={{
         top: `${headerHeight}px`,

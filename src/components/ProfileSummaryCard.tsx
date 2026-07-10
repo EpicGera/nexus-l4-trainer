@@ -37,7 +37,7 @@ export default function ProfileSummaryCard({
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-white/10">
+      <div className="mt-4 pt-3 border-t border-[#3F3F46]">
         <div className={`${TXT.label} mb-2`}>Equipo</div>
         <div className="flex flex-wrap gap-2">
           {eq?.grebas && <Pill tone="neutral">{eq.grebas}</Pill>}

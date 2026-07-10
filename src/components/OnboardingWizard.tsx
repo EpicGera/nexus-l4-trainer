@@ -41,12 +41,12 @@ function LevelRow({ label, level, onClick }: { label: string; level: SkillLevel;
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-4 py-2.5 border border-white/15 bg-transparent hover:bg-white/5 transition-colors cursor-pointer"
+      className="w-full flex items-center justify-between px-4 py-2.5 border border-[#3F3F46] bg-transparent hover:bg-[#18181B] transition-colors cursor-pointer"
     >
       <span className="text-sm font-mono text-white uppercase tracking-wider">{label}</span>
       <span
         className={`text-[11px] font-mono font-bold uppercase tracking-widest px-2 py-1 ${
-          level === "rx" ? "bg-white text-black" : level === "some" ? "text-white border border-white/40" : "text-neutral-500 border border-white/15"
+          level === "rx" ? "bg-white text-black" : level === "some" ? "text-white border border-white/40" : "text-neutral-500 border border-[#3F3F46]"
         }`}
       >
         {SKILL_LABEL[level]}
@@ -125,8 +125,8 @@ export default function OnboardingWizard({ onDone, onSkip }: Props) {
     </div>
   );
 
-  const inputCls = "w-full bg-black/60 border border-white/15 rounded-none h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-white transition-colors placeholder:text-neutral-600";
-  const areaCls = "w-full bg-black/60 border border-white/15 rounded-none p-3 text-white font-mono text-sm focus:outline-none focus:border-white transition-colors placeholder:text-neutral-600 resize-none";
+  const inputCls = "w-full bg-black/60 border border-[#3F3F46] rounded-none h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-white transition-colors placeholder:text-neutral-600";
+  const areaCls = "w-full bg-black/60 border border-[#3F3F46] rounded-none p-3 text-white font-mono text-sm focus:outline-none focus:border-white transition-colors placeholder:text-neutral-600 resize-none";
 
   return (
     <ModalSheet
@@ -232,7 +232,7 @@ export default function OnboardingWizard({ onDone, onSkip }: Props) {
             <div className="grid grid-cols-2 gap-1.5">
               {(Object.keys(DIET_LABEL) as DietApproach[]).map((d) => (
                 <button key={d} onClick={() => setDietState(d)}
-                  className={`py-2 px-2 border text-[11px] font-mono font-bold uppercase tracking-wider cursor-pointer ${diet === d ? "bg-white text-black border-transparent" : "text-neutral-300 border-white/15 hover:border-white/40"}`}>
+                  className={`py-2 px-2 border text-[11px] font-mono font-bold uppercase tracking-wider cursor-pointer ${diet === d ? "bg-white text-black border-transparent" : "text-neutral-300 border-[#3F3F46] hover:border-white/40"}`}>
                   {DIET_LABEL[d]}
                 </button>
               ))}
@@ -246,7 +246,7 @@ export default function OnboardingWizard({ onDone, onSkip }: Props) {
               const meta = dim.levels[lvl];
               return (
                 <button key={dim.id} onClick={() => setGear((g) => ({ ...g, [dim.id]: GEAR_CYCLE[(GEAR_CYCLE.indexOf(g[dim.id]) + 1) % 3] }))}
-                  className="w-full text-left px-4 py-2.5 border border-white/15 bg-transparent hover:bg-white/5 transition-colors cursor-pointer">
+                  className="w-full text-left px-4 py-2.5 border border-[#3F3F46] bg-transparent hover:bg-[#18181B] transition-colors cursor-pointer">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-mono text-white uppercase tracking-wider">{dim.label}</span>
                     <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-white">{meta.desc}</span>

@@ -216,7 +216,7 @@ export default function WorkoutBlockCard({
                   >
                     <div
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
-                      className="text-[13px] sm:text-sm font-condensed text-neutral-300 border-l-2 border-white/15 pl-3 py-0.5"
+                      className="text-[13px] sm:text-sm font-condensed text-neutral-300 border-l-2 border-[#3F3F46] pl-3 py-0.5"
                     />
                   </li>
                 );

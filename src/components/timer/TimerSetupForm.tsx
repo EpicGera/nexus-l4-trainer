@@ -34,7 +34,7 @@ export default function TimerSetupForm({
         isFull ? "max-w-xl mx-auto border-emerald-500/55" : ""
       }`}
     >
-      <div className="flex items-center gap-2 border-b border-white/15 pb-3.5 mb-5 font-mono">
+      <div className="flex items-center gap-2 border-b border-[#3F3F46] pb-3.5 mb-5 font-mono">
         <Zap
           size={18}
           className="text-emerald-400 animate-pulse shrink-0 fill-current"
@@ -64,14 +64,14 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempWork((p) => Math.max(5, p - 5))}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -5s
             </button>
             <button
               type="button"
               onClick={() => setTempWork((p) => Math.max(10, p - 30))}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -30s
             </button>
@@ -86,14 +86,14 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempWork((p) => p + 5)}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +5s
             </button>
             <button
               type="button"
               onClick={() => setTempWork((p) => p + 30)}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +30s
             </button>
@@ -130,14 +130,14 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempRest((p) => Math.max(0, p - 5))}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -5s
             </button>
             <button
               type="button"
               onClick={() => setTempRest((p) => Math.max(0, p - 30))}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -30s
             </button>
@@ -152,14 +152,14 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempRest((p) => p + 5)}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +5s
             </button>
             <button
               type="button"
               onClick={() => setTempRest((p) => p + 30)}
-              className="px-2 py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +30s
             </button>
@@ -196,7 +196,7 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempRounds((p) => Math.max(1, p - 1))}
-              className="flex-grow py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="flex-grow py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -1 Serie
             </button>
@@ -211,7 +211,7 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempRounds((p) => p + 1)}
-              className="flex-grow py-1.5 bg-neutral-900 border border-white/10 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="flex-grow py-1.5 bg-neutral-900 border border-[#3F3F46] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +1 Serie
             </button>

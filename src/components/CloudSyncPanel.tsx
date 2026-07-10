@@ -247,14 +247,14 @@ export default function CloudSyncPanel({
 
   return (
     <section
-      className="mt-4 p-5 border border-white/10 bg-pure-black/95 relative overflow-hidden"
+      className="mt-4 p-5 border border-[#3F3F46] bg-pure-black/95 relative overflow-hidden"
       data-purpose="cloud-sync-panel"
     >
       <div className="absolute top-0 right-0 p-3 select-none pointer-events-none opacity-5 font-brutalist text-6xl text-white">
         CLOUD
       </div>
 
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-[#3F3F46] pb-4 mb-4">
         <div className="space-y-1">
           <h4 className="text-xl font-brutalist tracking-wider text-pure-white flex items-center gap-2">
             <CloudLightning className="text-electric-blue" size={20} />
@@ -425,7 +425,7 @@ export default function CloudSyncPanel({
       </div>
 
       {/* PER-USER PROGRAM SHEET — ONBOARDING IN 3 STEPS */}
-      <div className="mt-5 pt-4 border-t border-white/10 text-left space-y-3">
+      <div className="mt-5 pt-4 border-t border-[#3F3F46] text-left space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <label className="text-[10px] font-mono font-black tracking-widest text-electric-blue uppercase flex items-center gap-1.5">
             <Link2 size={11} /> VINCULAR GOOGLE SHEETS (OPCIONAL)
@@ -491,7 +491,7 @@ export default function CloudSyncPanel({
               onChange={(e) => setSheetInput(e.target.value)}
               placeholder="https://docs.google.com/spreadsheets/d/…"
               spellCheck={false}
-              className="w-full bg-pure-black border border-white/15 text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-electric-blue transition-colors"
+              className="w-full bg-pure-black border border-[#3F3F46] text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-electric-blue transition-colors"
             />
             <button
               onClick={handleLinkSheet}
@@ -510,7 +510,7 @@ export default function CloudSyncPanel({
       </div>
 
       {/* AI PROVIDER — PRIVATE LOCAL KEYS (Gemini / Claude) */}
-      <div className="mt-5 pt-4 border-t border-white/10 text-left space-y-3">
+      <div className="mt-5 pt-4 border-t border-[#3F3F46] text-left space-y-3">
         <label className="text-[10px] font-mono font-black tracking-widest text-[#00f0ff] uppercase flex items-center gap-1.5">
           🧠 INTELIGENCIA ARTIFICIAL (LLAVES PRIVADAS)
         </label>
@@ -529,7 +529,7 @@ export default function CloudSyncPanel({
               className={`flex-1 font-mono text-[11px] tracking-widest uppercase py-2 rounded border transition-colors cursor-pointer ${
                 aiProvider === p
                   ? "bg-[#00f0ff] text-pure-black border-[#00f0ff] font-black"
-                  : "bg-[#0b0c10] text-neutral-300 border-white/15"
+                  : "bg-[#0b0c10] text-neutral-300 border-[#3F3F46]"
               }`}
             >
               {p === "gemini" ? "Google Gemini" : "Anthropic Claude"}
@@ -547,7 +547,7 @@ export default function CloudSyncPanel({
               placeholder="AIza…"
               spellCheck={false}
               autoComplete="off"
-              className="w-full bg-pure-black border border-white/15 text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
+              className="w-full bg-pure-black border border-[#3F3F46] text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
             />
           </div>
           <div>
@@ -559,7 +559,7 @@ export default function CloudSyncPanel({
               placeholder="sk-ant-…"
               spellCheck={false}
               autoComplete="off"
-              className="w-full bg-pure-black border border-white/15 text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
+              className="w-full bg-pure-black border border-[#3F3F46] text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
             />
           </div>
         </div>
@@ -589,7 +589,7 @@ export default function CloudSyncPanel({
 
       {/* COACH/AI MONTHLY PROGRAM: LOAD CSV/JSON + JSON TEMPLATE */}
       {onProgramImported && (
-        <div className="mt-5 pt-4 border-t border-white/10 text-left space-y-3">
+        <div className="mt-5 pt-4 border-t border-[#3F3F46] text-left space-y-3">
           <label className="text-[10px] font-mono font-black tracking-widest text-amber-500 uppercase flex items-center gap-1.5">
             <FolderUp size={11} /> PROGRAMACIÓN MENSUAL (COACH / IA)
           </label>
@@ -619,7 +619,7 @@ export default function CloudSyncPanel({
                 type="button"
                 onClick={() => handleExportProgramJSON(currentDatabase)}
                 title="Descargá el programa activo como JSON para que tu coach o la IA genere el próximo mes con la misma estructura"
-                className="flex-1 bg-neutral-950 border border-white/15 text-neutral-300 hover:text-white hover:border-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 bg-neutral-950 border border-[#3F3F46] text-neutral-300 hover:text-white hover:border-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <FileJson size={12} /> DESCARGAR PLANTILLA JSON
               </button>
@@ -633,7 +633,7 @@ export default function CloudSyncPanel({
           </p>
 
           {auditReport && auditReport.issues.length > 0 && (
-            <div className="border border-white/10 bg-black/50 rounded-sm p-3 space-y-2 text-left">
+            <div className="border border-[#3F3F46] bg-black/50 rounded-sm p-3 space-y-2 text-left">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[10px] font-mono font-black tracking-widest text-amber-400 uppercase">
                   🛡 Auditoría del JSON
@@ -682,7 +682,7 @@ export default function CloudSyncPanel({
 
       {/* PUBLIC PROGRAM CATALOG */}
       {onProgramImported && (
-        <div className="mt-5 pt-4 border-t border-white/10 text-left space-y-3">
+        <div className="mt-5 pt-4 border-t border-[#3F3F46] text-left space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <label className="text-[10px] font-mono font-black tracking-widest text-[#00f0ff] uppercase flex items-center gap-1.5">
               🌐 CATÁLOGO PÚBLICO DE PROGRAMAS
@@ -714,7 +714,7 @@ export default function CloudSyncPanel({
                 placeholder="Ej. MES 2 — ACTO II: EL DESIERTO"
                 spellCheck={false}
                 maxLength={120}
-                className="flex-1 bg-[#0b0c10] border border-white/15 text-white font-mono text-[11px] px-3 py-2.5 rounded uppercase focus:outline-none focus:border-[#00f0ff] transition-colors"
+                className="flex-1 bg-[#0b0c10] border border-[#3F3F46] text-white font-mono text-[11px] px-3 py-2.5 rounded uppercase focus:outline-none focus:border-[#00f0ff] transition-colors"
               />
               <button
                 type="button"

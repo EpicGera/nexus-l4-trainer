@@ -145,7 +145,7 @@ export interface BodyHeatmapProps {
 export default function BodyHeatmap({
   values,
   baseColor = "#DC2626",
-  unselectedColor = "rgba(255,255,255,0.08)",
+  unselectedColor = "#3F3F46",
   className,
 }: BodyHeatmapProps) {
   const opacityFor = (g?: MuscleGroup): number => {

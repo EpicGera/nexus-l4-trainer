@@ -1,4 +1,5 @@
 import React from "react";
+import type { BlockIntention } from "../types/workout";
 
 // Prescribed RPE target band per mesocycle week (same progression as the cycle
 // definition in RpeProgressionSection: acumulación→intensificación→pico→deload).
@@ -8,6 +9,16 @@ export const WEEK_RPE_TARGET: Record<string, { min: number; max: number }> = {
   w2: { min: 7, max: 8 },
   w3: { min: 8, max: 9 },
   w4: { min: 5, max: 6 },
+};
+
+// Banda RPE por INTENCIÓN del bloque (independiente del layout fijo w1–w4). Cuando
+// el capítulo declara (o infiere) su intención, la autorregulación usa esta banda
+// en vez de asumir la progresión clásica por número de semana.
+export const INTENTION_RPE_BAND: Record<BlockIntention, { min: number; max: number }> = {
+  acumulacion: { min: 6, max: 8 },
+  intensificacion: { min: 7, max: 9 },
+  realizacion: { min: 8, max: 9.5 },
+  restauracion: { min: 4, max: 6 },
 };
 
 // Brutalist vibrant background color bands mapping per week

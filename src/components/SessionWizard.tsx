@@ -755,19 +755,19 @@ export default function SessionWizard({
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div className="bg-black/60 border border-white/10 rounded-sm p-3">
+            <div className="bg-black/60 border border-[#3F3F46] rounded-sm p-3">
               <div className={TXT.label}>Trabajo</div>
               <div className="text-lg font-brutalist text-white">{Math.round(reward.totalWorkJ / 1000)} kJ</div>
             </div>
-            <div className="bg-black/60 border border-white/10 rounded-sm p-3">
+            <div className="bg-black/60 border border-[#3F3F46] rounded-sm p-3">
               <div className={TXT.label}>Volumen</div>
               <div className="text-lg font-brutalist text-white">{reward.totalVolumeKg.toLocaleString()} kg</div>
             </div>
-            <div className="bg-black/60 border border-white/10 rounded-sm p-3">
+            <div className="bg-black/60 border border-[#3F3F46] rounded-sm p-3">
               <div className={TXT.label}>Potencia</div>
               <div className="text-lg font-brutalist text-white">{reward.avgPowerW != null ? `${reward.avgPowerW} W` : "—"}</div>
             </div>
-            <div className="bg-black/60 border border-white/10 rounded-sm p-3">
+            <div className="bg-black/60 border border-[#3F3F46] rounded-sm p-3">
               <div className={TXT.label}>Carga</div>
               <div className="text-lg font-brutalist text-white">{reward.loadAU != null ? `${reward.loadAU} AU` : "—"}</div>
             </div>
@@ -915,7 +915,7 @@ export default function SessionWizard({
                       className={`px-2.5 py-2 rounded-sm border text-[11px] font-mono font-bold uppercase tracking-wider cursor-pointer transition-colors ${
                         sel
                           ? "bg-electric-blue text-black border-transparent"
-                          : "bg-black/40 text-neutral-300 border-white/15 hover:border-white/30"
+                          : "bg-black/40 text-neutral-300 border-[#3F3F46] hover:border-white/30"
                       }`}
                     >
                       {opt.label}
@@ -943,7 +943,7 @@ export default function SessionWizard({
                 if (lastChip.weightKg != null) setInW(String(lastChip.weightKg));
                 if (lastChip.reps != null) setInR(String(lastChip.reps));
               }}
-              className="w-full flex items-center gap-2 text-left bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-[11px] font-mono text-neutral-300 hover:bg-white/10 transition-colors cursor-pointer"
+              className="w-full flex items-center gap-2 text-left bg-[#18181B] border border-[#3F3F46] rounded-sm px-3 py-2 text-[11px] font-mono text-neutral-300 hover:bg-[#27272A] transition-colors cursor-pointer"
             >
               <span className="font-bold text-neutral-400">Última</span>
               <span>{lastChip.weightKg != null ? `${lastChip.weightKg} kg` : ""}{lastChip.weightKg != null && lastChip.reps != null ? " × " : ""}{lastChip.reps != null ? `${lastChip.reps} reps` : ""}</span>
@@ -1012,7 +1012,7 @@ export default function SessionWizard({
                   : d.timeSec != null ? fmtTime(d.timeSec)
                   : "—";
                 return (
-                  <div key={i} className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-[12px] font-mono">
+                  <div key={i} className="flex items-center gap-2 bg-black/40 border border-[#3F3F46] rounded-sm px-3 py-2 text-[12px] font-mono">
                     <span className="text-neutral-500">S{i + 1}</span>
                     <span className="text-white">{desc}</span>
                     {d.prescribed && (
@@ -1048,7 +1048,7 @@ export default function SessionWizard({
             <div className="flex gap-1.5 flex-wrap">
               {fmts.map((f) => (
                 <button key={f.v} type="button" onClick={() => changeFormat(f.v)}
-                  className={`flex-1 min-w-[64px] py-2 rounded-sm border text-[11px] font-mono font-bold uppercase tracking-wider cursor-pointer transition-colors ${mFormat === f.v ? "bg-orange-500 text-black border-transparent" : "bg-black/40 text-neutral-300 border-white/15"}`}>
+                  className={`flex-1 min-w-[64px] py-2 rounded-sm border text-[11px] font-mono font-bold uppercase tracking-wider cursor-pointer transition-colors ${mFormat === f.v ? "bg-orange-500 text-black border-transparent" : "bg-black/40 text-neutral-300 border-[#3F3F46]"}`}>
                   {f.label}
                 </button>
               ))}
@@ -1078,7 +1078,7 @@ export default function SessionWizard({
                           key={mv}
                           type="button"
                           onClick={() => setMLastMovement(sel ? "" : mv)}
-                          className={`text-[11px] font-mono px-2.5 py-1.5 rounded-sm border cursor-pointer transition-colors ${sel ? "bg-orange-500 text-black border-transparent" : "bg-black/40 text-neutral-300 border-white/15"}`}
+                          className={`text-[11px] font-mono px-2.5 py-1.5 rounded-sm border cursor-pointer transition-colors ${sel ? "bg-orange-500 text-black border-transparent" : "bg-black/40 text-neutral-300 border-[#3F3F46]"}`}
                         >
                           <span className="text-neutral-500 mr-1">{i + 1}.</span>
                           {mv}
@@ -1094,8 +1094,8 @@ export default function SessionWizard({
             <div className="space-y-3">
               <Field label="¿Terminó dentro del cap?">
                 <div className="flex gap-1.5">
-                  <button type="button" onClick={() => setMFinished(true)} className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${mFinished ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-white/15"}`}>Sí</button>
-                  <button type="button" onClick={() => setMFinished(false)} className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${!mFinished ? "bg-amber-400 text-black border-transparent" : "bg-black/40 text-neutral-300 border-white/15"}`}>No — pegué el cap</button>
+                  <button type="button" onClick={() => setMFinished(true)} className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${mFinished ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-[#3F3F46]"}`}>Sí</button>
+                  <button type="button" onClick={() => setMFinished(false)} className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${!mFinished ? "bg-amber-400 text-black border-transparent" : "bg-black/40 text-neutral-300 border-[#3F3F46]"}`}>No — pegué el cap</button>
                 </div>
               </Field>
               {mFinished ? (
@@ -1118,7 +1118,7 @@ export default function SessionWizard({
             <div className="flex gap-1.5">
               {(["rx", "scaled", "mixed"] as Scaling[]).map((sc) => (
                 <button key={sc} type="button" onClick={() => setMScaling(sc)}
-                  className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${mScaling === sc ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-white/15"}`}>
+                  className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${mScaling === sc ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-[#3F3F46]"}`}>
                   {sc === "rx" ? "RX" : sc === "scaled" ? "Escalado" : "Mixto"}
                 </button>
               ))}
@@ -1129,7 +1129,7 @@ export default function SessionWizard({
               <Field label="Qué cambió, por movimiento">
                 <div className="space-y-2">
                   {metconMovements.map((mv) => (
-                    <div key={mv} className="bg-black/40 border border-white/10 rounded-sm p-2">
+                    <div key={mv} className="bg-black/40 border border-[#3F3F46] rounded-sm p-2">
                       <div className="text-[12px] font-mono text-neutral-200 mb-1.5 truncate">{mv}</div>
                       <div className="flex gap-1.5 flex-wrap">
                         {([
@@ -1139,7 +1139,7 @@ export default function SessionWizard({
                           return (
                             <button key={t} type="button"
                               onClick={() => setMMoveScaling((p) => ({ ...p, [mv]: t }))}
-                              className={`text-[10.5px] font-mono px-2.5 py-1 rounded-sm border cursor-pointer ${sel ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-white/15"}`}>
+                              className={`text-[10.5px] font-mono px-2.5 py-1 rounded-sm border cursor-pointer ${sel ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-[#3F3F46]"}`}>
                               {lbl}
                             </button>
                           );
@@ -1151,7 +1151,7 @@ export default function SessionWizard({
               </Field>
               <Field label="Cómo varió (opcional · escalado dinámico)">
                 <textarea value={mNotes} onChange={(e) => setMNotes(e.target.value)} rows={2}
-                  className="w-full bg-black/60 border border-white/15 rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+                  className="w-full bg-black/60 border border-[#3F3F46] rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
                   placeholder="ej. rondas 1-3 RX, después pull-ups con banda" />
               </Field>
             </>

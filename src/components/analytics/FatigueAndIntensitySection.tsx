@@ -158,15 +158,15 @@ export default function FatigueAndIntensitySection({
         icon={<TrendingUp size={15} className="text-white" />}
         subtitle="Promedio diario calculado con la fecha real de cada serie registrada"
         badge={
-          <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-neutral-400 font-bold border bg-black border-white/10 p-1 rounded">
+          <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-neutral-400 font-bold border bg-black border-[#3F3F46] p-1 rounded">
             {[7, 14, 30].map((days) => (
               <button
                 key={`range-${days}`}
                 onClick={() => setRpeTrendRange(days)}
                 className={`px-2.5 py-1.5 rounded transition-all cursor-pointer leading-none ${
                   rpeTrendRange === days
-                    ? "bg-white/15 text-white border border-white/40"
-                    : "hover:bg-white/5 border border-transparent"
+                    ? "bg-[#27272A] text-white border border-white/40"
+                    : "hover:bg-[#18181B] border border-transparent"
                 }`}
               >
                 {days}D
@@ -280,7 +280,7 @@ export default function FatigueAndIntensitySection({
                   {cns.avg}
                   <span className="text-xs text-neutral-500 font-mono"> /10</span>
                 </span>
-                <div className="flex-grow bg-neutral-900 h-3 rounded overflow-hidden p-0.5 border border-white/10">
+                <div className="flex-grow bg-neutral-900 h-3 rounded overflow-hidden p-0.5 border border-[#3F3F46]">
                   <div
                     className={`h-full ${cns.progressBg} transition-all duration-500 rounded-sm`}
                     style={{ width: `${cns.scalePercent}%` }}
@@ -291,7 +291,7 @@ export default function FatigueAndIntensitySection({
                 Basado en {cns.setCount} series registradas.
               </p>
             </div>
-            <div className="md:col-span-2 border-t md:border-t-0 md:border-l border-white/10 pt-3 md:pt-0 md:pl-6">
+            <div className="md:col-span-2 border-t md:border-t-0 md:border-l border-[#3F3F46] pt-3 md:pt-0 md:pl-6">
               <p className="text-[11px] font-mono text-neutral-300 leading-relaxed">
                 <strong className="text-white uppercase font-black">
                   PRESCRIPCIÓN CF-L4:
@@ -300,7 +300,7 @@ export default function FatigueAndIntensitySection({
               </p>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
+          <div className="mt-4 pt-3 border-t border-[#3F3F46] flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
             <span><span className="text-emerald-400">●</span> Estable ≤ 7.4</span>
             <span><span className="text-amber-400">●</span> Regulada 7.4–8.5</span>
             <span><span className="text-rose-400">●</span> Al límite &gt; 8.5</span>

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DayWorkout, DayVariation } from "../types/workout";
+import type { DayWorkout, DayVariation, WeekMeta } from "../types/workout";
 import { getDayReward } from "../lib/sideQuests";
-import { generateSidequest } from "../services/aiService";
+import { generateMission, validateMission, type MissionValidation } from "../lib/missionEngine";
+import { getSessionForDay } from "../lib/sessionStore";
 
 export interface SideQuestEntry {
   completed: boolean;
@@ -19,6 +20,7 @@ export function useSideQuests(
   activeDay: DayWorkout | undefined,
   activeVariation: DayVariation | undefined,
   checkAndUnlockAchievement: (id: string) => void,
+  weekMeta?: WeekMeta,
 ) {
   const [dailyGoals, setDailyGoals] = useState<Record<string, string>>(() => {
     const saved = localStorage.getItem("nexus_daily_goals");
@@ -125,58 +127,50 @@ export function useSideQuests(
     prevQuestCompletedRef.current = updatedHistory;
   }, [sideQuests, activeDay?.id]);
 
-  const handleFetchSideQuest = async () => {
+  // Genera la misión secundaria del día de forma DETERMINISTA (del JSON, sin IA).
+  const handleFetchSideQuest = () => {
     if (!activeDay) return;
     setIsGeneratingQuest(true);
-    try {
-      const data = await generateSidequest(activeDay.id, activeDay.name, activeDay.title, activeVariation);
-      if (data && data.sidequest) {
-        const updated = {
-          ...dailyGoals,
-          [activeDay.id]: data.sidequest.trim().toUpperCase(),
-        };
-        setDailyGoals(updated);
-        localStorage.setItem("nexus_daily_goals", JSON.stringify(updated));
-      }
-    } catch (e) {
-      console.error("Error rolling sidequest:", e);
-    } finally {
-      setIsGeneratingQuest(false);
-    }
+    const mission = generateMission(activeDay.id, activeVariation, weekMeta);
+    const updated = { ...dailyGoals, [activeDay.id]: mission };
+    setDailyGoals(updated);
+    localStorage.setItem("nexus_daily_goals", JSON.stringify(updated));
+    setIsGeneratingQuest(false);
   };
 
-  // Auto-fetch sidequest if none exists for activeDay
+  // Auto-genera la misión si el día no tiene una todavía.
   useEffect(() => {
-    if (activeDay && !dailyGoals[activeDay.id] && !isGeneratingQuest) {
+    if (activeDay && !dailyGoals[activeDay.id]) {
       handleFetchSideQuest();
     }
   }, [activeDay?.id, dailyGoals]);
 
-  const handleValidateQuest = (
-    dayId: string,
-    proofText: string,
-    proofFileName: string,
-    checkedRom: boolean,
-    checkedBio: boolean,
-    checkedRpe: boolean,
-  ) => {
+  /**
+   * Valida la misión contra la sesión LOGUEADA (INCURSIÓN). Si pasa, sella la
+   * misión con la recompensa determinista (XP intacto → barra, athleteStats y el
+   * personaje del ABISMO leen nexus_daily_quests_v2.xpEarned). Devuelve el detalle
+   * de checks para mostrarlo en el panel.
+   */
+  const handleAutoValidate = (dayId: string): MissionValidation => {
+    const session = getSessionForDay(dayId);
+    const result = validateMission(dayId, session, activeVariation);
+
+    if (!result.ok) return result;
+
     const rewards = getDayReward(dayId);
-
-    // play spectacular lightning strobe flash!
     setLightningFlash(true);
-    setTimeout(() => {
-      setLightningFlash(false);
-    }, 1200);
+    setTimeout(() => setLightningFlash(false), 1200);
 
+    const allChecks = result.checks.every((c) => c.pass);
     const updated = {
       ...sideQuests,
       [dayId]: {
         completed: true,
-        proofText,
-        proofFileName,
-        checkedRom,
-        checkedBio,
-        checkedRpe,
+        proofText: "Validado por INCURSIÓN",
+        proofFileName: "",
+        checkedRom: allChecks,
+        checkedBio: allChecks,
+        checkedRpe: allChecks,
         rewardItem: rewards.item,
         xpEarned: rewards.xp,
         completedAt: new Date().toISOString(),
@@ -185,10 +179,8 @@ export function useSideQuests(
     setSideQuests(updated);
     localStorage.setItem("nexus_daily_quests_v2", JSON.stringify(updated));
 
-    // Unlock achievement if complete clinical indicators are satisfied
-    if (checkedRom && checkedBio && checkedRpe) {
-      setTimeout(() => checkAndUnlockAchievement("clinical_sec"), 800);
-    }
+    if (allChecks) setTimeout(() => checkAndUnlockAchievement("clinical_sec"), 800);
+    return result;
   };
 
   const handleResetQuest = (dayId: string) => {
@@ -210,7 +202,7 @@ export function useSideQuests(
     earnedLootList,
     dayTitleAlertTrigger,
     handleFetchSideQuest,
-    handleValidateQuest,
+    handleAutoValidate,
     handleResetQuest,
   };
 }

@@ -21,7 +21,8 @@ import {
   getDefaultProgram,
   isUsingCustomSheet,
 } from "./lib/sheetImport";
-import CoachChat from "./components/CoachChat";
+import { deriveDayGoal } from "./lib/missionEngine";
+import guiaDiaEspecial from "../docs/GUIA-dia-especial.md?raw";
 import Confetti from "./components/Confetti";
 import { AchievementNotification } from "./components/AchievementNotification";
 import WorkoutTimer from "./components/WorkoutTimer";
@@ -122,7 +123,7 @@ import { exportToGoogleSheets } from "./lib/sheets";
 import DailyMissionPanel from "./components/DailyMissionPanel";
 import ActiveDayHeader from "./components/ActiveDayHeader";
 import CloudSyncPanel from "./components/CloudSyncPanel";
-import { generateSidequest, tagChapterInspiration } from "./services/aiService";
+import { tagChapterInspiration } from "./services/aiService";
 import {
   WEEK_COLOR_MAPPING,
   WEEK_ACCENT_COLORS,
@@ -324,12 +325,13 @@ export default function App() {
             setActiveAchievement(null);
           }, 3000);
 
-          // Push notification for CoachChat overlay
+          // Toast de logro (antes iba al overlay del CoachChat, ya retirado).
           window.dispatchEvent(
-            new CustomEvent("nexus_push_notification", {
+            new CustomEvent("nexus_toast", {
               detail: {
                 message: `¡Meta Alcanzada! Desbloqueaste la insignia: ${found.title}`,
-                type: "goal",
+                kind: "success",
+                durationMs: 5000,
               },
             }),
           );
@@ -520,9 +522,14 @@ export default function App() {
     earnedLootList,
     dayTitleAlertTrigger,
     handleFetchSideQuest,
-    handleValidateQuest,
+    handleAutoValidate,
     handleResetQuest,
-  } = useSideQuests(activeDay, activeVariation, checkAndUnlockAchievement);
+  } = useSideQuests(
+    activeDay,
+    activeVariation,
+    checkAndUnlockAchievement,
+    database?.[currentWeek]?.meta,
+  );
 
   const handleRefreshFromSheet = async () => {
     setIsRefreshingSheet(true);
@@ -1443,7 +1450,7 @@ export default function App() {
           </div>
 
           {showStoryMenu && (
-            <div className="mt-2 space-y-3 border border-white/10 bg-black/40 p-3 rounded-sm">
+            <div className="mt-2 space-y-3 border border-[#3F3F46] bg-black/40 p-3 rounded-sm">
               {/* web: input con capture abre la cámara del teléfono; nativo usa el plugin */}
               <input
                 type="file"
@@ -1469,7 +1476,7 @@ export default function App() {
                           className={`px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${
                             sel
                               ? isSpecial ? "bg-signal-red text-white border-signal-red" : "bg-white text-black border-white"
-                              : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"
+                              : "bg-[#18181B] text-[#A1A1AA] border-[#3F3F46] hover:bg-[#27272A]"
                           }`}
                         >
                           {v.tabName}
@@ -1486,7 +1493,7 @@ export default function App() {
                     e.stopPropagation();
                     exportFileInputRef.current?.click();
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-white/15 bg-white/5 hover:bg-white/15 text-white active:scale-95 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-[#3F3F46] bg-[#18181B] hover:bg-[#27272A] text-white active:scale-95 cursor-pointer"
                   title="Subir una foto ya tomada"
                 >
                   <Camera size={16} />
@@ -1498,7 +1505,7 @@ export default function App() {
                     e.stopPropagation();
                     void handleTakePhoto();
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-white/15 bg-white text-black hover:bg-neutral-200 active:scale-95 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-[#3F3F46] bg-white text-black hover:bg-neutral-200 active:scale-95 cursor-pointer"
                   title="Tomar la foto ahora con la cámara"
                 >
                   <Camera size={16} />
@@ -1506,25 +1513,25 @@ export default function App() {
                 </button>
               </div>
               {isFxProcessing && (
-                <div className="text-[10px] font-mono text-white/60 uppercase tracking-widest animate-pulse text-center">
+                <div className="text-[10px] font-mono text-[#A1A1AA] uppercase tracking-widest animate-pulse text-center">
                   Detectando personas y aplicando efecto…
                 </div>
               )}
 
               {/* ── VIDEO (Fase A): movimiento + música local ─────────────── */}
-              <div className="space-y-2.5 border-t border-white/10 pt-3">
-                <div className="grid grid-cols-2 gap-1 bg-black/60 p-1 border border-white/10 rounded-sm">
+              <div className="space-y-2.5 border-t border-[#3F3F46] pt-3">
+                <div className="grid grid-cols-2 gap-1 bg-black/60 p-1 border border-[#3F3F46] rounded-sm">
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setVideoMode(false); }}
-                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${!videoMode ? "bg-white text-black" : "text-white/60 hover:bg-white/5"}`}
+                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${!videoMode ? "bg-white text-black" : "text-[#A1A1AA] hover:bg-[#18181B]"}`}
                   >
                     Foto
                   </button>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setVideoMode(true); }}
-                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${videoMode ? "bg-white text-black" : "text-white/60 hover:bg-white/5"}`}
+                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${videoMode ? "bg-white text-black" : "text-[#A1A1AA] hover:bg-[#18181B]"}`}
                   >
                     Video
                   </button>
@@ -1553,7 +1560,7 @@ export default function App() {
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); videoBgInputRef.current?.click(); }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-white/15 bg-white/5 hover:bg-white/15 text-white rounded-sm transition-all cursor-pointer"
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-[#3F3F46] bg-[#18181B] hover:bg-[#27272A] text-white rounded-sm transition-all cursor-pointer"
                         >
                           <Film size={14} />
                           USAR CLIP DE VIDEO
@@ -1576,7 +1583,7 @@ export default function App() {
                             key={fx}
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setVideoEffect(fx); }}
-                            className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"}`}
+                            className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-[#18181B] text-[#A1A1AA] border-[#3F3F46] hover:bg-[#27272A]"}`}
                           >
                             {fx === "kenburns" ? "Zoom" : fx === "pulse" ? "Pulso" : "Estático"}
                           </button>
@@ -1588,7 +1595,7 @@ export default function App() {
                     <div className="space-y-1.5">
                       <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
                       {videoBgFile ? (
-                        <div className="px-3 py-2 rounded-sm border border-white/15 bg-white/5 font-mono text-[10px] text-white/80">
+                        <div className="px-3 py-2 rounded-sm border border-[#3F3F46] bg-[#18181B] font-mono text-[10px] text-white/80">
                           {clipExportSec}s{" "}
                           <span className="text-white/40">
                             ({videoBgDurationSec == null
@@ -1605,7 +1612,7 @@ export default function App() {
                               key={d}
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
-                              className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-white/5 text-white/60 border-white/15 hover:bg-white/10"}`}
+                              className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-[#18181B] text-[#A1A1AA] border-[#3F3F46] hover:bg-[#27272A]"}`}
                             >
                               {d}s
                             </button>
@@ -1622,7 +1629,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-white/15 bg-white/5 hover:bg-white/15 text-white rounded-sm transition-all cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-[#3F3F46] bg-[#18181B] hover:bg-[#27272A] text-white rounded-sm transition-all cursor-pointer"
                       >
                         <Music size={14} />
                         <span className="truncate max-w-[70%]">{audioName || "ELEGIR TEMA"}</span>
@@ -1740,7 +1747,7 @@ export default function App() {
       />
 
       {/* 1. WEEK SELECTION HORIZONTAL BAR */}
-      <div className="w-full bg-white/5 backdrop-blur-md border-y border-white/10 mb-2 no-print">
+      <div className="w-full bg-[#18181B] backdrop-blur-md border-y border-[#3F3F46] mb-2 no-print">
         <div className="mx-auto px-6 md:px-10 flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-4">
           <div
             id="weekNav"
@@ -1831,6 +1838,24 @@ export default function App() {
                 >
                   <span>{hasSpecialVariation(database, activeDay.id) ? "CAMBIAR ESPECIAL" : "+ DÍA ESPECIAL"}</span>
                 </button>
+                <button
+                  onClick={() => {
+                    const blob = new Blob([guiaDiaEspecial], { type: "text/markdown;charset=utf-8" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "GUIA-dia-especial.md";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#18181B] border border-[#3F3F46] hover:bg-[#27272A] text-[#A1A1AA] hover:text-white rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
+                  title="Descargar la guía para pedirle a una IA externa (ChatGPT/Claude/Gemini) un día especial en el formato correcto"
+                >
+                  <FileText size={14} />
+                  <span>GUÍA IA</span>
+                </button>
                 {hasSpecialVariation(database, activeDay.id) && (
                   <button
                     onClick={handleRemoveSpecialDay}
@@ -1875,7 +1900,7 @@ export default function App() {
             )}
 
             {/* 2. DAY SELECTION FILTER CHIPS */}
-            <div className="w-full bg-white/5 backdrop-blur-md mb-2 md:mb-4 no-print relative border-b border-white/5">
+            <div className="w-full bg-[#18181B] backdrop-blur-md mb-2 md:mb-4 no-print relative border-b border-white/5">
               {/* Degradiente inferior indicando colores de la semana al deslizador de abajo */}
               <div
                 className="absolute bottom-0 left-0 right-0 h-1 z-0 shadow-sm"
@@ -1893,7 +1918,7 @@ export default function App() {
                     const isActive = idx === currentDayIndex;
 
                     let statusClass =
-                      "text-white/70 hover:bg-white/10 hover:text-white bg-white/5";
+                      "text-white/70 hover:bg-[#27272A] hover:text-white bg-[#18181B]";
                     let activeStyle = {};
                     if (isCompleted) {
                       statusClass =
@@ -2026,7 +2051,7 @@ export default function App() {
                     "DELOAD / DESCARGA"
                   )}
                   {activeWeekPlan?.meta?.gear != null && (
-                    <span className="ml-2 text-[9px] font-mono tracking-normal bg-white/10 px-1.5 py-0.5 rounded text-neutral-300 align-middle">
+                    <span className="ml-2 text-[9px] font-mono tracking-normal bg-[#27272A] px-1.5 py-0.5 rounded text-neutral-300 align-middle">
                       {GEAR_LABEL[activeWeekPlan.meta.gear] || `GEAR ${activeWeekPlan.meta.gear}`}
                     </span>
                   )}
@@ -2034,7 +2059,8 @@ export default function App() {
 
                 <DailyMissionPanel
                   dayId={activeDay.id}
-                  dailyGoalText={dailyGoals[activeDay.id] || ""}
+                  dailyGoalText={deriveDayGoal(activeVariation, database?.[currentWeek]?.meta)}
+                  missionText={dailyGoals[activeDay.id] || ""}
                   isGeneratingQuest={isGeneratingQuest}
                   sideQuestCompleted={!!sideQuests[activeDay.id]?.completed}
                   questData={sideQuests[activeDay.id]}
@@ -2044,6 +2070,7 @@ export default function App() {
                   dayTitleAlertTrigger={dayTitleAlertTrigger}
                   handleFetchSideQuest={handleFetchSideQuest}
                   handleResetQuest={handleResetQuest}
+                  onValidate={handleAutoValidate}
                   mousePos={mousePos}
                 />
               </div>
@@ -2088,7 +2115,7 @@ export default function App() {
                             className={`text-[7px] px-1 py-0.5 rounded font-mono font-black tracking-tighter ${
                               isActive
                                 ? "bg-black/40 text-[#DC2626] border border-[#DC2626]/35"
-                                : "bg-white/5 text-neutral-400 border border-transparent"
+                                : "bg-[#18181B] text-neutral-400 border border-transparent"
                             }`}
                           >
                             {shortTag}
@@ -2172,14 +2199,14 @@ export default function App() {
                                   <button
                                     key={b.key}
                                     onClick={() => setActiveFlexKey(b.key)}
-                                    className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${isOn ? "text-white shadow-sm" : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"}`}
+                                    className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${isOn ? "text-white shadow-sm" : "border-[#3F3F46] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"}`}
                                     style={isOn ? { borderColor: c, backgroundColor: `${c}26` } : undefined}
                                   >
                                     <div className="flex justify-between items-start mb-1 font-brutalist gap-1.5">
                                       <span className="text-xs sm:text-[13px] font-extrabold tracking-wider truncate" style={isOn ? { color: c } : undefined}>
                                         {b.title || b.key}
                                       </span>
-                                      <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-white/10 px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                                      <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                                         {b.items.length}
                                       </span>
                                     </div>
@@ -2221,7 +2248,7 @@ export default function App() {
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "warmup"
                               ? "border-electric-blue bg-electric-blue/15 text-white shadow-sm"
-                              : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                              : "border-[#3F3F46] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
@@ -2230,7 +2257,7 @@ export default function App() {
                             >
                               01. CALENTAMIENTO
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-white/10 px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.warmup.items.length} MOV.
                             </span>
                           </div>
@@ -2272,7 +2299,7 @@ export default function App() {
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "strength"
                               ? "border-[#FAFAFA] bg-[#FAFAFA]/15 text-white shadow-sm"
-                              : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                              : "border-[#3F3F46] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
@@ -2281,7 +2308,7 @@ export default function App() {
                             >
                               02. FUERZA / OLY
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-white/10 px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.strength.items.length} MOVS.
                             </span>
                           </div>
@@ -2323,7 +2350,7 @@ export default function App() {
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "metcon"
                               ? "border-[#DC2626] bg-[#DC2626]/15 text-white shadow-sm"
-                              : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                              : "border-[#3F3F46] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
@@ -2332,7 +2359,7 @@ export default function App() {
                             >
                               03. METCON / WOD
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-white/10 px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.metcon.items.length} MOVS.
                             </span>
                           </div>
@@ -2374,7 +2401,7 @@ export default function App() {
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "accessories"
                               ? "border-[#A1A1AA] bg-[#A1A1AA]/15 text-white shadow-sm"
-                              : "border-white/10 hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                              : "border-[#3F3F46] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
@@ -2383,7 +2410,7 @@ export default function App() {
                             >
                               04. ACCESORIOS / ACC
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-white/10 px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.accessories.items.length} MOVS.
                             </span>
                           </div>
@@ -2531,7 +2558,7 @@ export default function App() {
                 activeDay && (
                   <main className="w-full flex-grow" id="workoutBoard">
                     {/* Default rest day whiteboard rendering */}
-                    <section className="col-span-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-white/15 bg-pure-black/95 text-center space-y-6">
+                    <section className="col-span-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#3F3F46] bg-pure-black/95 text-center space-y-6">
                       <div className="text-5xl md:text-7xl font-brutalist text-electric-blue tracking-wider">
                         REST DAY - PORTAL REGENT
                       </div>
@@ -2577,14 +2604,6 @@ export default function App() {
               handleGenerateMonthlyReportPDF={handleGenerateMonthlyReportPDF}
               getMonthlyVolumeStats={getMonthlyVolumeStats}
               database={database}
-              dailyGoals={dailyGoals}
-              onSaveGoal={(key, text) => {
-                setDailyGoals((prev) => {
-                  const updated = { ...prev, [key]: text };
-                  localStorage.setItem("nexus_daily_goals", JSON.stringify(updated));
-                  return updated;
-                });
-              }}
             />
           </motion.div>
         )}
@@ -2852,31 +2871,6 @@ export default function App() {
           />
         )}
       </AnimatePresence>
-
-      {/* 8. FLOATING INTUITIVE COACH AI CHAT */}
-      <CoachChat
-        currentWorkouts={database as any}
-        onUpdateWorkouts={() => {}}
-        activeWeek={currentWeek}
-        activeDayId={activeDay?.id || "w2d1"}
-        athlete={athlete}
-        onUpdateAthlete={handleUpdateAthlete}
-        sideQuests={sideQuests}
-        dailyGoals={dailyGoals}
-        onUpdateSideQuests={(updatedQuests) => {
-          setSideQuests(updatedQuests);
-          localStorage.setItem(
-            "nexus_daily_quests_v2",
-            JSON.stringify(updatedQuests),
-          );
-        }}
-        onTriggerLightning={() => {
-          setLightningFlash(true);
-          setTimeout(() => {
-            setLightningFlash(false);
-          }, 1200);
-        }}
-      />
 
       {/* 9. DECORATION COMPACT FOOTER — pb clears the floating buttons. */}
       <footer className="mt-8 pt-6 pb-24 opacity-40" data-purpose="footer-texture">

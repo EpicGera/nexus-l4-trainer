@@ -25,7 +25,7 @@ export default function LensTabs({
   return (
     <div
       role="tablist"
-      className={`grid gap-1 bg-black/70 p-1 border border-white/10 rounded-sm ${className}`}
+      className={`grid gap-1 bg-black/70 p-1 border border-[#3F3F46] rounded-sm ${className}`}
       style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
     >
       {tabs.map((t) => {
@@ -40,7 +40,7 @@ export default function LensTabs({
             className={`py-2.5 px-1 text-[11px] font-mono font-black tracking-widest uppercase rounded-sm transition-all cursor-pointer ${
               sel
                 ? "text-black shadow-lg"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+                : "text-neutral-400 hover:text-white hover:bg-[#18181B]"
             }`}
             style={sel ? { backgroundColor: accent || "#1F51FF" } : undefined}
           >

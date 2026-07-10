@@ -65,17 +65,8 @@ export default function MuscleMapSection({ activeDay, currentVariationIndex }: M
         <Accessibility size={16} style={{ color: PRIMARY }} />
       </div>
 
-      {/* Cuerpo del escáner: grilla + gradiente rojo sutil */}
-      <div
-        className="p-6 flex flex-col items-center gap-5"
-        style={{
-          backgroundImage: `
-            repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 30px),
-            repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 30px),
-            linear-gradient(to bottom, transparent, rgba(220,38,38,0.05), transparent)
-          `,
-        }}
-      >
+      {/* Cuerpo del escáner: fondo plano, sin texturas */}
+      <div className="p-6 flex flex-col items-center gap-5 bg-[var(--color-surface-1)]">
         <div className="w-full max-w-[280px] flex flex-col items-center gap-1.5">
           <BodyHeatmap values={load} baseColor={PRIMARY} className="w-full h-auto" />
           {/* etiquetas de vista: el asset trae frente a la izquierda, dorso a la derecha */}
@@ -111,7 +102,7 @@ export default function MuscleMapSection({ activeDay, currentVariationIndex }: M
                     <span className="text-[10px] font-mono text-[var(--color-ink-muted)] w-[68px] shrink-0 truncate">
                       {LABELS[m]}
                     </span>
-                    <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                    <div className="flex-1 h-1.5 rounded-full bg-[#18181B] overflow-hidden">
                       <div
                         className="h-full rounded-full"
                         style={{ width: `${Math.round(load[m] * 100)}%`, background: PRIMARY, opacity: 0.35 + 0.65 * load[m] }}

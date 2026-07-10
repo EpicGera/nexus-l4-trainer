@@ -10,7 +10,6 @@ import AutoregulationSection from "./analytics/AutoregulationSection";
 import TrainingAnalysis from "./TrainingAnalysis";
 import HelpNote from "./ui/HelpNote";
 import LensTabs from "./ui/LensTabs";
-import { SectionCard, Field, Input } from "./ui/primitives";
 import { WEEK_ACCENT_COLORS } from "../lib/constants";
 
 interface RpeAnalyticsPanelProps {
@@ -28,29 +27,26 @@ interface RpeAnalyticsPanelProps {
     totalLogsCount: number;
   };
   database?: any;
-  dailyGoals: Record<string, string>;
-  onSaveGoal: (key: string, text: string) => void;
 }
 
-type Lens = "intensidad" | "volumen" | "espectro" | "metas";
+type Lens = "intensidad" | "volumen" | "espectro";
 
 const LENS_TABS: { key: Lens; label: string }[] = [
   { key: "intensidad", label: "Intensidad" },
   { key: "volumen", label: "Volumen" },
   { key: "espectro", label: "Espectro" },
-  { key: "metas", label: "Metas" },
 ];
 
 const LENS_KEY = "nexus_rpe_lens";
 
 /**
- * RPE & Metas sheet — split into four focused lenses (one segmented control, no
+ * RPE sheet — split into three focused lenses (one segmented control, no
  * nesting) so the athlete sees a single intent at a time instead of a 12-section
- * scroll. Only the active lens renders.
+ * scroll. Only the active lens renders. Las metas por día viven ahora en el
+ * pizarrón (derivadas del JSON), no en una solapa editable.
  *  · Intensidad — prescribed cycle + real RPE + fatigue/CNS
  *  · Volumen    — real tonnage + monthly PDF
  *  · Espectro   — today's biomechanics + program spectrum (modality/patterns/e1RM)
- *  · Metas      — editable per-day goals for the active week
  */
 export default function RpeAnalyticsPanel({
   currentWeek,
@@ -60,10 +56,8 @@ export default function RpeAnalyticsPanel({
   handleGenerateMonthlyReportPDF,
   getMonthlyVolumeStats,
   database,
-  dailyGoals,
-  onSaveGoal,
 }: RpeAnalyticsPanelProps) {
-  const accentColor = WEEK_ACCENT_COLORS[currentWeek]?.color || "#00f0ff";
+  const accentColor = WEEK_ACCENT_COLORS[currentWeek]?.color || "#FAFAFA";
   const [lens, setLens] = useState<Lens>(
     () => (localStorage.getItem(LENS_KEY) as Lens) || "intensidad",
   );
@@ -98,7 +92,7 @@ export default function RpeAnalyticsPanel({
             accentColor={accentColor}
           />
           <FatigueAndIntensitySection currentWeek={currentWeek} />
-          <AutoregulationSection currentWeek={currentWeek} />
+          <AutoregulationSection currentWeek={currentWeek} intention={database?.[currentWeek]?.meta?.intention} />
         </div>
       )}
 
@@ -135,64 +129,6 @@ export default function RpeAnalyticsPanel({
           <TrainingAnalysis database={database} />
         </div>
       )}
-
-      {lens === "metas" && (
-        <MetasLens
-          currentWeek={currentWeek}
-          activeDayId={activeDay?.id ?? null}
-          dailyGoals={dailyGoals}
-          onSaveGoal={onSaveGoal}
-        />
-      )}
     </div>
-  );
-}
-
-const DAY_LABELS = ["Día 1", "Día 2", "Día 3", "Día 4", "Día 5", "Día 6", "Día 7"];
-
-/** Lightweight editor for the active week's per-day goals (finally a home for "Metas"). */
-function MetasLens({
-  currentWeek,
-  activeDayId,
-  dailyGoals,
-  onSaveGoal,
-}: {
-  currentWeek: string;
-  activeDayId: string | null;
-  dailyGoals: Record<string, string>;
-  onSaveGoal: (key: string, text: string) => void;
-}) {
-  // Local draft so typing is smooth; persist on blur.
-  const [draft, setDraft] = useState<Record<string, string>>({});
-  const valueFor = (key: string) =>
-    draft[key] !== undefined ? draft[key] : dailyGoals[key] || "";
-
-  return (
-    <SectionCard
-      title={`Metas · ${currentWeek.toUpperCase()}`}
-      subtitle="Objetivo declarado por día de la semana activa. Se edita y guarda en el acto."
-    >
-      <div className="flex flex-col gap-3">
-        {DAY_LABELS.map((label, i) => {
-          const key = `${currentWeek}d${i + 1}`;
-          const isActive = activeDayId === key;
-          return (
-            <Field
-              key={key}
-              label={label}
-              hint={isActive ? "hoy" : undefined}
-              className={isActive ? "ring-1 ring-electric-blue/40 rounded-sm p-1" : ""}
-            >
-              <Input
-                value={valueFor(key)}
-                placeholder="Sin meta declarada…"
-                onChange={(e) => setDraft((d) => ({ ...d, [key]: e.target.value }))}
-                onBlur={(e) => onSaveGoal(key, e.target.value.trim())}
-              />
-            </Field>
-          );
-        })}
-      </div>
-    </SectionCard>
   );
 }

@@ -99,7 +99,7 @@ function Bar({ label, color, pct, count }: { label: string; color: string; pct: 
           {pct}% · {count}
         </span>
       </div>
-      <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+      <div className="w-full bg-[#18181B] rounded-full h-2 overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${pct}%`, backgroundColor: color }}

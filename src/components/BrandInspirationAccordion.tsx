@@ -44,12 +44,12 @@ export default function BrandInspirationAccordion({
 
   return (
     <div
-      className={`border border-white/10 ${brand.bg} text-[10px] font-mono rounded-none select-none overflow-hidden transition-all duration-300`}
+      className={`border border-[#3F3F46] ${brand.bg} text-[10px] font-mono rounded-none select-none overflow-hidden transition-all duration-300`}
       id={`brand_badge_accordion_${blockId}`}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-3 py-1.5 flex items-center justify-between text-left hover:bg-white/5 transition-colors focus:outline-none cursor-pointer"
+        className="w-full px-3 py-1.5 flex items-center justify-between text-left hover:bg-[#18181B] transition-colors focus:outline-none cursor-pointer"
         type="button"
       >
         <div className="flex items-center gap-1.5 min-w-0">

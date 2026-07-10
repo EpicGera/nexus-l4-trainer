@@ -59,7 +59,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
         
         {/* Left Side: Dynamic Icon and Spark */}
         <div 
-          className="p-2 shrink-0 border border-white/20 bg-white/5 flex items-center justify-center relative"
+          className="p-2 shrink-0 border border-white/20 bg-[#18181B] flex items-center justify-center relative"
           style={{ textShadow: `0 0 8px ${achievement.color}` }}
         >
           <span className="text-xl leading-none">{achievement.icon || '🏆'}</span>

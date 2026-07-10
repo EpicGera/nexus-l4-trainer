@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Sparkles, Trophy, RotateCcw, Check, Dices } from "lucide-react";
+import { Sparkles, Trophy, RotateCcw, Check, X, Dices, ShieldCheck } from "lucide-react";
+import type { MissionValidation } from "../lib/missionEngine";
 
 interface DailyMissionPanelProps {
   dayId: string;
   dailyGoalText: string;
+  missionText: string;
   isGeneratingQuest: boolean;
   sideQuestCompleted: boolean;
   questData: any;
@@ -12,14 +14,16 @@ interface DailyMissionPanelProps {
   isHelpOpen: boolean;
   setIsHelpOpen: (open: boolean) => void;
   dayTitleAlertTrigger: boolean;
-  handleFetchSideQuest: () => Promise<void>;
+  handleFetchSideQuest: () => void;
   handleResetQuest: (dayId: string) => void;
+  onValidate: (dayId: string) => MissionValidation;
   mousePos: { x: number; y: number };
 }
 
 export default function DailyMissionPanel({
   dayId,
   dailyGoalText,
+  missionText,
   isGeneratingQuest,
   sideQuestCompleted,
   questData,
@@ -29,7 +33,9 @@ export default function DailyMissionPanel({
   dayTitleAlertTrigger,
   handleFetchSideQuest,
   handleResetQuest,
+  onValidate,
 }: DailyMissionPanelProps) {
+  const [validation, setValidation] = useState<MissionValidation | null>(null);
   return (
     <motion.div
       animate={
@@ -65,16 +71,25 @@ export default function DailyMissionPanel({
         </span>
       </div>
 
+      {/* OBJ. DIARIO: meta del día derivada del JSON del programa */}
+      {dailyGoalText && (
+        <div className="mb-1.5 bg-[#18181B] border-l-2 border-amber-500 pl-1.5 py-0.5">
+          <p className="font-bold text-[9px] sm:text-[9.5px] tracking-wide uppercase text-amber-300 leading-snug break-words">
+            {dailyGoalText}
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-12 gap-x-2 gap-y-1.5 items-center">
-        <div className="col-span-12 sm:col-span-7 flex justify-between items-center gap-1.5 border-b sm:border-b-0 sm:border-r border-white/10 pb-1 sm:pb-0 sm:pr-2.5">
+        <div className="col-span-12 sm:col-span-7 flex justify-between items-center gap-1.5 border-b sm:border-b-0 sm:border-r border-[#3F3F46] pb-1 sm:pb-0 sm:pr-2.5">
           <div className="flex-1 min-h-[1.2rem] flex items-center">
-            <p className="font-bold text-[9.5px] sm:text-[10px] tracking-wide uppercase text-zinc-100 border-l-2 border-[#00f0ff] pl-1.5 py-0 w-full whitespace-normal break-words leading-snug">
+            <p className="font-bold text-[9.5px] sm:text-[10px] tracking-wide uppercase text-zinc-100 border-l-2 border-[var(--color-accent)] pl-1.5 py-0 w-full whitespace-normal break-words leading-snug">
               {isGeneratingQuest ? (
                 <span className="text-neutral-500 flex items-center gap-1">
-                  <span>BUSCANDO EN LA BASE CO-OP RE-ROLL CON IA...</span>
+                  <span>GENERANDO MISIÓN…</span>
                 </span>
               ) : (
-                dailyGoalText || "DALE CLIC AL DADO PARA GENERAR LA MISIÓN SECUNDARIA CON IA"
+                missionText || "DALE CLIC AL DADO PARA GENERAR LA MISIÓN SECUNDARIA"
               )}
             </p>
           </div>
@@ -177,34 +192,53 @@ export default function DailyMissionPanel({
                 </span>
               </div>
 
-              <div className="bg-zinc-900/60 p-1 border border-white/5 rounded-none flex items-center justify-between gap-2">
+              <div className="bg-[#18181B] p-1 border border-[#3F3F46] rounded-none flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => setIsHelpOpen(!isHelpOpen)}
-                  className="flex items-center gap-1 text-[8px] font-black text-electric-blue uppercase tracking-wider font-mono hover:text-electric-blue/80 transition-colors focus:outline-none cursor-pointer"
+                  className="flex items-center gap-1 text-[8px] font-black text-[var(--color-ink-muted)] uppercase tracking-wider font-mono hover:text-white transition-colors focus:outline-none cursor-pointer"
                 >
-                  <Sparkles size={7} className="text-[#00f0ff] shrink-0" />
+                  <Sparkles size={7} className="text-amber-400 shrink-0" />
                   <span>{isHelpOpen ? "▲ OCULTAR" : "▼ GUÍA"}</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    window.dispatchEvent(new Event("open_nexus_chat"));
-                  }}
-                  className="py-1 px-1.5 font-brutalist text-[8px] font-black tracking-widest text-center bg-electric-blue text-white hover:bg-opacity-95 cursor-pointer active:scale-[0.98] uppercase flex items-center gap-0.5 transition-all"
+                  onClick={() => setValidation(onValidate(dayId))}
+                  className="py-1 px-1.5 font-brutalist text-[8px] font-black tracking-widest text-center bg-[var(--color-accent)] text-white hover:brightness-110 cursor-pointer active:scale-[0.98] uppercase flex items-center gap-0.5 transition-all"
                 >
-                  <span>REPORTAR</span>
+                  <ShieldCheck size={9} /> VALIDAR MISIÓN
                 </button>
               </div>
 
+              {/* checks del validador determinista */}
+              {validation && !validation.ok && (
+                <div className="bg-[#111113] border border-[#3F3F46] p-1 space-y-0.5 rounded-none">
+                  {validation.checks.map((c, i) => (
+                    <div key={i} className="flex items-center gap-1 text-[7.5px] font-mono leading-tight">
+                      {c.pass ? (
+                        <Check size={8} className="text-emerald-400 shrink-0" />
+                      ) : (
+                        <X size={8} className="text-[var(--color-accent-soft)] shrink-0" />
+                      )}
+                      <span className={c.pass ? "text-[var(--color-ink-muted)]" : "text-[var(--color-ink)]"}>
+                        {c.label}
+                      </span>
+                    </div>
+                  ))}
+                  <p className="text-[7px] font-mono text-[var(--color-ink-faint)] pt-0.5 leading-tight">
+                    Registrá la sesión con INCURSIÓN para completar la misión.
+                  </p>
+                </div>
+              )}
+
               <div
                 className={`transition-all duration-300 overflow-hidden ${
-                  isHelpOpen ? "max-h-[150px] mt-0.5 opacity-100 pt-0.5 border-t border-white/5" : "max-h-0 opacity-0 pointer-events-none"
+                  isHelpOpen ? "max-h-[150px] mt-0.5 opacity-100 pt-0.5 border-t border-[#3F3F46]" : "max-h-0 opacity-0 pointer-events-none"
                 }`}
               >
-                <p className="text-[7.5px] font-mono text-zinc-400 text-left leading-tight">
-                  Reporta pesos, RPE/RIR, o adaptaciones al **Coach Chat** para recibir XP y botín.
+                <p className="text-[7.5px] font-mono text-[var(--color-ink-muted)] text-left leading-tight">
+                  Registrá tu entrenamiento con **INCURSIÓN** y tocá VALIDAR: la misión se sella con XP y botín si los datos cumplen.
                 </p>
               </div>
             </div>
