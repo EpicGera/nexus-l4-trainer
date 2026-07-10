@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { effectTransform, canEncodeMp4, coverRect, flashAlpha, shakeOffset } from "./videoExport";
+import { effectTransform, canEncodeMp4, coverRect, flashAlpha, shakeOffset, fadeFactor } from "./videoExport";
 
 describe("effectTransform", () => {
   it("kenburns: identidad en t=0, escala objetivo en t=1, monótona", () => {
@@ -93,6 +93,29 @@ describe("shakeOffset (sacudida por beat)", () => {
     const at = shakeOffset(1.0, beats);
     expect(Math.hypot(at.dx, at.dy)).toBeLessThanOrEqual(12 + 1e-9);
     expect(shakeOffset(2.0, beats)).toEqual({ dx: 0, dy: 0 });
+  });
+});
+
+describe("fadeFactor (fade in/out)", () => {
+  it("0 en los extremos, 1 en el medio", () => {
+    expect(fadeFactor(0, 10)).toBe(0);
+    expect(fadeFactor(10, 10)).toBe(0);
+    expect(fadeFactor(5, 10)).toBe(1);
+  });
+  it("rampa lineal en la ventana de fade (0.4s por defecto)", () => {
+    expect(fadeFactor(0.2, 10)).toBeCloseTo(0.5, 5); // mitad de la subida
+    expect(fadeFactor(9.8, 10)).toBeCloseTo(0.5, 5); // mitad de la bajada
+    expect(fadeFactor(0.4, 10)).toBeCloseTo(1, 5);
+  });
+  it("clip muy corto: fades no se solapan (tope en duración/2)", () => {
+    // duración 0.5s → fade efectivo 0.25s; el medio llega a 1
+    expect(fadeFactor(0.25, 0.5)).toBeCloseTo(1, 5);
+    expect(fadeFactor(0, 0.5)).toBe(0);
+  });
+  it("acota fuera de rango y casos degenerados", () => {
+    expect(fadeFactor(-1, 10)).toBe(0);
+    expect(fadeFactor(99, 10)).toBe(0);
+    expect(fadeFactor(1, 0)).toBe(1); // duración 0 → sin fade
   });
 });
 

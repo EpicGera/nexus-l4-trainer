@@ -154,6 +154,33 @@ function fxNeedsBeats(fx?: StoryFx): boolean {
   return !!fx && (!!fx.beatFlash || !!fx.beatShake);
 }
 
+const FADE_SEC = 0.4; // fade in/out rápido de apertura y cierre
+
+/**
+ * Factor de fade en tSec ∈ [0,1]: sube 0→1 en los primeros `fadeSec`, baja 1→0
+ * en los últimos `fadeSec`, y vale 1 en el medio. Puro y testeable.
+ */
+export function fadeFactor(tSec: number, durationSec: number, fadeSec = FADE_SEC): number {
+  if (durationSec <= 0 || fadeSec <= 0) return 1;
+  const f = Math.min(fadeSec, durationSec / 2); // clips muy cortos: no se solapan
+  const t = Math.max(0, Math.min(durationSec, tSec));
+  const up = t / f;
+  const down = (durationSec - t) / f;
+  return Math.max(0, Math.min(1, up, down));
+}
+
+/** Oscurece el frame según el fade (negro con alpha 1-f). */
+function applyFade(ctx: CanvasRenderingContext2D, tSec: number, durationSec: number): void {
+  const f = fadeFactor(tSec, durationSec);
+  if (f >= 1) return;
+  ctx.save();
+  ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = 1 - f;
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, STORY_W, STORY_H);
+  ctx.restore();
+}
+
 /** Canvas 1080×1920 (scratch para el glitch 70s). */
 function makeStoryCanvas(): HTMLCanvasElement {
   const c = document.createElement("canvas");
@@ -361,6 +388,7 @@ async function renderMp4(opts: StoryVideoOpts): Promise<Blob> {
     }
     ctx.restore();
     if (opts.fx) applyFx(ctx, tSec, opts.fx, beats, scratch);
+    applyFade(ctx, tSec, opts.durationSec);
     const frame = new VideoFrameCtor(canvas, {
       timestamp: Math.round((i * 1_000_000) / fps),
       duration: Math.round(1_000_000 / fps),
@@ -412,8 +440,10 @@ async function encodeAudioTrack(
     const data = new Float32Array(frames * channels);
     for (let f = 0; f < frames; f++) {
       const srcIdx = (startSample + pos + f) % buf.length;
+      // fade in/out para que el audio no arranque ni corte seco
+      const g = fadeFactor((pos + f) / buf.sampleRate, durationSec);
       for (let c = 0; c < channels; c++) {
-        data[f * channels + c] = buf.getChannelData(c)[srcIdx] ?? 0;
+        data[f * channels + c] = (buf.getChannelData(c)[srcIdx] ?? 0) * g;
       }
     }
     const audioData = new AudioDataCtor({
@@ -459,7 +489,16 @@ async function renderWebm(opts: StoryVideoOpts): Promise<Blob> {
     source = audioCtx.createBufferSource();
     source.buffer = opts.audio.buffer;
     source.loop = true;
-    source.connect(dest);
+    // fade in/out de audio con GainNode (mismo 0.4s que el fade visual)
+    const gain = audioCtx.createGain();
+    const now = audioCtx.currentTime;
+    const fade = Math.min(FADE_SEC, opts.durationSec / 2);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(1, now + fade);
+    gain.gain.setValueAtTime(1, now + opts.durationSec - fade);
+    gain.gain.linearRampToValueAtTime(0, now + opts.durationSec);
+    source.connect(gain);
+    gain.connect(dest);
     dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
   }
 
@@ -495,6 +534,7 @@ async function renderWebm(opts: StoryVideoOpts): Promise<Blob> {
       else drawFrame(ctx, img, opts.effect, t01);
       ctx.restore();
       if (opts.fx) applyFx(ctx, tSec, opts.fx, beats, scratch);
+      applyFade(ctx, tSec, opts.durationSec);
       opts.onProgress?.(Math.round(t01 * 95));
       if (elapsed >= totalMs) resolve();
       else requestAnimationFrame(tick);

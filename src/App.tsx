@@ -605,6 +605,10 @@ export default function App() {
     videoBgUrl,
     videoBgDurationSec,
     clipExportSec,
+    videoLoop,
+    setVideoLoop,
+    isPreviewingAudio,
+    toggleAudioPreview,
     handleVideoBgFile,
     clearVideoBg,
     isExportingVideo,
@@ -1656,16 +1660,32 @@ export default function App() {
                     <div className="space-y-1.5">
                       <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
                       {videoBgFile ? (
-                        <div className="px-3 py-2 rounded-sm border border-[#3F3F46] bg-[#18181B] font-mono text-[10px] text-white/80">
-                          {clipExportSec}s{" "}
-                          <span className="text-white/40">
-                            ({videoBgDurationSec == null
-                              ? "duración del clip"
-                              : videoBgDurationSec > 15
-                                ? "clip recortado a 15s"
-                                : "duración del clip"})
-                          </span>
-                        </div>
+                        videoBgDurationSec != null && videoBgDurationSec < 15 ? (
+                          // clip corto: elegir dejarlo tal cual o loopearlo hasta 15s
+                          <div className="grid grid-cols-2 gap-1">
+                            {([false, true] as const).map((loop) => (
+                              <button
+                                key={String(loop)}
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setVideoLoop(loop); }}
+                                className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoLoop === loop ? "bg-white text-black border-white" : "bg-[#18181B] text-[#A1A1AA] border-[#3F3F46] hover:bg-[#27272A]"}`}
+                              >
+                                {loop ? "Loop a 15s" : `Clip (${Math.round(videoBgDurationSec)}s)`}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="px-3 py-2 rounded-sm border border-[#3F3F46] bg-[#18181B] font-mono text-[10px] text-white/80">
+                            {clipExportSec}s{" "}
+                            <span className="text-white/40">
+                              ({videoBgDurationSec == null
+                                ? "duración del clip"
+                                : videoBgDurationSec > 15
+                                  ? "clip recortado a 15s"
+                                  : "duración del clip"})
+                            </span>
+                          </div>
+                        )
                       ) : (
                         <div className="grid grid-cols-2 gap-1">
                           {([10, 15] as const).map((d) => (
@@ -1695,19 +1715,32 @@ export default function App() {
                         <Music size={14} />
                         <span className="truncate max-w-[70%]">{audioName || "ELEGIR TEMA"}</span>
                       </button>
-                      {audioBuffer && (
-                        <label className="block text-[9px] font-mono text-white/50 uppercase tracking-widest">
-                          Empezar en: {audioOffsetSec}s
-                          <input
-                            type="range"
-                            min={0}
-                            max={Math.max(0, Math.floor(audioBuffer.duration - (videoBgFile ? clipExportSec : videoDurationSec)))}
-                            value={audioOffsetSec}
-                            onChange={(e) => setAudioOffsetSec(Number(e.target.value))}
-                            className="w-full accent-white mt-1"
-                          />
-                        </label>
-                      )}
+                      {audioBuffer && (() => {
+                        const segLen = videoBgFile ? clipExportSec : videoDurationSec;
+                        const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+                        return (
+                          <div className="space-y-1.5">
+                            <label className="block text-[9px] font-mono text-white/50 uppercase tracking-widest">
+                              Usar de {fmt(audioOffsetSec)} a {fmt(audioOffsetSec + segLen)}
+                              <input
+                                type="range"
+                                min={0}
+                                max={Math.max(0, Math.floor(audioBuffer.duration - segLen))}
+                                value={audioOffsetSec}
+                                onChange={(e) => setAudioOffsetSec(Number(e.target.value))}
+                                className="w-full accent-white mt-1"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); toggleAudioPreview(); }}
+                              className={`w-full flex items-center justify-center gap-2 py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${isPreviewingAudio ? "bg-cyan-400 text-black border-cyan-400" : "bg-[#18181B] text-[#A1A1AA] border-[#3F3F46] hover:bg-[#27272A]"}`}
+                            >
+                              {isPreviewingAudio ? "■ Parar" : "▶ Escuchar segmento"}
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <button

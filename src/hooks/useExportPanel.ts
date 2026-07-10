@@ -75,6 +75,9 @@ export function useExportPanel(
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
   const [audioName, setAudioName] = useState<string | null>(null);
   const [audioOffsetSec, setAudioOffsetSec] = useState(0);
+  // Preview del segmento de música elegido (mismo tramo que saldrá en el video).
+  const [isPreviewingAudio, setIsPreviewingAudio] = useState(false);
+  const previewRef = useRef<{ ctx: AudioContext; src: AudioBufferSourceNode } | null>(null);
   const [isExportingVideo, setIsExportingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
 
@@ -88,8 +91,12 @@ export function useExportPanel(
   const videoBgUrlRef = useRef<string | null>(null);
 
   // Duración efectiva del export con clip: la del clip, con tope de 15s.
+  // Con videoLoop, un clip corto se repite hasta llegar a 15s.
   const CLIP_MAX_SEC = 15;
-  const clipExportSec = Math.min(videoBgDurationSec ?? CLIP_MAX_SEC, CLIP_MAX_SEC);
+  const [videoLoop, setVideoLoop] = useState(false);
+  const clipExportSec = videoLoop
+    ? CLIP_MAX_SEC
+    : Math.min(videoBgDurationSec ?? CLIP_MAX_SEC, CLIP_MAX_SEC);
 
   const clearVideoBg = () => {
     if (videoBgUrlRef.current) { URL.revokeObjectURL(videoBgUrlRef.current); videoBgUrlRef.current = null; }
@@ -97,6 +104,7 @@ export function useExportPanel(
     setVideoBgName(null);
     setVideoBgUrl(null);
     setVideoBgDurationSec(null);
+    setVideoLoop(false);
   };
   const handleVideoBgFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -140,6 +148,32 @@ export function useExportPanel(
       emitToast("❌ No se pudo leer el audio (formato no soportado).", "error");
     }
   };
+
+  // Escuchar el tramo exacto que saldrá en el video (offset → duración del export).
+  const stopAudioPreview = () => {
+    if (previewRef.current) {
+      try { previewRef.current.src.stop(); } catch { /* ya frenado */ }
+      void previewRef.current.ctx.close();
+      previewRef.current = null;
+    }
+    setIsPreviewingAudio(false);
+  };
+  const toggleAudioPreview = () => {
+    if (isPreviewingAudio) { stopAudioPreview(); return; }
+    if (!audioBuffer) return;
+    const ctx = new AudioContext();
+    const src = ctx.createBufferSource();
+    src.buffer = audioBuffer;
+    src.connect(ctx.destination);
+    const len = videoBgFile ? clipExportSec : videoDurationSec;
+    src.onended = () => stopAudioPreview();
+    src.start(0, audioOffsetSec, len);
+    previewRef.current = { ctx, src };
+    setIsPreviewingAudio(true);
+  };
+  // Cortar el preview si cambia el tramo/archivo o al desmontar.
+  useEffect(() => { stopAudioPreview(); }, [audioOffsetSec, audioName, videoDurationSec, clipExportSec]);
+  useEffect(() => () => { stopAudioPreview(); }, []);
 
   const handleExportDayVideo = async () => {
     if (!activeDay || !storyVariation) return;
@@ -365,6 +399,10 @@ export function useExportPanel(
     videoBgUrl,
     videoBgDurationSec,
     clipExportSec,
+    videoLoop,
+    setVideoLoop,
+    isPreviewingAudio,
+    toggleAudioPreview,
     handleVideoBgFile,
     clearVideoBg,
     isExportingVideo,
