@@ -13,6 +13,7 @@ import {
 import { Dumbbell, FileText } from "lucide-react";
 import { ACCENT_COLORS_MAP, WEEK_ACCENT_COLORS } from "../../lib/constants";
 import { SectionCard, Pill, StatBox, EmptyState, NexusButton, TXT } from "../ui/primitives";
+import { CHART } from "../../lib/chartTheme";
 
 interface VolumeProgressionSectionProps {
   currentWeek: string;
@@ -165,20 +166,20 @@ export default function VolumeProgressionSection({
                   data={chartData}
                   margin={{ top: 15, right: 5, left: -10, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
                   <XAxis
                     dataKey="name"
-                    stroke="#A1A1AA"
+                    stroke={CHART.tick.fill}
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#3F3F46" }}
+                    axisLine={{ stroke: CHART.axis }}
                   />
                   <YAxis
                     yAxisId="left"
-                    stroke="#A1A1AA"
+                    stroke={CHART.tick.fill}
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#3F3F46" }}
+                    axisLine={{ stroke: CHART.axis }}
                   />
                   <YAxis
                     yAxisId="right"
@@ -187,7 +188,7 @@ export default function VolumeProgressionSection({
                     fontSize={10}
                     domain={[0, 10]}
                     tickLine={false}
-                    axisLine={{ stroke: "#3F3F46" }}
+                    axisLine={{ stroke: CHART.axis }}
                   />
                   <Tooltip
                     contentStyle={{

@@ -102,7 +102,7 @@ export default function MuscleMapSection({ activeDay, currentVariationIndex }: M
                     <span className="text-[10px] font-mono text-[var(--color-ink-muted)] w-[68px] shrink-0 truncate">
                       {LABELS[m]}
                     </span>
-                    <div className="flex-1 h-1.5 rounded-full bg-[#18181B] overflow-hidden">
+                    <div className="flex-1 h-1.5 rounded-full bg-[color:var(--color-card-2)] overflow-hidden">
                       <div
                         className="h-full rounded-full"
                         style={{ width: `${Math.round(load[m] * 100)}%`, background: PRIMARY, opacity: 0.35 + 0.65 * load[m] }}

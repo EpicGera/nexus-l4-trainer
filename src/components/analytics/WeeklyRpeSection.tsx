@@ -20,6 +20,7 @@ import {
   computeRpeComparisonInfo,
 } from "../../lib/analyticsService";
 import { SectionCard, Pill, EmptyState, TXT } from "../ui/primitives";
+import { CHART } from "../../lib/chartTheme";
 
 interface WeeklyRpeSectionProps {
   currentWeek: string;
@@ -94,7 +95,7 @@ export default function WeeklyRpeSection({
                   data={chartData}
                   margin={{ top: 8, right: 8, left: -28, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
                   {WEEK_RPE_TARGET[currentWeek] && (
                     <ReferenceArea
                       y1={WEEK_RPE_TARGET[currentWeek].min}
@@ -109,17 +110,17 @@ export default function WeeklyRpeSection({
                   )}
                   <XAxis
                     dataKey="name"
-                    stroke="#A1A1AA"
+                    stroke={CHART.tick.fill}
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#3F3F46" }}
+                    axisLine={{ stroke: CHART.axis }}
                   />
                   <YAxis
-                    stroke="#A1A1AA"
+                    stroke={CHART.tick.fill}
                     fontSize={10}
                     domain={[0, 10]}
                     tickLine={false}
-                    axisLine={{ stroke: "#3F3F46" }}
+                    axisLine={{ stroke: CHART.axis }}
                     ticks={[2, 4, 6, 8, 10]}
                   />
                   <Tooltip
@@ -128,7 +129,7 @@ export default function WeeklyRpeSection({
                         const data = payload[0].payload;
                         if (data.isMissed) {
                           return (
-                            <div className="bg-[#0A0A0A] border border-[#3F3F46] p-2 text-[10px] font-mono shadow-md text-left z-50">
+                            <div className="bg-[color:var(--color-card)] border border-[color:var(--color-line)] p-2 text-[10px] font-mono shadow-md text-left z-50">
                               <p className="font-bold text-white uppercase">{data.name}</p>
                               <p className="text-neutral-400">Día perdido — sin registro</p>
                             </div>
@@ -136,7 +137,7 @@ export default function WeeklyRpeSection({
                         }
                         if (!data.isReal) return null;
                         return (
-                          <div className="bg-[#0A0A0A] border border-[#3F3F46] p-2 text-[10px] font-mono shadow-md text-left z-50">
+                          <div className="bg-[color:var(--color-card)] border border-[color:var(--color-line)] p-2 text-[10px] font-mono shadow-md text-left z-50">
                             <p className="font-bold text-white uppercase">{data.name}</p>
                             <p style={{ color: accentColor }}>
                               RPE: <span className="text-white font-bold">{data.rpe}/10</span>
@@ -150,21 +151,21 @@ export default function WeeklyRpeSection({
                   <Line
                     type="monotone"
                     dataKey="rpe"
-                    stroke={accentColor}
-                    strokeWidth={2}
+                    stroke={CHART.cyan}
+                    strokeWidth={2.5}
                     connectNulls={false}
                     dot={(props: any) => {
                       const { cx, cy, key, payload } = props;
                       if (cx == null || cy == null) return <g key={key} />;
-                      // Día perdido: punto hueco gris en 0 (cierra el hueco de la
-                      // línea sin fingir un RPE). Día real: punto de acento.
+                      // Día perdido: aro ámbar hueco en 0 (cierra el hueco de la
+                      // línea sin fingir un RPE). Día real: punto cian (dato medido).
                       return payload?.isMissed ? (
-                        <circle key={key} cx={cx} cy={cy} r={4} fill="none" stroke="#71717A" strokeWidth={1.5} strokeDasharray="2 1.5" />
+                        <circle key={key} cx={cx} cy={cy} r={4.5} fill="var(--color-card)" stroke={CHART.missed} strokeWidth={2} />
                       ) : (
-                        <circle key={key} cx={cx} cy={cy} r={4} fill="#000" stroke={accentColor} strokeWidth={1.5} />
+                        <circle key={key} cx={cx} cy={cy} r={4} fill="var(--color-card)" stroke={CHART.cyan} strokeWidth={2} />
                       );
                     }}
-                    activeDot={{ r: 5, fill: accentColor }}
+                    activeDot={{ r: 5, fill: CHART.cyan }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -183,20 +184,20 @@ export default function WeeklyRpeSection({
                   data={distributionData}
                   margin={{ top: 8, right: 8, left: -28, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
                   <XAxis
                     dataKey="rpeName"
-                    stroke="#A1A1AA"
+                    stroke={CHART.tick.fill}
                     fontSize={9}
                     tickLine={false}
-                    axisLine={{ stroke: "#3F3F46" }}
+                    axisLine={{ stroke: CHART.axis }}
                     tickFormatter={(val) => val.replace("RPE ", "")}
                   />
                   <YAxis
-                    stroke="#A1A1AA"
+                    stroke={CHART.tick.fill}
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: "#3F3F46" }}
+                    axisLine={{ stroke: CHART.axis }}
                     allowDecimals={false}
                   />
                   <Tooltip
@@ -204,7 +205,7 @@ export default function WeeklyRpeSection({
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-[#0A0A0A] border border-[#3F3F46] p-2 text-[10px] font-mono shadow-md text-left z-50">
+                          <div className="bg-[color:var(--color-card)] border border-[color:var(--color-line)] p-2 text-[10px] font-mono shadow-md text-left z-50">
                             <p className="font-bold text-white uppercase">{data.rpeName}</p>
                             <p className="text-neutral-300">
                               {data.frequency} {data.frequency === 1 ? "serie" : "series"}
@@ -232,7 +233,7 @@ export default function WeeklyRpeSection({
 
       {/* Honest day-vs-prior-cycles comparison */}
       {comparison && comparison.hasCurrentReal && (
-        <div className="mt-5 bg-black/50 border border-[#3F3F46] p-4 rounded-sm space-y-3">
+        <div className="mt-5 bg-black/50 border border-[color:var(--color-line)] p-4 rounded-sm space-y-3">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-white/5 pb-2">
             <span className={TXT.label}>HOY VS. MISMO DÍA EN OTRAS SEMANAS</span>
             <Pill
@@ -259,7 +260,7 @@ export default function WeeklyRpeSection({
                     {comparison.currentAvg}
                   </div>
                 </div>
-                <div className="border-l border-r border-[#3F3F46]">
+                <div className="border-l border-r border-[color:var(--color-line)]">
                   <div className={TXT.label}>CICLOS PREVIOS</div>
                   <div className="text-2xl font-brutalist font-black text-neutral-400">
                     {comparison.priorAvg}

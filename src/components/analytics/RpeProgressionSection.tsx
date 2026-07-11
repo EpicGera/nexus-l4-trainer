@@ -165,7 +165,7 @@ export default function RpeProgressionSection({
                 className={`p-4 border bg-black/60 rounded-sm relative transition-all ${
                   isCurrent
                     ? `${wk.borderColor} border-2 bg-zinc-900/40`
-                    : "border-[#3F3F46]"
+                    : "border-[color:var(--color-line)]"
                 }`}
               >
                 {isCurrent && (
@@ -250,14 +250,14 @@ export default function RpeProgressionSection({
           )
         }
       >
-        <div className="grid grid-cols-3 gap-3 text-center bg-black/60 border border-[#3F3F46] rounded-sm p-4">
+        <div className="grid grid-cols-3 gap-3 text-center bg-black/60 border border-[color:var(--color-line)] rounded-sm p-4">
           <div>
             <p className={`${TXT.label} mb-1`}>PROMEDIO MES</p>
             <p className="text-2xl text-white font-brutalist font-black">
               {monthAvg > 0 ? monthAvg.toFixed(1) : "—"}
             </p>
           </div>
-          <div className="border-l border-r border-[#3F3F46]">
+          <div className="border-l border-r border-[color:var(--color-line)]">
             <p className={`${TXT.label} mb-1`}>
               SEMANA {currentWeek.replace("w", "")}
             </p>

@@ -132,7 +132,7 @@ export default function AutoregulationSection({
                       <button
                         type="button"
                         onClick={() => skip(a)}
-                        className="shrink-0 text-[9px] font-mono uppercase tracking-wider text-[var(--color-ink-faint)] hover:text-[var(--color-ink)] border border-[#3F3F46] hover:border-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-sm transition-colors cursor-pointer"
+                        className="shrink-0 text-[9px] font-mono uppercase tracking-wider text-[var(--color-ink-faint)] hover:text-[var(--color-ink)] border border-[color:var(--color-line)] hover:border-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-sm transition-colors cursor-pointer"
                         title="Descartar este ajuste (no reaparecerá esta semana)"
                       >
                         OMITIR
