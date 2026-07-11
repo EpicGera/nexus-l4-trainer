@@ -413,7 +413,7 @@ export default function TelemetryBoard({
                 {crew.map((member) => (
                   <li
                     key={member.id}
-                    className="flex items-center gap-2 bg-black/60 border border-[#3F3F46] rounded-sm px-3 py-2"
+                    className="flex items-center gap-2 bg-black/60 border border-[color:var(--color-line)] rounded-sm px-3 py-2"
                   >
                     <span className="text-emerald-400 text-[10px]">●</span>
                     <div className="flex-grow min-w-0">
@@ -446,7 +446,7 @@ export default function TelemetryBoard({
                 onKeyDown={(e) => e.key === "Enter" && addCrewMember()}
                 placeholder="Nombre (ej: LUCAS)"
                 maxLength={24}
-                className="bg-black/80 border border-[#3F3F46] rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+                className="bg-black/80 border border-[color:var(--color-line)] rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
               />
               <div className="flex gap-1.5">
                 <input
@@ -455,7 +455,7 @@ export default function TelemetryBoard({
                   onKeyDown={(e) => e.key === "Enter" && addCrewMember()}
                   placeholder="Nota (ej: partner de WOD)"
                   maxLength={40}
-                  className="flex-grow min-w-0 bg-black/80 border border-[#3F3F46] rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+                  className="flex-grow min-w-0 bg-black/80 border border-[color:var(--color-line)] rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
                 />
                 <NexusButton
                   variant="good"
@@ -485,7 +485,7 @@ export default function TelemetryBoard({
                   {weeklyCompletionInfo.completedCount} / 7 ({weeklyCompletionInfo.percentage}%)
                 </span>
               </div>
-              <div className="w-full h-3 bg-neutral-950 border border-[#3F3F46] p-0.5 overflow-hidden rounded-xs">
+              <div className="w-full h-3 bg-neutral-950 border border-[color:var(--color-line)] p-0.5 overflow-hidden rounded-xs">
                 <motion.div
                   className="h-full bg-amber-400"
                   animate={{ width: `${weeklyCompletionInfo.percentage}%` }}
@@ -503,7 +503,7 @@ export default function TelemetryBoard({
                     {activeDayLoggingPercentage}% REGISTRADO
                   </span>
                 </div>
-                <div className="w-full h-3 bg-neutral-950 border border-[#3F3F46] p-0.5 overflow-hidden rounded-xs">
+                <div className="w-full h-3 bg-neutral-950 border border-[color:var(--color-line)] p-0.5 overflow-hidden rounded-xs">
                   <motion.div
                     className="h-full bg-[#39ff14]"
                     animate={{ width: `${activeDayLoggingPercentage}%` }}
