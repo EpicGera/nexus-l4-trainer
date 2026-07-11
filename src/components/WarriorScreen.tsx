@@ -17,6 +17,9 @@ import {
 import { Swords, Shield, Flame, Zap, Trophy, Star, Crown, Dumbbell } from "lucide-react";
 import { computeAthleteStats, AthleteStatsDoc } from "../lib/athleteStats";
 import { MASTER_ACHIEVEMENTS } from "../lib/constants";
+import { radarProps } from "../lib/chartTheme";
+import { computeCoachNotes, noteFor } from "../lib/coachNotes";
+import { CoachNote } from "./ui/primitives";
 
 interface WarriorScreenProps {
   athlete: { identity: string; level: string };
@@ -118,6 +121,20 @@ export default function WarriorScreen({
     [attributes]
   );
 
+  // Nota del coach: el atributo más flojo del radar (si lo hay). Los inputs ya
+  // están calculados, así que es gratis.
+  const radarNote = useMemo(
+    () =>
+      noteFor(
+        computeCoachNotes({
+          week: currentWeek,
+          radar: attributes.map((a) => ({ attr: a.attr, value: a.value })),
+        }),
+        "radar",
+      ),
+    [attributes, currentWeek],
+  );
+
   const topPRs = useMemo(() => {
     return Object.entries(stats.prs)
       .sort((a, b) => b[1].weightKg - a[1].weightKg)
@@ -152,7 +169,7 @@ export default function WarriorScreen({
   return (
     <div className="space-y-5 pb-12">
       {/* ═══ RANK CARD ═══ */}
-      <section className="relative overflow-hidden border-2 border-[#3F3F46] bg-gradient-to-br from-[#0D0D14] via-[#111118] to-[#0A0A10] p-5">
+      <section className="relative overflow-hidden border-2 border-[color:var(--color-line)] bg-gradient-to-br from-[#0D0D14] via-[#111118] to-[#0A0A10] p-5">
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -287,7 +304,7 @@ export default function WarriorScreen({
       </section>
 
       {/* ═══ ATTRIBUTES RADAR ═══ */}
-      <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
+      <section className="bg-[color:var(--color-card)] shadow-[var(--shadow-card)] p-4">
         <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
           <Zap size={14} className="text-amber-400" />
           ATRIBUTOS DEL GUERRERO
@@ -310,10 +327,10 @@ export default function WarriorScreen({
               <Radar
                 name="Atributos"
                 dataKey="value"
-                stroke={rank.color}
-                fill={rank.color}
-                fillOpacity={0.15}
-                strokeWidth={2}
+                stroke={radarProps.stroke}
+                fill={radarProps.fill}
+                fillOpacity={radarProps.fillOpacity}
+                strokeWidth={2.5}
               />
             </RadarChart>
           </ResponsiveContainer>
@@ -344,11 +361,14 @@ export default function WarriorScreen({
             </div>
           ))}
         </div>
+        {radarNote && (
+          <CoachNote note={`↑ ${radarNote.meta?.attr}: ${radarNote.text}`} rotate={-1} className="mt-2 text-right" />
+        )}
       </section>
 
       {/* ═══ TOP PRs — "HABILIDADES" ═══ */}
       {topPRs.length > 0 && (
-        <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
+        <section className="bg-[color:var(--color-card)] shadow-[var(--shadow-card)] p-4">
           <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
             <Trophy size={14} className="text-amber-400" />
             HABILIDADES MÁXIMAS (PRs)
@@ -393,7 +413,7 @@ export default function WarriorScreen({
 
       {/* ═══ WEEKLY VOLUME — "PODER SEMANAL" ═══ */}
       {weeklyVolume.length > 0 && (
-        <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
+        <section className="bg-[color:var(--color-card)] shadow-[var(--shadow-card)] p-4">
           <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
             <Flame size={14} className="text-orange-400" />
             PODER SEMANAL (VOLUMEN KG)
@@ -441,7 +461,7 @@ export default function WarriorScreen({
       )}
 
       {/* ═══ ACHIEVEMENTS — "INSIGNIAS" ═══ */}
-      <section className="border-2 border-[#3F3F46] bg-[#0D0D14] p-4">
+      <section className="bg-[color:var(--color-card)] shadow-[var(--shadow-card)] p-4">
         <h3 className="text-xs font-brutalist tracking-[0.15em] text-neutral-400 mb-3 flex items-center gap-2">
           <Star size={14} className="text-yellow-400" />
           INSIGNIAS ({unlockedAchievements.length}/{achievementData.length})
@@ -452,7 +472,7 @@ export default function WarriorScreen({
               key={a.id}
               className={`relative border p-3 text-center transition-all ${
                 a.unlocked
-                  ? "border-[#3F3F46] bg-white/[0.03]"
+                  ? "border-[color:var(--color-line)] bg-white/[0.03]"
                   : "border-white/5 bg-white/[0.01] opacity-30 grayscale"
               }`}
             >
