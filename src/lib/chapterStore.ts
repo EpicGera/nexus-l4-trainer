@@ -28,8 +28,9 @@ import {
 
 export interface ChapterTheme {
   key: string;
-  accent: string; // emphasis color
-  band: string; // central band color
+  label?: string; // nombre visible en el selector de paletas
+  accent: string; // emphasis color (debe ser claro: los headers usan texto negro encima)
+  band: string; // central band color (tinte oscuro del tono)
   titleGradient: string; // CSS gradient for the day title
   fontKey: string; // font registry key applied to day titles
 }
@@ -68,15 +69,21 @@ const INDEX_KEY = "nexus_chapters_index";
 const programKey = (id: string) => `nexus_chapter_${id}`;
 const dataKey = (id: string) => `nexus_chapter_data_${id}`;
 
-// ── Theme palettes (assigned by chapter index; refined visually in Fase 2) ───
-// PRVN monochrome: capítulos diferenciados por tono de gris/inversión, con el
-// rojo señal reservado a un solo tema. La identidad la lleva la tipografía.
+// ── Theme palettes (10 combinaciones de color únicas; elegibles por el usuario) ─
+// El usuario elige la paleta de su programación mensual. Regla: el `accent` debe
+// ser CLARO (los headers de bloque pintan texto negro encima), el `band` un tinte
+// oscuro del mismo tono, y el `titleGradient` la firma colorida del título del día.
 export const THEME_PALETTES: ChapterTheme[] = [
-  { key: "mono", accent: "#FFFFFF", band: "#1A1A1A", titleGradient: "linear-gradient(90deg,#FFFFFF,#A3A3A3)", fontKey: "diablo" },
-  { key: "signal", accent: "#DC2626", band: "#1A1A1A", titleGradient: "linear-gradient(90deg,#DC2626,#7F1D1D)", fontKey: "sunkenrock" },
-  { key: "steel", accent: "#D4D4D4", band: "#171717", titleGradient: "linear-gradient(90deg,#E5E5E5,#737373)", fontKey: "default" },
-  { key: "invert", accent: "#FFFFFF", band: "#FFFFFF", titleGradient: "linear-gradient(90deg,#FFFFFF,#D4D4D4)", fontKey: "default" },
-  { key: "graphite", accent: "#A3A3A3", band: "#0F0F0F", titleGradient: "linear-gradient(90deg,#A3A3A3,#525252)", fontKey: "default" },
+  { key: "mono",    label: "Blanco",   accent: "#FFFFFF", band: "#1A1A1A", titleGradient: "linear-gradient(90deg,#FFFFFF,#A3A3A3)", fontKey: "default" },
+  { key: "signal",  label: "Rojo",     accent: "#FF5A4D", band: "#1E1413", titleGradient: "linear-gradient(90deg,#FF7A6E,#B91C1C)", fontKey: "sunkenrock" },
+  { key: "solar",   label: "Solar",    accent: "#FFB020", band: "#1E1708", titleGradient: "linear-gradient(90deg,#FFD166,#F59E0B)", fontKey: "cinzel" },
+  { key: "cyber",   label: "Cíber",    accent: "#35D6F0", band: "#08191E", titleGradient: "linear-gradient(90deg,#7DE7FF,#0EA5C4)", fontKey: "default" },
+  { key: "toxic",   label: "Tóxico",   accent: "#B6F24A", band: "#141F08", titleGradient: "linear-gradient(90deg,#D9F99D,#84CC16)", fontKey: "metal" },
+  { key: "mint",    label: "Menta",    accent: "#45E0A0", band: "#0A1E15", titleGradient: "linear-gradient(90deg,#6EE7B7,#10B981)", fontKey: "default" },
+  { key: "violet",  label: "Violeta",  accent: "#B79BFF", band: "#170F2C", titleGradient: "linear-gradient(90deg,#C4B5FD,#7C3AED)", fontKey: "gothic" },
+  { key: "magenta", label: "Magenta",  accent: "#FF7AC6", band: "#22101C", titleGradient: "linear-gradient(90deg,#F9A8D4,#DB2777)", fontKey: "comic" },
+  { key: "ice",     label: "Hielo",    accent: "#BAE6FD", band: "#0E1822", titleGradient: "linear-gradient(90deg,#E0F2FE,#7DD3FC)", fontKey: "default" },
+  { key: "ember",   label: "Brasa",    accent: "#FF9F45", band: "#200E06", titleGradient: "linear-gradient(90deg,#FDBA74,#EA580C)", fontKey: "diablo" },
 ];
 export function themeForIndex(index: number): ChapterTheme {
   return THEME_PALETTES[(Math.max(1, index) - 1) % THEME_PALETTES.length];

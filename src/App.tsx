@@ -3,7 +3,8 @@ import { svgIcons } from "./components/icons/BlockIcons";
 import { getCleanExerciseName } from "./lib/historyUtils";
 import { AthleteState, Database, ProgramBlock } from "./types/workout";
 import { INTENTION_META, GEAR_LABEL } from "./lib/blockMeta";
-import { ensureChaptersInitialized, createChapter, getActiveChapter, ChapterTheme } from "./lib/chapterStore";
+import { ensureChaptersInitialized, createChapter, getActiveChapter, getActiveChapterId, updateChapterMeta, ChapterTheme } from "./lib/chapterStore";
+import PalettePicker from "./components/PalettePicker";
 import { loadCustomFont } from "./lib/customFont";
 import { SYSTEM_VERSION, SYSTEM_NAME, SYSTEM_TAGLINE } from "./lib/version";
 import { getProgramTodayPosition } from "./lib/programStart";
@@ -429,6 +430,13 @@ export default function App() {
     }
     return WEEK_MID_BAND_COLORS[currentWeek] || WEEK_MID_BAND_COLORS.w2;
   }, [chapterTheme, currentWeek]);
+
+  // El usuario elige la paleta de color de su programación: se persiste en el
+  // capítulo activo y refresca el acento global (accent/banda/gradiente del título).
+  const applyPalette = (theme: ChapterTheme) => {
+    updateChapterMeta(getActiveChapterId(), { theme });
+    setChapterTheme(theme);
+  };
 
   const activeBgColorClass = useMemo(() => {
     return WEEK_COLOR_MAPPING[currentWeek] || "bg-neon-pink";
@@ -1455,15 +1463,15 @@ export default function App() {
             ref={exportFileInputRef}
             onChange={handleBgImageUpload}
           />
-          <div className="flex w-full overflow-hidden rounded-sm">
+          <div className="flex w-full lg:w-auto lg:inline-flex overflow-hidden rounded-sm">
             <button
               type="button"
               onClick={handleExportDayJPG}
               disabled={isExportingJPG}
-              className="flex-grow flex items-center justify-center gap-2.5 px-6 py-4 lg:px-4 lg:py-2.5 font-brutalist text-xs sm:text-sm lg:text-[11px] tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white shadow-sm hover:shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer text-center"
+              className="flex-grow lg:flex-grow-0 flex items-center justify-center gap-2 px-5 py-3 lg:px-3.5 lg:py-2 font-brutalist text-sm sm:text-base lg:text-sm tracking-wide font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white shadow-sm hover:shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer text-center"
               title="Guardar el día como una imagen para compartir"
             >
-              <Share2 size={18} className={`shrink-0 lg:w-[15px] lg:h-[15px] ${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
+              <Camera size={17} className={`shrink-0 lg:w-4 lg:h-4 ${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
               <span>{isExportingJPG ? "EXPORTANDO..." : "CAPTURA DEL DÍA"}</span>
             </button>
             <button
@@ -1473,7 +1481,7 @@ export default function App() {
                 setShowStoryMenu((s) => !s);
               }}
               aria-expanded={showStoryMenu}
-              className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-4 lg:py-2.5 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
+              className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-3 lg:py-2 font-brutalist text-sm tracking-wide font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
               title="Opciones de la imagen: foto de fondo y personalización"
             >
               <Settings2 size={16} />
@@ -1876,6 +1884,8 @@ export default function App() {
               exportaciones (TXT mes, Sync Sheets, PDF semana, Programa del día,
               Guía IA) viven en la solapa Perfil & Bio → Datos & Nube. */}
           <div className="flex gap-2 w-full sm:w-auto h-full items-center justify-start sm:justify-end shrink-0">
+            {/* Paleta de color de la programación mensual (10 combinaciones) */}
+            <PalettePicker activeKey={chapterTheme?.key} onSelect={applyPalette} />
             {/* DÍA ESPECIAL: subir JSON de día suelto como pestaña extra del día activo */}
             {activeDay && (
               <>
@@ -3150,9 +3160,9 @@ export default function App() {
           <button
             onClick={() => setWizardOpen(true)}
             title={existingSession ? "Editar el WOD anotado" : "Anotar tu WOD paso a paso, como en la pizarra del box"}
-            className="fixed bottom-5 left-5 z-[90] no-print bg-[color:var(--color-sem-red)] text-white hover:-translate-y-0.5 font-brutalist text-xs tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+            className="fixed bottom-5 left-5 z-[90] no-print bg-[color:var(--color-sem-red)] text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
           >
-            {existingSession ? <Pencil size={14} aria-hidden="true" /> : <Swords size={14} aria-hidden="true" />}
+            {existingSession ? <Pencil size={16} aria-hidden="true" /> : <Swords size={16} aria-hidden="true" />}
             {existingSession ? "EDITAR WOD" : "ANOTAR WOD"}
           </button>
           {/* Cerrar un día que no se entrenó: lo marca perdido (sin datos) para
