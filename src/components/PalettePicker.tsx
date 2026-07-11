@@ -44,11 +44,13 @@ export default function PalettePicker({ activeKey, onSelect }: PalettePickerProp
         className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-tile)] bg-[color:var(--color-card)] text-[color:var(--color-ink-2)] hover:text-white shadow-[var(--shadow-card)] transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase cursor-pointer active:scale-95"
       >
         <Palette size={15} aria-hidden="true" />
+        <span>Paleta</span>
         <span
           className="w-3.5 h-3.5 rounded-full shrink-0 ring-1 ring-white/20"
           style={{ background: active.accent }}
+          title={active.label}
         />
-        <span className="hidden sm:inline">{active.label ?? "Paleta"}</span>
+        <span className="hidden md:inline text-[color:var(--color-label)]">{active.label ?? ""}</span>
       </button>
 
       {open && (
