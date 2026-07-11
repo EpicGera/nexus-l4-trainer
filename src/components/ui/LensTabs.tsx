@@ -10,6 +10,28 @@ interface LensTabsProps {
 }
 
 /**
+ * Color de texto legible sobre un fondo hex: negro si el fondo es claro, blanco
+ * si es oscuro (luminancia relativa WCAG). Evita el blanco-sobre-blanco cuando el
+ * acento es claro (paleta "Blanco"/"Hielo" o el casi-blanco de la semana). Si el
+ * acento no es un hex parseable (p.ej. `var(--...)`), asume oscuro → texto blanco.
+ */
+function readableTextOn(bg?: string): string {
+  // Sin hex parseable (p.ej. el default `var(--color-sem-red)` #ff453a, lum≈0.27):
+  // negro contrasta mejor que blanco para todo lum>0.18, así que el fallback es negro.
+  if (!bg) return "#0b0b0e";
+  const m = /^#?([0-9a-f]{6})$/i.exec(bg.trim());
+  if (!m) return "#0b0b0e";
+  const n = parseInt(m[1], 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  // Cruce WCAG donde el negro empieza a ganarle al blanco ≈ 0.18.
+  return lum > 0.18 ? "#0b0b0e" : "#fff";
+}
+
+/**
  * One segmented control per sheet to switch between focused "lenses". Keeps each
  * view to a single intent instead of an endless analytics scroll — only the
  * active lens renders. Do not nest these; one per tab (see plan: "sin abuso de
@@ -42,10 +64,12 @@ export default function LensTabs({
             onClick={() => onChange(t.key)}
             className={`py-2.5 px-1 text-[11px] font-mono font-black tracking-widest uppercase rounded-[var(--radius-tile)] transition-all cursor-pointer ${
               sel
-                ? "text-white shadow-[0_6px_18px_-4px_rgba(255,69,58,.55)]"
+                ? "shadow-[0_6px_18px_-4px_rgba(0,0,0,.45)]"
                 : "text-[color:var(--color-label)] hover:text-white hover:bg-[color:var(--color-card-2)]"
             }`}
-            style={sel ? { backgroundColor: activeBg } : undefined}
+            // El texto del segmento activo contrasta con el acento (negro sobre
+            // acento claro, blanco sobre oscuro) — nunca blanco-sobre-blanco.
+            style={sel ? { backgroundColor: activeBg, color: readableTextOn(accent) } : undefined}
           >
             {t.label}
           </button>
