@@ -59,7 +59,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
         
         {/* Left Side: Dynamic Icon and Spark */}
         <div 
-          className="p-2 shrink-0 border border-white/20 bg-[color:var(--color-card-2)] flex items-center justify-center relative"
+          className="p-2 shrink-0 bg-[color:var(--color-card-2)] flex items-center justify-center relative"
           style={{ textShadow: `0 0 8px ${achievement.color}` }}
         >
           <span className="text-xl leading-none">{achievement.icon || '🏆'}</span>
@@ -77,7 +77,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
             >
               🏆 LOGRO DESBLOQUEADO
             </span>
-            <span className="text-[7.5px] font-mono text-zinc-500 tracking-wider font-bold">
+            <span className="text-[7.5px] font-mono text-[color:var(--color-label)] tracking-wider font-bold">
               {achievement.rarity.toUpperCase()}
             </span>
           </div>
@@ -92,7 +92,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
         </div>
 
         {/* Right Close indicator */}
-        <div className="self-center shrink-0 text-zinc-500 hover:text-white transition-colors">
+        <div className="self-center shrink-0 text-[color:var(--color-label)] hover:text-white transition-colors">
           <Check size={12} className="text-emerald-400 font-extrabold animate-pulse" />
         </div>
 

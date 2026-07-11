@@ -14,8 +14,8 @@
   --font-hand: "Caveat", "Segoe Print", cursive;
 
   /* ── Paleta base del revamp ─────────────────────────────────────────── */
-  --color-bg: #33333b;        /* fondo de página (claro, para que la tarjeta flote) */
-  --color-bg-hi: #3c3c45;     /* tope del gradiente radial */
+  --color-bg: #2b2b31;        /* fondo de página (v2: apenas más oscuro, sigue > tarjeta) */
+  --color-bg-hi: #33333a;     /* tope del gradiente radial */
   --color-card: #131318;      /* tarjeta elevada */
   --color-card-2: #1c1c23;    /* tile interno */
 
@@ -33,8 +33,9 @@
   /* radios y elevación → habilitan rounded-card/tile y shadow-card/float */
   --radius-card: 7px;
   --radius-tile: 5px;
-  --shadow-card: 0 18px 40px -12px rgb(0 0 0 / 0.72), 0 4px 12px rgb(0 0 0 / 0.45);
-  --shadow-float: 0 10px 26px -6px rgb(0 0 0 / 0.6);
+  /* Soft UI: sombras más grandes y difusas (flotan más, sin glow duro) */
+  --shadow-card: 0 26px 60px -14px rgb(0 0 0 / 0.85), 0 6px 18px rgb(0 0 0 / 0.5);
+  --shadow-float: 0 14px 32px -8px rgb(0 0 0 / 0.65);
 
   /* ── Tokens legacy REMAPEADOS a la paleta nueva ─────────────────────── */
   --color-pure-black: #131318;   /* antes fondo; ahora superficie de tarjeta */
@@ -90,8 +91,8 @@
 }
 
 body {
-  background-color: #33333b;
-  background-image: radial-gradient(130% 90% at 50% -15%, #3c3c45 0%, #33333b 60%);
+  background-color: #2b2b31;
+  background-image: radial-gradient(130% 90% at 50% -15%, #33333a 0%, #2b2b31 60%);
   background-attachment: fixed;
   color: #FFFFFF;
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -327,3 +328,17 @@ body {
 }
 
 /* Workout grid styling handled dynamically in React components via Tailwind utility classes */
+
+/* Accesibilidad: respetar prefers-reduced-motion. Anula animaciones infinitas
+   (flash-intense, rpe pulses) y acorta transiciones a casi nada. Cubre también
+   las animaciones de motion/react que caen a CSS. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -195,7 +195,7 @@ export default function FatigueAndIntensitySection({
               )}
             </div>
 
-            <div className="h-[200px] bg-black/40 border border-white/5 rounded p-3">
+            <div className="h-[200px] bg-black/40 rounded p-3">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={trendData}
@@ -279,16 +279,16 @@ export default function FatigueAndIntensitySection({
               <div className="flex items-center gap-3">
                 <span className="font-brutalist text-3xl font-black text-white tracking-wide">
                   {cns.avg}
-                  <span className="text-xs text-neutral-500 font-mono"> /10</span>
+                  <span className="text-xs text-[color:var(--color-label)] font-mono"> /10</span>
                 </span>
-                <div className="flex-grow bg-neutral-900 h-3 rounded overflow-hidden p-0.5 border border-[color:var(--color-line)]">
+                <div className="flex-grow bg-neutral-900 h-3 rounded overflow-hidden p-0.5 ">
                   <div
                     className={`h-full ${cns.progressBg} transition-all duration-500 rounded-sm`}
                     style={{ width: `${cns.scalePercent}%` }}
                   />
                 </div>
               </div>
-              <p className="text-[10px] font-mono text-neutral-500">
+              <p className="text-[10px] font-mono text-[color:var(--color-label)]">
                 Basado en {cns.setCount} series registradas.
               </p>
             </div>
@@ -301,7 +301,7 @@ export default function FatigueAndIntensitySection({
               </p>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-[color:var(--color-line)] flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
+          <div className="mt-4 pt-3 border-t border-[color:var(--color-line)] flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-mono text-[color:var(--color-label)] uppercase tracking-wider">
             <span><span className="text-emerald-400">●</span> Estable ≤ 7.4</span>
             <span><span className="text-amber-400">●</span> Regulada 7.4–8.5</span>
             <span><span className="text-rose-400">●</span> Al límite &gt; 8.5</span>

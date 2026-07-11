@@ -102,13 +102,13 @@ export default function ChapterSwitcher() {
       <label className="text-[10px] font-mono font-black tracking-widest text-neutral-300 uppercase flex items-center gap-1.5">
         <BookOpen size={12} /> BIBLIOTECA DE CAPÍTULOS ({chapters.length})
       </label>
-      <p className="text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+      <p className="text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
         El capítulo activo se muestra encendido. Los anteriores quedan guardados y consultables —
         nada se destruye al cargar uno nuevo.
       </p>
 
       {/* Cloud backup status + manual force-save */}
-      <div className="flex items-center justify-between gap-2 border border-[color:var(--color-line)] bg-white/[0.03] px-2.5 py-2 rounded-sm">
+      <div className="flex items-center justify-between gap-2 bg-white/[0.03] px-2.5 py-2 rounded-sm">
         <span className="flex items-center gap-1.5 text-[9px] font-mono text-neutral-400 min-w-0">
           {user ? (
             <>
@@ -173,7 +173,7 @@ export default function ChapterSwitcher() {
                       </span>
                     )}
                   </div>
-                  {c.lore && <div className="text-[9px] font-mono text-neutral-500 truncate">{c.lore}</div>}
+                  {c.lore && <div className="text-[9px] font-mono text-[color:var(--color-label)] truncate">{c.lore}</div>}
                 </div>
                 <button
                   type="button"
@@ -196,7 +196,7 @@ export default function ChapterSwitcher() {
                     type="button"
                     onClick={() => onDelete(c)}
                     title="Eliminar capítulo (local + nube)"
-                    className="shrink-0 p-1.5 text-neutral-500 hover:text-red-400 cursor-pointer"
+                    className="shrink-0 p-1.5 text-[color:var(--color-label)] hover:text-red-400 cursor-pointer"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -231,9 +231,9 @@ export default function ChapterSwitcher() {
                       return (
                         <div key={d.id} className="flex items-center justify-between gap-2 text-[10px] font-mono">
                           <span className="text-neutral-300 truncate">
-                            <span className="text-neutral-600">{wk.toUpperCase()}·{d.name}</span> {d.title}
+                            <span className="text-[color:var(--color-label)]">{wk.toUpperCase()}·{d.name}</span> {d.title}
                           </span>
-                          <span className="text-neutral-500 shrink-0">{blocks || "—"} bloq · {items} ej</span>
+                          <span className="text-[color:var(--color-label)] shrink-0">{blocks || "—"} bloq · {items} ej</span>
                         </div>
                       );
                     })}
@@ -250,13 +250,13 @@ export default function ChapterSwitcher() {
           <label className="text-[10px] font-mono font-black tracking-widest text-neutral-300 uppercase flex items-center gap-1.5">
             <Type size={12} /> TIPOGRAFÍA DEL TÍTULO · ADMIN
           </label>
-          <p className="text-[9px] font-mono text-neutral-500 uppercase">
+          <p className="text-[9px] font-mono text-[color:var(--color-label)] uppercase">
             Fuente del título del día para el capítulo activo. El generador siempre usa la estándar.
           </p>
           <select
             value={activeChapter.theme.fontKey || "default"}
             onChange={(e) => onSetFont(e.target.value)}
-            className="w-full bg-black/50 border border-[color:var(--color-line)] text-neutral-200 text-[11px] font-mono px-2 py-2 rounded-sm focus:outline-none focus:border-white/40 cursor-pointer"
+            className="w-full bg-black/50 text-neutral-200 text-[11px] font-mono px-2 py-2 rounded-sm focus:outline-none focus:border-white/40 cursor-pointer"
           >
             {FONT_OPTIONS.map((o) => (
               <option key={o.key} value={o.key}>{o.label}</option>
@@ -264,7 +264,7 @@ export default function ChapterSwitcher() {
           </select>
           {/* live preview in the selected face */}
           <div
-            className="border border-[color:var(--color-line)] bg-black/40 px-3 py-3 text-center text-white text-2xl truncate"
+            className="bg-black/40 px-3 py-3 text-center text-white text-2xl truncate"
             style={{ fontFamily: fontFamilyFor(activeChapter.theme.fontKey) || undefined }}
           >
             {activeChapter.title || "NEXUS L4"}
@@ -280,7 +280,7 @@ export default function ChapterSwitcher() {
             type="button"
             onClick={() => fontInputRef.current?.click()}
             title="Subir una fuente propia (.woff2 / .ttf / .otf) — se guarda solo en este dispositivo"
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[10px] font-mono font-black uppercase tracking-wider border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] text-neutral-200 hover:bg-[color:var(--color-card-2)] cursor-pointer rounded-sm"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[10px] font-mono font-black uppercase tracking-wider bg-[color:var(--color-card-2)] text-neutral-200 hover:bg-[color:var(--color-card-2)] cursor-pointer rounded-sm"
           >
             <Upload size={12} /> Subir fuente (.woff2 / .ttf / .otf)
           </button>

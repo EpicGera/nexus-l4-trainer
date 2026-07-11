@@ -198,12 +198,12 @@ export default function RpeProgressionSection({
                     );
                   })}
                 </div>
-                <div className="flex justify-between text-[10px] font-mono text-neutral-500 mt-1">
+                <div className="flex justify-between text-[10px] font-mono text-[color:var(--color-label)] mt-1">
                   <span>1</span>
                   <span>10</span>
                 </div>
 
-                <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider mt-3">
+                <div className="text-[10px] font-mono text-[color:var(--color-label)] uppercase tracking-wider mt-3">
                   {wk.physiological}
                 </div>
                 <p className="text-[11px] font-mono text-neutral-300 mt-1.5 leading-relaxed">
@@ -250,7 +250,7 @@ export default function RpeProgressionSection({
           )
         }
       >
-        <div className="grid grid-cols-3 gap-3 text-center bg-black/60 border border-[color:var(--color-line)] rounded-sm p-4">
+        <div className="grid grid-cols-3 gap-3 text-center bg-black/60 rounded-sm p-4">
           <div>
             <p className={`${TXT.label} mb-1`}>PROMEDIO MES</p>
             <p className="text-2xl text-white font-brutalist font-black">
@@ -264,7 +264,7 @@ export default function RpeProgressionSection({
             <p
               className={`text-2xl font-brutalist font-black ${
                 currentWeekAvg === 0
-                  ? "text-neutral-500"
+                  ? "text-[color:var(--color-label)]"
                   : isDanger
                     ? "text-rose-400"
                     : "text-emerald-400"
@@ -278,7 +278,7 @@ export default function RpeProgressionSection({
             <p
               className={`text-2xl font-brutalist font-black ${
                 monthAvg === 0
-                  ? "text-neutral-500"
+                  ? "text-[color:var(--color-label)]"
                   : isDanger
                     ? "text-rose-500"
                     : "text-emerald-500"
@@ -290,7 +290,7 @@ export default function RpeProgressionSection({
             </p>
           </div>
         </div>
-        <p className="text-[10px] font-mono text-neutral-500 mt-2 leading-relaxed">
+        <p className="text-[10px] font-mono text-[color:var(--color-label)] mt-2 leading-relaxed">
           {monthAvg === 0
             ? "Registrá series con RPE para activar esta comparación."
             : "Desviación alta = tu semana supera RPE 9 o se aleja más de +15% del promedio del mes."}

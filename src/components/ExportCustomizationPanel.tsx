@@ -456,7 +456,7 @@ export default function ExportCustomizationPanel({
                 Neón
               </button>
             </div>
-            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+            <span className="text-[9px] font-mono text-[color:var(--color-label)] uppercase tracking-wider">
               Silueta / Neón detectan personas (procesado local en el dispositivo)
             </span>
           </div>

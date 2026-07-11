@@ -49,7 +49,7 @@ export default function ProfileSummaryCard({
         </div>
       </div>
 
-      <p className="mt-4 text-[10px] font-mono text-neutral-500 leading-relaxed">
+      <p className="mt-4 text-[10px] font-mono text-[color:var(--color-label)] leading-relaxed">
         Tus 1RM / Working Max, calendario de programa, colores y fondos se editan en el perfil completo.
       </p>
     </SectionCard>

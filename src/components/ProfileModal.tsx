@@ -131,7 +131,7 @@ export default function ProfileModal({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 10 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="border border-white/20 p-6 md:p-8 max-w-xl w-full bg-[#0A0A0B] shadow-sm font-condensed relative overflow-hidden my-auto"
+        className="p-6 md:p-8 max-w-xl w-full bg-[#0A0A0B] shadow-sm font-condensed relative overflow-hidden my-auto"
       >
         {/* decorative lines */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-electric-blue/40 via-electric-blue to-electric-blue/40"></div>
@@ -161,7 +161,7 @@ export default function ProfileModal({
                   identity: e.target.value.toUpperCase(),
                 })
               }
-              className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2.5 sm:p-3 text-white text-sm uppercase font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+              className="w-full bg-[#111113] p-2.5 sm:p-3 text-white text-sm uppercase font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               placeholder="EJ: GERA & FLOR"
             />
           </div>
@@ -177,7 +177,7 @@ export default function ProfileModal({
               onChange={(e) =>
                 setTempAthlete({ ...tempAthlete, level: e.target.value })
               }
-              className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700 mb-2"
+              className="w-full bg-[#111113] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700 mb-2"
               placeholder="EJ: PRVN ELITE // LVL 4 ⚡"
             />
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
@@ -229,7 +229,7 @@ export default function ProfileModal({
                       condition: preset.condition,
                     })
                   }
-                  className={`text-[9px] font-mono bg-[color:var(--color-card-2)] text-neutral-300 px-2 py-1.5 border border-[color:var(--color-line)] transition-all cursor-pointer ${preset.color} hover:bg-[color:var(--color-card-2)] active:scale-95 text-left leading-tight`}
+                  className={`text-[9px] font-mono bg-[color:var(--color-card-2)] text-neutral-300 px-2 py-1.5 transition-all cursor-pointer ${preset.color} hover:bg-[color:var(--color-card-2)] active:scale-95 text-left leading-tight`}
                 >
                   {preset.name}
                 </button>
@@ -255,13 +255,13 @@ export default function ProfileModal({
                 type="date"
                 value={programStart}
                 onChange={(e) => updateProgramStart(e.target.value)}
-                className="bg-[#111113] border border-[color:var(--color-line)] p-2.5 text-white text-sm font-mono focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all [color-scheme:dark]"
+                className="bg-[#111113] p-2.5 text-white text-sm font-mono focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all [color-scheme:dark]"
               />
               {programStart && (
                 <button
                   type="button"
                   onClick={() => updateProgramStart("")}
-                  className="text-[9px] font-mono uppercase tracking-wider border border-[color:var(--color-line)] text-neutral-400 hover:text-white hover:border-white/30 px-3 py-2.5 transition-all cursor-pointer"
+                  className="text-[9px] font-mono uppercase tracking-wider text-neutral-400 hover:text-white hover:border-white/30 px-3 py-2.5 transition-all cursor-pointer"
                 >
                   Limpiar
                 </button>
@@ -284,7 +284,7 @@ export default function ProfileModal({
                     restriction: e.target.value,
                   })
                 }
-                className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
             </div>
             <div className="space-y-1 group">
@@ -300,7 +300,7 @@ export default function ProfileModal({
                     condition: e.target.value,
                   })
                 }
-                className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] p-2 text-white text-sm focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function ProfileModal({
                     },
                   })
                 }
-                className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
               <div className="flex flex-wrap gap-1 pt-1">
                 {[
@@ -347,7 +347,7 @@ export default function ProfileModal({
                         },
                       })
                     }
-                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-[color:var(--color-line)] text-neutral-300 px-1.5 py-1"
+                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors text-neutral-300 px-1.5 py-1"
                   >
                     {item.split(" (")[0]}
                   </button>
@@ -371,7 +371,7 @@ export default function ProfileModal({
                     },
                   })
                 }
-                className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
               <div className="flex flex-wrap gap-1 pt-1">
                 {[
@@ -390,7 +390,7 @@ export default function ProfileModal({
                         },
                       })
                     }
-                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-[color:var(--color-line)] text-neutral-300 px-1.5 py-1"
+                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors text-neutral-300 px-1.5 py-1"
                   >
                     {item.split(" (")[0]}
                   </button>
@@ -414,7 +414,7 @@ export default function ProfileModal({
                     },
                   })
                 }
-                className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                className="w-full bg-[#111113] p-2 text-white text-xs focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
               />
               <div className="flex flex-wrap gap-1 pt-1">
                 {[
@@ -433,7 +433,7 @@ export default function ProfileModal({
                         },
                       })
                     }
-                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors border border-[color:var(--color-line)] text-neutral-300 px-1.5 py-1"
+                    className="text-[8.5px] font-mono bg-[#111113] hover:text-electric-blue duration-150 transition-colors text-neutral-300 px-1.5 py-1"
                   >
                     {item.split(" (")[0]}
                   </button>
@@ -457,7 +457,7 @@ export default function ProfileModal({
 
             {/* Coeficiente K del Working Max Dinámico (enciclopedia cap. 30–31 / Apéndice B) */}
             <div className="space-y-1.5">
-              <div className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider">
+              <div className="text-[9px] font-mono text-[color:var(--color-label)] uppercase tracking-wider">
                 Calibración del Working Max Dinámico (K)
               </div>
               <div className="grid grid-cols-3 gap-1">
@@ -474,7 +474,7 @@ export default function ProfileModal({
                       title={opt.hint}
                       onClick={() => setTempAthlete({ ...tempAthlete, kCoefficient: opt.k })}
                       className={`py-1.5 text-[10px] font-mono font-black uppercase tracking-wider transition-all cursor-pointer ${
-                        active ? "bg-electric-blue text-pure-black" : "bg-[#111113] border border-[color:var(--color-line)] text-neutral-400 hover:text-white"
+                        active ? "bg-electric-blue text-pure-black" : "bg-[#111113] text-neutral-400 hover:text-white"
                       }`}
                     >
                       {opt.label}
@@ -482,7 +482,7 @@ export default function ProfileModal({
                   );
                 })}
               </div>
-              <p className="text-[9px] font-mono text-neutral-600 leading-relaxed">
+              <p className="text-[9px] font-mono text-[color:var(--color-label)] leading-relaxed">
                 K calibra cuánta carga real tolerás bajo volumen: 0.85 si tu SNC se fatiga rápido, 0.95 si toleras
                 mucho. Afecta todas las cargas % WM del pizarrón.
               </p>
@@ -515,14 +515,14 @@ export default function ProfileModal({
                         step="2.5"
                         value={orm ?? ""}
                         onChange={(e) => updateOneRm(lift.id, e.target.value)}
-                        className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                        className="w-full bg-[#111113] p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
                         placeholder="—"
                       />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-neutral-600 pointer-events-none">
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-[color:var(--color-label)] pointer-events-none">
                         kg
                       </span>
                     </div>
-                    <div className="text-[8px] font-mono text-neutral-600 flex items-center gap-1.5 min-h-[12px]">
+                    <div className="text-[8px] font-mono text-[color:var(--color-label)] flex items-center gap-1.5 min-h-[12px]">
                       {wm != null && <span>WM {wm} kg</span>}
                       {logEst != null && (
                         <button
@@ -542,10 +542,10 @@ export default function ProfileModal({
 
             {/* Otros movimientos con carga (carga de trabajo, sin K) */}
             <div className="border-t border-white/5 pt-3 mt-3 space-y-2">
-              <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
+              <div className="text-[10px] font-mono text-[color:var(--color-label)] uppercase tracking-wider">
                 Otros movimientos con carga (carga de trabajo)
               </div>
-              <p className="text-[9px] font-mono text-neutral-600 leading-relaxed">
+              <p className="text-[9px] font-mono text-[color:var(--color-label)] leading-relaxed">
                 Cargá el peso que usás en accesorios/KB/DB (KB Swing, Bulgarian, V-up lastrado…) para que el
                 pizarrón resuelva sus cargas <span className="text-electric-blue font-bold">% WM</span> y se autorregulen.
                 Acá <span className="text-neutral-400">no</span> se aplica el coeficiente K.
@@ -569,11 +569,11 @@ export default function ProfileModal({
                             value={val ?? ""}
                             onChange={(e) => updateOneRm(id, e.target.value)}
                             placeholder="—"
-                            className="w-full bg-[#111113] border border-[color:var(--color-line)] p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
+                            className="w-full bg-[#111113] p-2 pr-9 text-white text-sm font-bold focus:border-electric-blue focus:bg-electric-blue/5 focus:outline-none transition-all placeholder:text-neutral-700"
                           />
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-neutral-600 pointer-events-none">kg</span>
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-[color:var(--color-label)] pointer-events-none">kg</span>
                         </div>
-                        <div className="text-[8px] font-mono text-neutral-600 min-h-[12px]">
+                        <div className="text-[8px] font-mono text-[color:var(--color-label)] min-h-[12px]">
                           {logEst != null && (
                             <button
                               type="button"
@@ -597,7 +597,7 @@ export default function ProfileModal({
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addMovement(); } }}
                   placeholder="Agregar movimiento (ej. KB Swing)"
                   spellCheck={false}
-                  className="flex-1 bg-[#111113] border border-[color:var(--color-line)] p-2 text-white text-xs focus:border-electric-blue focus:outline-none placeholder:text-neutral-700"
+                  className="flex-1 bg-[#111113] p-2 text-white text-xs focus:border-electric-blue focus:outline-none placeholder:text-neutral-700"
                 />
                 <button
                   type="button"
@@ -673,7 +673,7 @@ export default function ProfileModal({
                             <Check size={8} className="stroke-[3]" /> DESBLOQUEADO
                           </span>
                         ) : (
-                          <span className="text-zinc-500 italic">POR ADQUIRIR</span>
+                          <span className="text-[color:var(--color-label)] italic">POR ADQUIRIR</span>
                         )}
                       </div>
                     </div>
@@ -751,7 +751,7 @@ export default function ProfileModal({
                   }`}
                 >
                   <span className={`block truncate w-full ${opt.colorText}`}>{opt.name}</span>
-                  <span className="text-[7.5px] text-neutral-500 block leading-none">
+                  <span className="text-[7.5px] text-[color:var(--color-label)] block leading-none">
                     {opt.id === "default" ? "Sincro auto" : "Anulación manual"}
                   </span>
                 </button>
@@ -841,10 +841,10 @@ export default function ProfileModal({
                           localStorage.setItem("nexus_bg_metcon", preset.metcon);
                           localStorage.setItem("nexus_bg_accessories", preset.accessories);
                         }}
-                        className="text-[9px] font-mono bg-[color:var(--color-card-2)] border border-[color:var(--color-line)] text-neutral-300 p-1.5 hover:bg-electric-blue/10 hover:border-electric-blue duration-150 transition-all text-left flex flex-col justify-between h-[52px] cursor-pointer"
+                        className="text-[9px] font-mono bg-[color:var(--color-card-2)] text-neutral-300 p-1.5 hover:bg-electric-blue/10 hover:border-electric-blue duration-150 transition-all text-left flex flex-col justify-between h-[52px] cursor-pointer"
                       >
                         <span className="font-bold text-white block truncate w-full">{preset.name}</span>
-                        <span className="text-[7.5px] text-neutral-500 line-clamp-2 leading-tight">
+                        <span className="text-[7.5px] text-[color:var(--color-label)] line-clamp-2 leading-tight">
                           {preset.d}
                         </span>
                       </button>
@@ -864,7 +864,7 @@ export default function ProfileModal({
                         setWarmupBg(e.target.value);
                         localStorage.setItem("nexus_bg_warmup", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-[color:var(--color-line)] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -878,7 +878,7 @@ export default function ProfileModal({
                         setStrengthBg(e.target.value);
                         localStorage.setItem("nexus_bg_strength", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-[color:var(--color-line)] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -892,7 +892,7 @@ export default function ProfileModal({
                         setMetconBg(e.target.value);
                         localStorage.setItem("nexus_bg_metcon", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-[color:var(--color-line)] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -906,7 +906,7 @@ export default function ProfileModal({
                         setAccessoriesBg(e.target.value);
                         localStorage.setItem("nexus_bg_accessories", e.target.value);
                       }}
-                      className="w-full bg-[#111113] border border-[color:var(--color-line)] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
+                      className="w-full bg-[#111113] p-1.5 text-white font-mono text-[9px] focus:border-electric-blue focus:outline-none"
                     />
                   </div>
                 </div>
@@ -919,7 +919,7 @@ export default function ProfileModal({
           <div className="pt-4 relative z-10">
             <button
               onClick={() => { onRecalibrate(); onClose(); }}
-              className="w-full bg-transparent border border-white/25 text-white font-brutalist py-3 px-4 text-xs tracking-widest hover:bg-white hover:text-black transition-all cursor-pointer uppercase font-bold"
+              className="w-full bg-transparent text-white font-brutalist py-3 px-4 text-xs tracking-widest hover:bg-white hover:text-black transition-all cursor-pointer uppercase font-bold"
               title="Volver a responder el cuestionario y recomputar tu punto de referencia"
             >
               ⚙ CALIBRAR ATLETA (RE-ONBOARDING)
@@ -942,7 +942,7 @@ export default function ProfileModal({
             <span className="relative z-10">ACTUALIZAR PERFIL BIOMECÁNICO</span>
           </button>
           <button
-            className="w-full sm:w-auto bg-transparent border border-white/20 text-neutral-400 font-brutalist py-3 px-6 text-xs sm:text-sm tracking-wider hover:bg-[color:var(--color-card-2)] hover:text-white hover:border-white/40 transition-all cursor-pointer font-bold"
+            className="w-full sm:w-auto bg-transparent text-neutral-400 font-brutalist py-3 px-6 text-xs sm:text-sm tracking-wider hover:bg-[color:var(--color-card-2)] hover:text-white hover:border-white/40 transition-all cursor-pointer font-bold"
             onClick={onClose}
           >
             CERRAR

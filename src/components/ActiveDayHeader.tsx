@@ -115,7 +115,7 @@ export default function ActiveDayHeader({
           {/* STATUS INDICATOR: verde=completado · gris tachado=perdido · acento=pendiente */}
           <div className="flex items-center gap-2.5 shrink-0 select-none">
             <span
-              className="w-3.5 h-3.5 rounded-full border border-white/25 transition-all duration-500 shrink-0 shadow-sm"
+              className="w-3.5 h-3.5 rounded-full transition-all duration-500 shrink-0 shadow-sm"
               style={{
                 backgroundColor:
                   completedDays[activeDay.id] === "completed"

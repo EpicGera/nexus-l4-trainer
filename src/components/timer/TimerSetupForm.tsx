@@ -64,14 +64,14 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempWork((p) => Math.max(5, p - 5))}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -5s
             </button>
             <button
               type="button"
               onClick={() => setTempWork((p) => Math.max(10, p - 30))}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -30s
             </button>
@@ -81,19 +81,19 @@ export default function TimerSetupForm({
               onChange={(e) =>
                 setTempWork(Math.max(1, parseInt(e.target.value, 10) || 1))
               }
-              className="flex-grow min-w-0 px-2.5 py-1 bg-black border border-white/20 text-white font-mono text-xs rounded text-center font-bold"
+              className="flex-grow min-w-0 px-2.5 py-1 bg-black text-white font-mono text-xs rounded text-center font-bold"
             />
             <button
               type="button"
               onClick={() => setTempWork((p) => p + 5)}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +5s
             </button>
             <button
               type="button"
               onClick={() => setTempWork((p) => p + 30)}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +30s
             </button>
@@ -130,14 +130,14 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempRest((p) => Math.max(0, p - 5))}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -5s
             </button>
             <button
               type="button"
               onClick={() => setTempRest((p) => Math.max(0, p - 30))}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -30s
             </button>
@@ -147,19 +147,19 @@ export default function TimerSetupForm({
               onChange={(e) =>
                 setTempRest(Math.max(0, parseInt(e.target.value, 10) || 0))
               }
-              className="flex-grow min-w-0 px-2.5 py-1 bg-black border border-white/20 text-emerald-400 font-mono text-xs rounded text-center font-bold"
+              className="flex-grow min-w-0 px-2.5 py-1 bg-black text-emerald-400 font-mono text-xs rounded text-center font-bold"
             />
             <button
               type="button"
               onClick={() => setTempRest((p) => p + 5)}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +5s
             </button>
             <button
               type="button"
               onClick={() => setTempRest((p) => p + 30)}
-              className="px-2 py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="px-2 py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +30s
             </button>
@@ -196,7 +196,7 @@ export default function TimerSetupForm({
             <button
               type="button"
               onClick={() => setTempRounds((p) => Math.max(1, p - 1))}
-              className="flex-grow py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="flex-grow py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               -1 Serie
             </button>
@@ -206,12 +206,12 @@ export default function TimerSetupForm({
               onChange={(e) =>
                 setTempRounds(Math.max(1, parseInt(e.target.value, 10) || 1))
               }
-              className="w-20 px-2.5 py-1 bg-black border border-white/20 text-[#00F0FF] font-mono text-xs rounded text-center font-bold"
+              className="w-20 px-2.5 py-1 bg-black text-[#00F0FF] font-mono text-xs rounded text-center font-bold"
             />
             <button
               type="button"
               onClick={() => setTempRounds((p) => p + 1)}
-              className="flex-grow py-1.5 bg-neutral-900 border border-[color:var(--color-line)] text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              className="flex-grow py-1.5 bg-neutral-900 text-[10px] sm:text-xs font-mono rounded text-neutral-300 hover:text-white hover:bg-neutral-800 cursor-pointer"
             >
               +1 Serie
             </button>
@@ -236,7 +236,7 @@ export default function TimerSetupForm({
         <button
           type="button"
           onClick={onOnlyRest}
-          className="px-3 py-3 bg-zinc-900 border border-white/5 text-neutral-300 hover:text-white uppercase tracking-wider text-[10px] font-mono duration-150 rounded cursor-pointer"
+          className="px-3 py-3 bg-zinc-900 text-neutral-300 hover:text-white uppercase tracking-wider text-[10px] font-mono duration-150 rounded cursor-pointer"
         >
           SÓLO DESCANSO COMPLETO
         </button>

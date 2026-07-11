@@ -23,10 +23,10 @@ export default function EnrichmentToggle({ value, onChange, compact = false }: E
   const barCount = value ? 3 : 1;
 
   return (
-    <div className={`${compact ? "" : "bg-black/30 border border-[color:var(--color-line)] rounded-sm p-3"}`}>
+    <div className={`${compact ? "" : "bg-black/30 rounded-sm p-3"}`}>
       {/* Segmented control */}
       <div
-        className="relative flex rounded-sm overflow-hidden border border-[color:var(--color-line)]"
+        className="relative flex rounded-sm overflow-hidden "
         style={{ height: compact ? 28 : 34 }}
       >
         {/* Sliding highlight */}
@@ -48,7 +48,7 @@ export default function EnrichmentToggle({ value, onChange, compact = false }: E
           onClick={() => handleToggle(false)}
           className={`relative z-10 flex-1 flex items-center justify-center gap-1 font-mono uppercase tracking-wider transition-colors duration-200 border-0 bg-transparent cursor-pointer ${
             compact ? "text-[8px]" : "text-[10px]"
-          } ${!value ? "text-white font-bold" : "text-neutral-500"}`}
+          } ${!value ? "text-white font-bold" : "text-[color:var(--color-label)]"}`}
         >
           ⚡ Ligero
         </button>
@@ -58,7 +58,7 @@ export default function EnrichmentToggle({ value, onChange, compact = false }: E
           onClick={() => handleToggle(true)}
           className={`relative z-10 flex-1 flex items-center justify-center gap-1 font-mono uppercase tracking-wider transition-colors duration-200 border-0 bg-transparent cursor-pointer ${
             compact ? "text-[8px]" : "text-[10px]"
-          } ${value ? "text-blue-300 font-bold" : "text-neutral-500"}`}
+          } ${value ? "text-blue-300 font-bold" : "text-[color:var(--color-label)]"}`}
         >
           🧬 Enriquecido
         </button>

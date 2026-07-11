@@ -153,7 +153,7 @@ export default function ChapterCreator({
       subtitle="Programación mensual fundamentada en la enciclopedia NEXUS y en tus resultados"
     >
       {/* Evaluación del atleta (lo que la IA usa como base) */}
-      <div className="bg-black/40 border border-[color:var(--color-line)] rounded-sm p-3 mb-4">
+      <div className="bg-black/40 rounded-sm p-3 mb-4">
         <div className={`${TXT.label} mb-1`}>Evaluación del atleta</div>
         <p className="text-[11px] font-mono text-neutral-300 leading-relaxed">{evaluation.summary}</p>
       </div>
@@ -170,7 +170,7 @@ export default function ChapterCreator({
             onChange={(e) => saveObjective({ ...objective, statement: e.target.value })}
             rows={2}
             placeholder="ej. Prep Open: snatch 80kg y primer ring muscle-up en 3 capítulos"
-            className="w-full bg-black/60 border border-[color:var(--color-line)] rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+            className="w-full bg-black/60 rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
           />
         </Field>
 
@@ -200,7 +200,7 @@ export default function ChapterCreator({
                   type="button"
                   aria-label="Quitar marca"
                   onClick={() => saveObjective({ ...objective, lifts: objective.lifts.filter((_, j) => j !== i) })}
-                  className="text-neutral-500 hover:text-rose-400 cursor-pointer px-1"
+                  className="text-[color:var(--color-label)] hover:text-rose-400 cursor-pointer px-1"
                 >
                   ✕
                 </button>
@@ -234,7 +234,7 @@ export default function ChapterCreator({
             />
           </Field>
         </div>
-        <p className="text-[9px] font-mono text-neutral-500 leading-relaxed">
+        <p className="text-[9px] font-mono text-[color:var(--color-label)] leading-relaxed">
           Cada capítulo se genera como el próximo paso hacia esto: la IA recibe tu brecha real (marca
           actual vs objetivo) y prescribe para cerrarla.
         </p>
@@ -247,7 +247,7 @@ export default function ChapterCreator({
             onChange={(e) => setBoss(e.target.value)}
             rows={2}
             placeholder="ej. demonios del desierto de Diablo II, cada semana un Acto…"
-            className="w-full bg-black/60 border border-[color:var(--color-line)] rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+            className="w-full bg-black/60 rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
           />
         </Field>
         <div className="grid grid-cols-2 gap-3">
@@ -255,7 +255,7 @@ export default function ChapterCreator({
             <select
               value={days}
               onChange={(e) => setDays(parseInt(e.target.value, 10))}
-              className="w-full bg-black/60 border border-[color:var(--color-line)] rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+              className="w-full bg-black/60 rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
             >
               {[3, 4, 5, 6].map((d) => (
                 <option key={d} value={d}>{d} días</option>
@@ -309,7 +309,7 @@ export default function ChapterCreator({
                 {result.newMovements.map((m, i) => (
                   <div key={i} className="text-[11px] font-mono text-neutral-300">
                     <span className="text-white">{m.name}</span>{" "}
-                    <span className="text-neutral-500">· {m.modality}/{m.pattern}</span>
+                    <span className="text-[color:var(--color-label)]">· {m.modality}/{m.pattern}</span>
                   </div>
                 ))}
               </div>

@@ -152,7 +152,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
   return (
     <div className="w-full mt-2">
       {/* Toggle button for Chart & Filtering */}
-      <div className="flex justify-between items-center mb-1.5 bg-zinc-950/40 border border-white/5 px-2 py-1 rounded-xs flex-wrap gap-2">
+      <div className="flex justify-between items-center mb-1.5 bg-zinc-950/40 px-2 py-1 rounded-xs flex-wrap gap-2">
         <span className="text-[8px] text-neutral-400 uppercase font-mono tracking-wider">
           Bitácora Reciente
         </span>
@@ -192,13 +192,13 @@ export default function HistoryTable({ history }: HistoryTableProps) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden bg-[#0A0A0B]/85 border border-white/5 p-2.5 rounded-sm mb-1.5"
+            className="overflow-hidden bg-[#0A0A0B]/85 p-2.5 rounded-sm mb-1.5"
           >
-            <p className="text-[8px] font-mono text-neutral-500 uppercase mb-2 text-center tracking-wider">
+            <p className="text-[8px] font-mono text-[color:var(--color-label)] uppercase mb-2 text-center tracking-wider">
               Evolución de Cargas Múltiples (kg) - Últimas {chartData.length} Sesiones
             </p>
             {chartData.every((d) => d.weight === 0) ? (
-              <div className="text-[9px] font-mono text-neutral-500 italic text-center py-6">
+              <div className="text-[9px] font-mono text-[color:var(--color-label)] italic text-center py-6">
                 Todas las sesiones cargadas con Peso Corporal (P.C.) o sin registro de peso numérico
               </div>
             ) : (
@@ -227,7 +227,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                         if (active && payload && payload.length) {
                           const data = payload[0].payload;
                           return (
-                            <div className="bg-zinc-950 border border-[color:var(--color-line)] p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
+                            <div className="bg-zinc-950 p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
                               <p className="font-bold text-white mb-0.5 truncate max-w-[150px]">
                                 {data.fullName}
                               </p>
@@ -280,7 +280,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
           >
             <table className="w-full text-[9px] font-mono text-left border-collapse min-w-[200px]">
               <thead>
-                <tr className="border-b border-[color:var(--color-line)] text-neutral-500 uppercase">
+                <tr className="border-b border-[color:var(--color-line)] text-[color:var(--color-label)] uppercase">
                   <th className="py-1 pr-2 font-medium">Sesión</th>
                   <th className="py-1 px-2 font-medium">Series (Carga × Reps @ RPE)</th>
                 </tr>
@@ -342,7 +342,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                                   <span className="font-bold text-white">
                                     {set.weight ? `${set.weight}kg` : "P.C."}
                                   </span>
-                                  <span className="text-neutral-500">×</span>
+                                  <span className="text-[color:var(--color-label)]">×</span>
                                   <span className="text-emerald-400 font-semibold font-mono">
                                     {set.reps ? `${set.reps}r` : "Fallo"}
                                   </span>
@@ -383,7 +383,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
               <TrendingUp size={9} style={{ color: activeColor }} />
               Monitoreo Biomecánico RPE Actual vs. Histórico (Promedio 3)
             </span>
-            <span className="text-[7px] font-mono text-neutral-500 italic bg-white/2.5 px-1 py-0.5 rounded-xs">
+            <span className="text-[7px] font-mono text-[color:var(--color-label)] italic bg-white/2.5 px-1 py-0.5 rounded-xs">
               Métrica de Fatiga SNC
             </span>
           </div>
@@ -421,7 +421,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                         (p) => p.dataKey === "rpePromedio",
                       )?.value;
                       return (
-                        <div className="bg-zinc-950 border border-[color:var(--color-line)] p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
+                        <div className="bg-zinc-950 p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
                           <p className="font-bold text-white mb-1 uppercase tracking-wider">
                             {data.name} ({data.cargaActual} × {data.repsActual})
                           </p>
@@ -502,7 +502,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
               </div>
             ) : (
               <span
-                className="text-neutral-500 italic text-[7px]"
+                className="text-[color:var(--color-label)] italic text-[7px]"
                 id="rpe_chart_no_history_legend"
               >
                 (Siguiente sesión habilitará el comparativo histórico)

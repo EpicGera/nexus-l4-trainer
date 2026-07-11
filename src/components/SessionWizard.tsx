@@ -755,19 +755,19 @@ export default function SessionWizard({
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div className="bg-black/60 border border-[color:var(--color-line)] rounded-sm p-3">
+            <div className="bg-black/60 rounded-sm p-3">
               <div className={TXT.label}>Trabajo</div>
               <div className="text-lg font-brutalist text-white">{Math.round(reward.totalWorkJ / 1000)} kJ</div>
             </div>
-            <div className="bg-black/60 border border-[color:var(--color-line)] rounded-sm p-3">
+            <div className="bg-black/60 rounded-sm p-3">
               <div className={TXT.label}>Volumen</div>
               <div className="text-lg font-brutalist text-white">{reward.totalVolumeKg.toLocaleString()} kg</div>
             </div>
-            <div className="bg-black/60 border border-[color:var(--color-line)] rounded-sm p-3">
+            <div className="bg-black/60 rounded-sm p-3">
               <div className={TXT.label}>Potencia</div>
               <div className="text-lg font-brutalist text-white">{reward.avgPowerW != null ? `${reward.avgPowerW} W` : "—"}</div>
             </div>
-            <div className="bg-black/60 border border-[color:var(--color-line)] rounded-sm p-3">
+            <div className="bg-black/60 rounded-sm p-3">
               <div className={TXT.label}>Carga</div>
               <div className="text-lg font-brutalist text-white">{reward.loadAU != null ? `${reward.loadAU} AU` : "—"}</div>
             </div>
@@ -893,7 +893,7 @@ export default function SessionWizard({
               type="button"
               onClick={() => setShowKind((v) => !v)}
               aria-expanded={showKind}
-              className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-neutral-500 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[color:var(--color-label)] hover:text-white transition-colors cursor-pointer"
             >
               <span aria-hidden="true">⚙</span>
               <span>¿Otro tipo de dato?</span>
@@ -943,11 +943,11 @@ export default function SessionWizard({
                 if (lastChip.weightKg != null) setInW(String(lastChip.weightKg));
                 if (lastChip.reps != null) setInR(String(lastChip.reps));
               }}
-              className="w-full flex items-center gap-2 text-left bg-[color:var(--color-card-2)] border border-[color:var(--color-line)] rounded-sm px-3 py-2 text-[11px] font-mono text-neutral-300 hover:bg-[color:var(--color-card-2)] transition-colors cursor-pointer"
+              className="w-full flex items-center gap-2 text-left bg-[color:var(--color-card-2)] rounded-sm px-3 py-2 text-[11px] font-mono text-neutral-300 hover:bg-[color:var(--color-card-2)] transition-colors cursor-pointer"
             >
               <span className="font-bold text-neutral-400">Última</span>
               <span>{lastChip.weightKg != null ? `${lastChip.weightKg} kg` : ""}{lastChip.weightKg != null && lastChip.reps != null ? " × " : ""}{lastChip.reps != null ? `${lastChip.reps} reps` : ""}</span>
-              <span className="ml-auto text-neutral-500">tocar para usar</span>
+              <span className="ml-auto text-[color:var(--color-label)]">tocar para usar</span>
             </button>
           )}
           {activeStation.mode === "loaded" && (
@@ -1012,8 +1012,8 @@ export default function SessionWizard({
                   : d.timeSec != null ? fmtTime(d.timeSec)
                   : "—";
                 return (
-                  <div key={i} className="flex items-center gap-2 bg-black/40 border border-[color:var(--color-line)] rounded-sm px-3 py-2 text-[12px] font-mono">
-                    <span className="text-neutral-500">S{i + 1}</span>
+                  <div key={i} className="flex items-center gap-2 bg-black/40 rounded-sm px-3 py-2 text-[12px] font-mono">
+                    <span className="text-[color:var(--color-label)]">S{i + 1}</span>
                     <span className="text-white">{desc}</span>
                     {d.prescribed && (
                       <span className="text-[9px] font-mono uppercase tracking-wider text-amber-400/80 border border-amber-500/30 px-1 rounded-sm">
@@ -1080,7 +1080,7 @@ export default function SessionWizard({
                           onClick={() => setMLastMovement(sel ? "" : mv)}
                           className={`text-[11px] font-mono px-2.5 py-1.5 rounded-sm border cursor-pointer transition-colors ${sel ? "bg-orange-500 text-black border-transparent" : "bg-black/40 text-neutral-300 border-[color:var(--color-line)]"}`}
                         >
-                          <span className="text-neutral-500 mr-1">{i + 1}.</span>
+                          <span className="text-[color:var(--color-label)] mr-1">{i + 1}.</span>
                           {mv}
                         </button>
                       );
@@ -1129,7 +1129,7 @@ export default function SessionWizard({
               <Field label="Qué cambió, por movimiento">
                 <div className="space-y-2">
                   {metconMovements.map((mv) => (
-                    <div key={mv} className="bg-black/40 border border-[color:var(--color-line)] rounded-sm p-2">
+                    <div key={mv} className="bg-black/40 rounded-sm p-2">
                       <div className="text-[12px] font-mono text-neutral-200 mb-1.5 truncate">{mv}</div>
                       <div className="flex gap-1.5 flex-wrap">
                         {([
@@ -1151,7 +1151,7 @@ export default function SessionWizard({
               </Field>
               <Field label="Cómo varió (opcional · escalado dinámico)">
                 <textarea value={mNotes} onChange={(e) => setMNotes(e.target.value)} rows={2}
-                  className="w-full bg-black/60 border border-[color:var(--color-line)] rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+                  className="w-full bg-black/60 rounded-sm p-2.5 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
                   placeholder="ej. rondas 1-3 RX, después pull-ups con banda" />
               </Field>
             </>

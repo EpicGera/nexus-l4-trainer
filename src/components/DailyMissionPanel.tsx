@@ -63,7 +63,7 @@ export default function DailyMissionPanel({
       className="mt-3 w-full max-w-xl mx-auto text-white p-2.5 md:p-3 shadow-[var(--shadow-card)] font-mono text-left relative overflow-hidden rounded-[var(--radius-card)]"
       style={{ background: "linear-gradient(160deg, #1e1720 0%, var(--color-card) 65%)" }}
     >
-      <div className="flex justify-between items-center text-[7.5px] sm:text-[8px] font-bold text-zinc-500 border-b border-white/5 pb-0.5 mb-1.5 uppercase tracking-widest leading-none">
+      <div className="flex justify-between items-center text-[7.5px] sm:text-[8px] font-bold text-[color:var(--color-label)] border-b border-white/5 pb-0.5 mb-1.5 uppercase tracking-widest leading-none">
         <span className="flex items-center gap-1">
           <Sparkles size={8} className="text-amber-500" />★ OBJ. DIARIO
         </span>
@@ -86,7 +86,7 @@ export default function DailyMissionPanel({
           <div className="flex-1 min-h-[1.2rem] flex items-center">
             <p className="font-bold text-[9.5px] sm:text-[10px] tracking-wide uppercase text-zinc-100 border-l-2 border-[var(--color-accent)] pl-1.5 py-0 w-full whitespace-normal break-words leading-snug">
               {isGeneratingQuest ? (
-                <span className="text-neutral-500 flex items-center gap-1">
+                <span className="text-[color:var(--color-label)] flex items-center gap-1">
                   <span>GENERANDO MISIÓN…</span>
                 </span>
               ) : (
@@ -98,7 +98,7 @@ export default function DailyMissionPanel({
             <button
               onClick={handleFetchSideQuest}
               disabled={isGeneratingQuest}
-              className="bg-electric-blue/15 text-electric-blue hover:bg-electric-blue/25 disabled:bg-neutral-800 disabled:text-neutral-600 p-0.5 shadow-sm hover:shadow-sm active:scale-95 transition-all cursor-pointer rounded-[var(--radius-tile)] shrink-0 group relative overflow-hidden flex items-center justify-center"
+              className="bg-electric-blue/15 text-electric-blue hover:bg-electric-blue/25 disabled:bg-neutral-800 disabled:text-[color:var(--color-label)] p-0.5 shadow-sm hover:shadow-sm active:scale-95 transition-all cursor-pointer rounded-[var(--radius-tile)] shrink-0 group relative overflow-hidden flex items-center justify-center"
               title="Obtener misión seleccionada por IA según el entreno del día"
               style={{ width: "20px", height: "20px" }}
             >
@@ -134,7 +134,7 @@ export default function DailyMissionPanel({
               <div className="bg-zinc-900/40 p-1 space-y-0.5 text-[9px] text-left rounded-[var(--radius-tile)] font-mono">
                 <div className="grid grid-cols-3 gap-0.5">
                   <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)]">
-                    <span className="text-[6.5px] text-zinc-500 block uppercase font-bold leading-none mb-0.5">
+                    <span className="text-[6.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
                       XP
                     </span>
                     <span className="text-[8.5px] font-black text-[#00f0ff]">
@@ -142,7 +142,7 @@ export default function DailyMissionPanel({
                     </span>
                   </div>
                   <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)]">
-                    <span className="text-[6.5px] text-zinc-500 block uppercase font-bold leading-none mb-0.5">
+                    <span className="text-[6.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
                       SCORE
                     </span>
                     <span className="text-[8.5px] font-black text-amber-400">
@@ -150,7 +150,7 @@ export default function DailyMissionPanel({
                     </span>
                   </div>
                   <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)] flex flex-col justify-center">
-                    <span className="text-[6.5px] text-zinc-500 block uppercase font-bold leading-none mb-0.5">
+                    <span className="text-[6.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
                       BOTÍN
                     </span>
                     <span
@@ -186,14 +186,14 @@ export default function DailyMissionPanel({
           ) : (
             <div className="animate-fade-in space-y-1.5">
               <div className="flex justify-between items-center text-[7.5px] pb-0.5 font-mono leading-none">
-                <span className="text-zinc-500 font-bold">RECOMPENSAS:</span>
+                <span className="text-[color:var(--color-label)] font-bold">RECOMPENSAS:</span>
                 <span className="text-electric-blue font-bold flex items-center gap-0.5">
                   <Sparkles size={7} className="text-amber-500" />
                   <span>+{rewards.xp} XP</span>
                 </span>
               </div>
 
-              <div className="bg-[color:var(--color-card-2)] p-1 border border-[color:var(--color-line)] rounded-[var(--radius-tile)] flex items-center justify-between gap-2">
+              <div className="bg-[color:var(--color-card-2)] p-1 rounded-[var(--radius-tile)] flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => setIsHelpOpen(!isHelpOpen)}
@@ -214,7 +214,7 @@ export default function DailyMissionPanel({
 
               {/* checks del validador determinista */}
               {validation && !validation.ok && (
-                <div className="bg-[#111113] border border-[color:var(--color-line)] p-1 space-y-0.5 rounded-[var(--radius-tile)]">
+                <div className="bg-[#111113] p-1 space-y-0.5 rounded-[var(--radius-tile)]">
                   {validation.checks.map((c, i) => (
                     <div key={i} className="flex items-center gap-1 text-[7.5px] font-mono leading-tight">
                       {c.pass ? (

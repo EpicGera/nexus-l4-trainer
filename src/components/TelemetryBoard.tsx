@@ -413,7 +413,7 @@ export default function TelemetryBoard({
                 {crew.map((member) => (
                   <li
                     key={member.id}
-                    className="flex items-center gap-2 bg-black/60 border border-[color:var(--color-line)] rounded-sm px-3 py-2"
+                    className="flex items-center gap-2 bg-black/60 rounded-sm px-3 py-2"
                   >
                     <span className="text-emerald-400 text-[10px]">●</span>
                     <div className="flex-grow min-w-0">
@@ -429,7 +429,7 @@ export default function TelemetryBoard({
                     <button
                       type="button"
                       onClick={() => removeCrewMember(member.id)}
-                      className="text-neutral-500 hover:text-rose-400 transition-colors cursor-pointer p-1"
+                      className="text-[color:var(--color-label)] hover:text-rose-400 transition-colors cursor-pointer p-1"
                       title={`Quitar a ${member.name}`}
                     >
                       <X size={13} />
@@ -446,7 +446,7 @@ export default function TelemetryBoard({
                 onKeyDown={(e) => e.key === "Enter" && addCrewMember()}
                 placeholder="Nombre (ej: LUCAS)"
                 maxLength={24}
-                className="bg-black/80 border border-[color:var(--color-line)] rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+                className="bg-black/80 rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-[color:var(--color-label)] focus:outline-none focus:border-emerald-500/50"
               />
               <div className="flex gap-1.5">
                 <input
@@ -455,7 +455,7 @@ export default function TelemetryBoard({
                   onKeyDown={(e) => e.key === "Enter" && addCrewMember()}
                   placeholder="Nota (ej: partner de WOD)"
                   maxLength={40}
-                  className="flex-grow min-w-0 bg-black/80 border border-[color:var(--color-line)] rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+                  className="flex-grow min-w-0 bg-black/80 rounded-sm px-3 py-2 text-[11px] font-mono text-white placeholder:text-[color:var(--color-label)] focus:outline-none focus:border-emerald-500/50"
                 />
                 <NexusButton
                   variant="good"
@@ -485,7 +485,7 @@ export default function TelemetryBoard({
                   {weeklyCompletionInfo.completedCount} / 7 ({weeklyCompletionInfo.percentage}%)
                 </span>
               </div>
-              <div className="w-full h-3 bg-neutral-950 border border-[color:var(--color-line)] p-0.5 overflow-hidden rounded-xs">
+              <div className="w-full h-3 bg-neutral-950 p-0.5 overflow-hidden rounded-xs">
                 <motion.div
                   className="h-full bg-amber-400"
                   animate={{ width: `${weeklyCompletionInfo.percentage}%` }}
@@ -503,14 +503,14 @@ export default function TelemetryBoard({
                     {activeDayLoggingPercentage}% REGISTRADO
                   </span>
                 </div>
-                <div className="w-full h-3 bg-neutral-950 border border-[color:var(--color-line)] p-0.5 overflow-hidden rounded-xs">
+                <div className="w-full h-3 bg-neutral-950 p-0.5 overflow-hidden rounded-xs">
                   <motion.div
                     className="h-full bg-[#39ff14]"
                     animate={{ width: `${activeDayLoggingPercentage}%` }}
                     transition={{ type: "spring", stiffness: 90, damping: 15 }}
                   />
                 </div>
-                <p className="text-[10px] font-mono text-neutral-500 leading-relaxed">
+                <p className="text-[10px] font-mono text-[color:var(--color-label)] leading-relaxed">
                   % de movimientos de hoy con series registradas. Tu XP y rango viven en la pestaña GUERRERO.
                 </p>
               </div>
@@ -664,7 +664,7 @@ export default function TelemetryBoard({
                 <span className="text-[10px] font-mono uppercase tracking-wider font-extrabold text-[#10b981] block">
                   Arrastra aquí tu CSV de Drive
                 </span>
-                <span className="text-[10px] text-zinc-500 block mt-1 uppercase font-mono tracking-tight">
+                <span className="text-[10px] text-[color:var(--color-label)] block mt-1 uppercase font-mono tracking-tight">
                   O HAZ CLIC PARA AGREGAR ARCHIVO
                 </span>
               </div>
@@ -700,7 +700,7 @@ export default function TelemetryBoard({
                     className={`px-3 py-1.5 text-[10px] font-mono font-bold tracking-wider uppercase rounded-sm cursor-pointer transition-all ${
                       importMode === "merge"
                         ? "bg-[#10b981] text-black font-extrabold"
-                        : "text-zinc-500 hover:text-white"
+                        : "text-[color:var(--color-label)] hover:text-white"
                     }`}
                     title="Suma las series importadas a tu historial actual sin borrar tus otros registros"
                   >
@@ -712,7 +712,7 @@ export default function TelemetryBoard({
                     className={`px-3 py-1.5 text-[10px] font-mono font-bold tracking-wider uppercase rounded-sm cursor-pointer transition-all ${
                       importMode === "replace"
                         ? "bg-red-500 text-black font-extrabold"
-                        : "text-zinc-500 hover:text-white"
+                        : "text-[color:var(--color-label)] hover:text-white"
                     }`}
                     title="¡ALERTA! Elimina todos los registros actuales para sustituirlos por la historia de Drive"
                   >

@@ -62,7 +62,7 @@ export default function Toast() {
               </p>
               <button
                 onClick={() => dismiss(t.id)}
-                className="shrink-0 text-neutral-500 hover:text-white transition-colors cursor-pointer"
+                className="shrink-0 text-[color:var(--color-label)] hover:text-white transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>

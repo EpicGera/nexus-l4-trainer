@@ -96,7 +96,7 @@ function ClassifyMovementModal({ name, onClose }: { name: string | null; onClose
           <select
             value={pattern}
             onChange={(e) => setPattern(e.target.value as Pattern)}
-            className="w-full bg-black/60 border border-[color:var(--color-line)] rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+            className="w-full bg-black/60 rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
           >
             {PATTERNS.map((p) => (
               <option key={p} value={p}>{PATTERN_ES[p] || p}</option>
@@ -238,7 +238,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
           <select
             value={scope.chapterId || getActiveChapterId()}
             onChange={(e) => setScope((s) => ({ ...s, chapterId: e.target.value }))}
-            className="bg-black/60 border border-[color:var(--color-line)] rounded-sm h-[30px] px-2 text-white font-mono text-[11px] focus:outline-none focus:border-electric-blue"
+            className="bg-black/60 rounded-sm h-[30px] px-2 text-white font-mono text-[11px] focus:outline-none focus:border-electric-blue"
           >
             {chapters.map((c) => (
               <option key={c.id} value={c.id}>
@@ -247,7 +247,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
             ))}
           </select>
         )}
-        <span className="text-[10px] font-mono text-neutral-500 ml-auto">
+        <span className="text-[10px] font-mono text-[color:var(--color-label)] ml-auto">
           {scopedSessions.length} incursión(es) en alcance
         </span>
       </div>
@@ -263,7 +263,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         title="Cobertura del espectro"
         subtitle="Sistemas energéticos × dominios del programa — las celdas vacías son tus huecos (PRVN)"
       >
-        <div className="text-[10px] font-mono text-neutral-500 uppercase mb-2">
+        <div className="text-[10px] font-mono text-[color:var(--color-label)] uppercase mb-2">
           {coverage.totalMetcons} metcon(s) del programa con metadata
           {coverage.unclassified > 0 && (
             <span className="text-amber-500/80"> · {coverage.unclassified} sin clasificar (sin duración parseable)</span>
@@ -300,7 +300,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
               return (
                 <div
                   key={td}
-                  className="rounded-sm border border-[color:var(--color-line)] p-2 text-center"
+                  className="rounded-sm p-2 text-center"
                   style={{ backgroundColor: count > 0 ? "rgba(0,200,255,0.10)" : "rgba(255,255,255,0.03)" }}
                 >
                   <div className="text-[9px] font-mono uppercase text-neutral-400">{TIMEDOMAIN_LABEL[td]}</div>
@@ -379,7 +379,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         <SectionCard title="Sin clasificar" subtitle="Clasificá estos movimientos para el desglose modal/skills completo">
           <div className="space-y-1.5">
             {data.unclassified.map((name) => (
-              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 border border-[color:var(--color-line)] rounded-sm px-3 py-2">
+              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 rounded-sm px-3 py-2">
                 <span className="text-[12px] font-mono text-white truncate">{name}</span>
                 <NexusButton variant="ghost" onClick={() => setClassifyName(name)}>Clasificar</NexusButton>
               </div>
@@ -424,7 +424,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
                     return (
                       <td key={td} className="p-1">
                         <div
-                          className="h-9 rounded-sm border border-[color:var(--color-line)] flex items-center justify-center text-[9px] font-mono"
+                          className="h-9 rounded-sm flex items-center justify-center text-[9px] font-mono"
                           style={{ backgroundColor: v > 0 ? `rgba(0, 200, 255, ${0.12 + intensity * 0.6})` : "rgba(255,255,255,0.03)" }}
                           title={`${MODALITY_ES[m]} · ${TD_ES[td]}: ${Math.round(v / 1000)} kJ`}
                         >
@@ -438,7 +438,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-[9px] font-mono text-neutral-500 uppercase">kJ por celda · cuanto más oscura, menos tocaste esa combinación</p>
+        <p className="mt-2 text-[9px] font-mono text-[color:var(--color-label)] uppercase">kJ por celda · cuanto más oscura, menos tocaste esa combinación</p>
       </SectionCard>
 
       <SectionCard title="Radar de habilidades" subtitle="Las 10 cualidades físicas (por exposición)">
@@ -457,7 +457,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         <SectionCard title="e1RM — fuerza estimada" subtitle="1RM proyectado (Epley) de tus mejores series">
           <div className="space-y-1.5">
             {data.topPrs.map(([name, kg]) => (
-              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 border border-[color:var(--color-line)] rounded-sm px-3 py-2">
+              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 rounded-sm px-3 py-2">
                 <span className="text-[12px] font-mono text-white truncate">{name}</span>
                 <Pill tone="accent">{Math.round(kg)} kg</Pill>
               </div>
@@ -493,10 +493,10 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
             {data.intervalGroupings.map((g, i) => {
               const meta = GROUPING_META[g.result.verdict];
               return (
-                <div key={`${g.dayId}-${i}`} className="flex items-center justify-between gap-2 bg-black/40 border border-[color:var(--color-line)] rounded-sm px-3 py-2">
+                <div key={`${g.dayId}-${i}`} className="flex items-center justify-between gap-2 bg-black/40 rounded-sm px-3 py-2">
                   <div className="min-w-0">
                     <div className="text-[11px] font-mono text-white">{g.dayId || g.date}</div>
-                    <div className="text-[9px] font-mono text-neutral-500">
+                    <div className="text-[9px] font-mono text-[color:var(--color-label)]">
                       {g.result.count} rondas · media {fmtSec(g.result.meanSec)} · spread {fmtSec(g.result.spreadSec)} · CV {g.result.cvPct}%
                     </div>
                   </div>

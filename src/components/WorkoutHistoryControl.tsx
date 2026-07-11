@@ -76,7 +76,7 @@ export default function WorkoutHistoryControl({
                     )}
                   </div>
                   {history.length === 0 ? (
-                    <div className="text-[8px] font-mono text-neutral-600 italic px-1">
+                    <div className="text-[8px] font-mono text-[color:var(--color-label)] italic px-1">
                       Aún sin registros en bitácora L4
                     </div>
                   ) : (

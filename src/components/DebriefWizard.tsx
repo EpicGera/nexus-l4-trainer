@@ -353,7 +353,7 @@ export default function DebriefWizard({
 
   // Field renderer helpers
   const inputCls =
-    "bg-[#16161c] text-white border border-[color:var(--color-line)] rounded px-3 h-11 focus:outline-none focus:border-electric-blue font-mono text-center text-base transition-colors";
+    "bg-[#16161c] text-white rounded px-3 h-11 focus:outline-none focus:border-electric-blue font-mono text-center text-base transition-colors";
   const labelCls =
     "text-[9px] font-extrabold uppercase tracking-widest text-neutral-400";
 
@@ -500,7 +500,7 @@ export default function DebriefWizard({
             <div className="text-base font-brutalist text-white truncate">{dayTitle}</div>
           </div>
           <button onClick={onClose}
-            className="shrink-0 text-neutral-500 hover:text-white transition-colors cursor-pointer p-1"
+            className="shrink-0 text-[color:var(--color-label)] hover:text-white transition-colors cursor-pointer p-1"
             title="Cerrar sin terminar">
             <X size={20} />
           </button>
@@ -536,11 +536,11 @@ export default function DebriefWizard({
         {/* FOOTER */}
         <div className="sticky bottom-0 bg-[#0a0a0e] border-t border-[color:var(--color-line)] px-5 py-3.5 flex items-center gap-2">
           <button onClick={goPrev} disabled={current === 0}
-            className="flex items-center gap-1 px-3 h-11 rounded font-mono text-xs font-bold uppercase tracking-wider border border-[color:var(--color-line)] text-neutral-300 hover:bg-[color:var(--color-card-2)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer">
+            className="flex items-center gap-1 px-3 h-11 rounded font-mono text-xs font-bold uppercase tracking-wider text-neutral-300 hover:bg-[color:var(--color-card-2)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer">
             <ChevronLeft size={16} /> Atrás
           </button>
           <button onClick={skip}
-            className="flex items-center gap-1 px-3 h-11 rounded font-mono text-xs font-bold uppercase tracking-wider text-neutral-500 hover:text-neutral-300 transition-all cursor-pointer"
+            className="flex items-center gap-1 px-3 h-11 rounded font-mono text-xs font-bold uppercase tracking-wider text-[color:var(--color-label)] hover:text-neutral-300 transition-all cursor-pointer"
             title="Saltar este paso">
             <SkipForward size={14} /> Saltar
           </button>

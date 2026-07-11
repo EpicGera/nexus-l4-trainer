@@ -110,7 +110,7 @@ export default function WorkoutBlockCard({
         <div className="relative z-10 flex flex-wrap gap-1.5 px-1">
           {block.timeDomain && (
             <span
-              className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] px-2 py-0.5 border border-white/25 text-neutral-200 cursor-help"
+              className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] px-2 py-0.5 text-neutral-200 cursor-help"
               title={TIMEDOMAIN_META[block.timeDomain].hint}
             >
               {TIMEDOMAIN_META[block.timeDomain].label}

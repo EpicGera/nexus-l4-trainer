@@ -167,9 +167,11 @@ export default function WarriorScreen({
   }, [unlockedAchievements]);
 
   return (
-    <div className="space-y-5 pb-12">
+    // Bento: en ≥lg rejilla de 2 columnas; rango ocupa la fila completa, el resto
+    // (radar, PRs, volumen, logros) se acomoda lado a lado.
+    <div className="space-y-5 pb-12 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0 lg:items-start">
       {/* ═══ RANK CARD ═══ */}
-      <section className="relative overflow-hidden border-2 border-[color:var(--color-line)] bg-gradient-to-br from-[#0D0D14] via-[#111118] to-[#0A0A10] p-5">
+      <section className="relative overflow-hidden rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-gradient-to-br from-[#17171f] via-[color:var(--color-card)] to-[#0f0f14] p-5 lg:col-span-2">
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -201,7 +203,7 @@ export default function WarriorScreen({
               >
                 {rank.rank} {rank.tier}
               </span>
-              <span className="text-[10px] font-mono text-neutral-500">
+              <span className="text-[10px] font-mono text-[color:var(--color-label)]">
                 PWR {powerLevel}
               </span>
             </div>
@@ -214,7 +216,7 @@ export default function WarriorScreen({
 
             {/* XP to next rank */}
             <div className="mt-2">
-              <div className="flex justify-between text-[9px] font-mono text-neutral-500 mb-0.5">
+              <div className="flex justify-between text-[9px] font-mono text-[color:var(--color-label)] mb-0.5">
                 <span>{currentXp} XP</span>
                 <span>
                   {rank.next
@@ -222,7 +224,7 @@ export default function WarriorScreen({
                     : "RANGO MÁXIMO"}
                 </span>
               </div>
-              <div className="h-2 bg-neutral-900 border border-white/5 overflow-hidden">
+              <div className="h-2 bg-neutral-900 overflow-hidden">
                 <div
                   className="h-full transition-all duration-700"
                   style={{
@@ -266,7 +268,7 @@ export default function WarriorScreen({
           ].map((s) => (
             <div
               key={s.label}
-              className="bg-white/[0.03] border border-white/5 p-2 text-center"
+              className="bg-white/[0.03] p-2 text-center"
             >
               <div
                 className="flex justify-center mb-1 opacity-70"
@@ -275,7 +277,7 @@ export default function WarriorScreen({
                 {s.icon}
               </div>
               <div className="text-sm font-brutalist text-white">{s.value}</div>
-              <div className="text-[8px] font-condensed text-neutral-500 uppercase tracking-wider">
+              <div className="text-[8px] font-condensed text-[color:var(--color-label)] uppercase tracking-wider">
                 {s.label}
               </div>
             </div>
@@ -297,7 +299,7 @@ export default function WarriorScreen({
           <span className="relative font-brutalist text-red-400 group-hover:text-red-300 tracking-[0.25em] text-base italic">
             ⚔ DESCENDER AL ABISMO
           </span>
-          <span className="relative block text-[9px] font-mono text-neutral-500 uppercase tracking-wider mt-0.5">
+          <span className="relative block text-[9px] font-mono text-[color:var(--color-label)] uppercase tracking-wider mt-0.5">
             ARPG — tu Eco pelea con tus stats y PRs reales
           </span>
         </button>
@@ -338,10 +340,10 @@ export default function WarriorScreen({
         {/* Attribute list */}
         <div className="grid grid-cols-3 gap-1.5 mt-2">
           {attributes.map((a) => (
-            <div key={a.attr} className="flex items-center gap-1.5 px-1.5 py-1 bg-white/[0.02] border border-white/5">
+            <div key={a.attr} className="flex items-center gap-1.5 px-1.5 py-1 bg-white/[0.02] ">
               <span className="text-sm">{a.icon}</span>
               <div className="flex-grow min-w-0">
-                <div className="text-[9px] font-condensed text-neutral-500 uppercase">
+                <div className="text-[9px] font-condensed text-[color:var(--color-label)] uppercase">
                   {a.attr}
                 </div>
                 <div className="h-1 bg-neutral-800 mt-0.5">
@@ -377,7 +379,7 @@ export default function WarriorScreen({
             {topPRs.map((pr, i) => (
               <div
                 key={pr.name}
-                className="flex items-center gap-3 px-3 py-2 bg-white/[0.02] border border-white/5"
+                className="flex items-center gap-3 px-3 py-2 bg-white/[0.02] "
               >
                 <span
                   className="text-xs font-brutalist w-5 text-center"
@@ -391,7 +393,7 @@ export default function WarriorScreen({
                   <div className="text-xs font-condensed text-white truncate capitalize">
                     {pr.name.toLowerCase()}
                   </div>
-                  <div className="text-[9px] font-mono text-neutral-500">
+                  <div className="text-[9px] font-mono text-[color:var(--color-label)]">
                     {pr.reps && pr.reps !== "0" ? `${pr.reps} reps` : "1RM"} · {pr.dayId.replace(/^w(\d+)d(\d+)$/i, "S$1 D$2")}
                   </div>
                 </div>
@@ -483,7 +485,7 @@ export default function WarriorScreen({
               >
                 {a.title.replace(/\s*[^\w\s]*$/g, "")}
               </div>
-              <div className="text-[8px] font-mono text-neutral-600 mt-0.5 uppercase">
+              <div className="text-[8px] font-mono text-[color:var(--color-label)] mt-0.5 uppercase">
                 {a.rarity}
               </div>
               {a.unlocked && (
@@ -501,7 +503,7 @@ export default function WarriorScreen({
       </section>
 
       {/* ═══ STATS FOOTER ═══ */}
-      <div className="text-center text-[9px] font-mono text-neutral-600 pb-4">
+      <div className="text-center text-[9px] font-mono text-[color:var(--color-label)] pb-4">
         {stats.movementsLogged} movimientos · {stats.totalSets} series ·{" "}
         {stats.avgRpe !== null ? `RPE ${stats.avgRpe}` : "sin RPE"} ·{" "}
         {Object.keys(stats.prs).length} PRs registrados

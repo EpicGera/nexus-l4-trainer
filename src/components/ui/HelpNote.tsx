@@ -6,19 +6,19 @@ interface HelpNoteProps {
   children: React.ReactNode;
   /** Optional bold lead-in (e.g. the tool name) shown before the text. */
   title?: string;
+  className?: string;
 }
 
 /**
- * A muted "cómo usar" caption shown above a chart or tool (Fase 7). Soft border
- * (no neon), low visual weight — it explains how to read the section and how the
- * data is fed, so the analytics tab stops being opaque.
+ * A muted "cómo usar" caption shown above a chart or tool. Low visual weight —
+ * explica cómo leer la sección y de dónde salen los datos, sin ser una caja más.
  */
-export default function HelpNote({ children, title }: HelpNoteProps) {
+export default function HelpNote({ children, title, className = "" }: HelpNoteProps) {
   return (
-    <div className="flex items-start gap-2 border border-[color:var(--color-line)] bg-white/[0.03] px-3 py-2 text-[11px] leading-snug text-neutral-400 rounded-none">
-      <Info size={13} className="mt-0.5 shrink-0 text-neutral-500" />
+    <div className={`flex items-start gap-2 bg-white/[0.04] px-3 py-2 text-[11px] leading-snug text-[color:var(--color-ink-2)] rounded-[var(--radius-tile)] ${className}`}>
+      <Info size={13} className="mt-0.5 shrink-0 text-[color:var(--color-label)]" />
       <p className="min-w-0">
-        {title && <span className="font-bold text-neutral-300">{title}: </span>}
+        {title && <span className="font-bold text-white">{title}: </span>}
         {children}
       </p>
     </div>

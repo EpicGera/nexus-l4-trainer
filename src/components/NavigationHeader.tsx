@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { LayoutDashboard, TrendingUp, UserCheck, Swords } from "lucide-react";
+import { LayoutDashboard, TrendingUp, UserCheck, Swords, Plug, Zap, Settings, AlertTriangle } from "lucide-react";
 import { WEEK_ACCENT_COLORS, WEEK_MID_BAND_COLORS } from "../lib/constants";
 
 interface NavigationHeaderProps {
@@ -104,8 +104,8 @@ export default function NavigationHeader({
                 NEXUS L4 MASTER
               </span>
             </div>
-            <span className="hidden lg:inline text-[9.5px] font-mono tracking-widest text-neutral-500 font-bold uppercase transition-colors hover:text-white">
-              ⚙️ AJUSTAR BIOMECÁNICA DEL ATLETA
+            <span className="hidden lg:inline-flex items-center gap-1 text-[9.5px] font-mono tracking-widest text-[color:var(--color-label)] font-bold uppercase transition-colors hover:text-white">
+              <Settings size={11} aria-hidden="true" /> AJUSTAR BIOMECÁNICA DEL ATLETA
             </span>
           </div>
 
@@ -144,11 +144,11 @@ export default function NavigationHeader({
             <span className="text-[8.5px] sm:text-[10px] font-mono shrink-0">
               {syncWithRealTime ? (
                 <span className="text-white font-bold flex items-center gap-1">
-                  ⚡ SEM {currentWeek.replace("w", "")} • {activeDayName}
+                  <Zap size={11} aria-hidden="true" /> SEM {currentWeek.replace("w", "")} • {activeDayName}
                 </span>
               ) : (
                 <span className="text-signal-red font-bold flex items-center gap-1 ">
-                  ⚠ OVERRIDE MANUAL
+                  <AlertTriangle size={11} aria-hidden="true" /> OVERRIDE MANUAL
                 </span>
               )}
             </span>
@@ -156,9 +156,9 @@ export default function NavigationHeader({
 
           <button
             onClick={handleToggleSync}
-            className={`px-1 min-[375px]:px-1.5 sm:px-3 py-0.5 sm:py-1 font-brutalist text-[7px] min-[320px]:text-[7.5px] min-[375px]:text-[8.5px] sm:text-[10px] tracking-wider transition-all cursor-pointer rounded-sm shrink-0 font-bold ${
+            className={`px-1 min-[375px]:px-1.5 sm:px-3 py-0.5 sm:py-1 font-brutalist text-[7px] min-[320px]:text-[7.5px] min-[375px]:text-[8.5px] sm:text-[10px] tracking-wider transition-all cursor-pointer rounded-sm shrink-0 font-bold inline-flex items-center gap-1 ${
               syncWithRealTime
-                ? "bg-transparent border border-white/25 text-white hover:bg-white hover:text-black"
+                ? "bg-transparent text-white hover:bg-white hover:text-black"
                 : "bg-white text-black hover:bg-neutral-200"
             }`}
             title={
@@ -168,13 +168,12 @@ export default function NavigationHeader({
             }
           >
             {syncWithRealTime ? (
-              "🔌 FIJAR"
+              <><Plug size={11} aria-hidden="true" /> FIJAR</>
             ) : (
               <>
-                <span className="hidden min-[320px]:inline">
-                  ⚡ ACOPLAR HOY ↻
-                </span>
-                <span className="inline min-[320px]:hidden">⚡ ACOPLAR</span>
+                <Zap size={11} aria-hidden="true" />
+                <span className="hidden min-[320px]:inline">ACOPLAR HOY</span>
+                <span className="inline min-[320px]:hidden">ACOPLAR</span>
               </>
             )}
           </button>
@@ -188,7 +187,7 @@ export default function NavigationHeader({
       </div>
 
       {/* Grid selectors */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pb-1 grid grid-cols-4 gap-1">
+      <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 pb-1 grid grid-cols-4 gap-1">
         {sheets.map((sheet, index) => {
           const isActive = activeSheet === index;
           return (
@@ -212,7 +211,7 @@ export default function NavigationHeader({
                   {sheet.label}
                 </span>
               </div>
-              <span className="text-[7.5px] font-mono text-neutral-500 uppercase tracking-widest mt-0.5 hidden md:inline">
+              <span className="text-[7.5px] font-mono text-[color:var(--color-label)] uppercase tracking-widest mt-0.5 hidden md:inline">
                 {sheet.desc}
               </span>
               {isActive && (

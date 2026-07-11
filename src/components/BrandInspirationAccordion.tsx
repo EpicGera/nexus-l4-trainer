@@ -44,7 +44,7 @@ export default function BrandInspirationAccordion({
 
   return (
     <div
-      className={`border border-[color:var(--color-line)] ${brand.bg} text-[10px] font-mono rounded-none select-none overflow-hidden transition-all duration-300`}
+      className={`${brand.bg} text-[10px] font-mono rounded-none select-none overflow-hidden transition-all duration-300`}
       id={`brand_badge_accordion_${blockId}`}
     >
       <button

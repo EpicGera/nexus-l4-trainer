@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
           Algo se rompió al renderizar. Tus registros están a salvo (guardados
           en el dispositivo y sincronizados a la nube).
         </p>
-        <p className="font-mono text-xs text-neutral-600 max-w-md break-all">
+        <p className="font-mono text-xs text-[color:var(--color-label)] max-w-md break-all">
           {this.state.error.message}
         </p>
         <button

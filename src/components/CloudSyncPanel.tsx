@@ -247,7 +247,7 @@ export default function CloudSyncPanel({
 
   return (
     <section
-      className="mt-4 p-5 border border-[color:var(--color-line)] bg-pure-black/95 relative overflow-hidden"
+      className="mt-4 p-5 bg-pure-black/95 relative overflow-hidden"
       data-purpose="cloud-sync-panel"
     >
       <div className="absolute top-0 right-0 p-3 select-none pointer-events-none opacity-5 font-brutalist text-6xl text-white">
@@ -289,7 +289,7 @@ export default function CloudSyncPanel({
             reales, históricos de RPE, perfiles de volumen de trabajo y
             misiones diarias se respaldan de inmediato.
           </p>
-          <p className="font-mono text-[10px] text-neutral-500 leading-normal uppercase">
+          <p className="font-mono text-[10px] text-[color:var(--color-label)] leading-normal uppercase">
             * Compatible con múltiples dispositivos. Inicia sesión en tu
             box mediante tu móvil o tableta para ver tus RMs y cargas de
             trabajo al instante.
@@ -297,7 +297,7 @@ export default function CloudSyncPanel({
         </div>
 
         {/* Middle Column: User details or login trigger */}
-        <div className="bg-[#0b0c10] border border-white/5 p-4 flex flex-col justify-center min-h-[110px]">
+        <div className="bg-[#0b0c10] p-4 flex flex-col justify-center min-h-[110px]">
           {currentUser ? (
             <div className="flex items-center gap-3 text-left">
               {currentUser.photoURL ? (
@@ -346,7 +346,7 @@ export default function CloudSyncPanel({
               <p className="text-[11px] font-mono text-neutral-400 uppercase tracking-widest leading-relaxed">
                 SINCRO DESACTIVADO // SIN SESIÓN INICIADA
               </p>
-              <div className="text-[9px] font-mono text-neutral-500">
+              <div className="text-[9px] font-mono text-[color:var(--color-label)]">
                 CONECTA GOOGLE AUTH PARA ACTIVAR EL RESPALDO
               </div>
             </div>
@@ -436,14 +436,14 @@ export default function CloudSyncPanel({
                 ● USANDO TU PLANILLA: …{getSourceSheetId().slice(-10)}
               </span>
             ) : (
-              <span className="text-neutral-500">
+              <span className="text-[color:var(--color-label)]">
                 ● TU PROGRAMA VIVE EN TU CUENTA (FIRESTORE)
               </span>
             )}
           </p>
         </div>
 
-        <p className="text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+        <p className="text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
           No necesitás Google Sheets: tu programa, cargas y RPE se guardan en tu
           cuenta y se sincronizan solos. Vincular una planilla es opcional —
           para quienes prefieren editar su rutina en Sheets.
@@ -451,11 +451,11 @@ export default function CloudSyncPanel({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Paso 1: copiar la plantilla */}
-          <div className="bg-[#0b0c10] border border-white/5 p-3 flex flex-col gap-2">
+          <div className="bg-[#0b0c10] p-3 flex flex-col gap-2">
             <span className="text-[9px] font-mono font-black text-neutral-400 uppercase tracking-widest">
               1 · CREÁ TU COPIA
             </span>
-            <p className="text-[9px] font-mono text-neutral-500 leading-relaxed uppercase">
+            <p className="text-[9px] font-mono text-[color:var(--color-label)] leading-relaxed uppercase">
               Google te crea tu propio WODForge con los macros y dashboards
               incluidos, en tu Drive.
             </p>
@@ -470,18 +470,18 @@ export default function CloudSyncPanel({
           </div>
 
           {/* Paso 2: instrucción */}
-          <div className="bg-[#0b0c10] border border-white/5 p-3 flex flex-col gap-2">
+          <div className="bg-[#0b0c10] p-3 flex flex-col gap-2">
             <span className="text-[9px] font-mono font-black text-neutral-400 uppercase tracking-widest">
               2 · COPIÁ EL LINK DE TU PLANILLA
             </span>
-            <p className="text-[9px] font-mono text-neutral-500 leading-relaxed uppercase">
+            <p className="text-[9px] font-mono text-[color:var(--color-label)] leading-relaxed uppercase">
               Con tu copia abierta en Google Sheets, copiá la dirección desde
               la barra del navegador o con el botón Compartir.
             </p>
           </div>
 
           {/* Paso 3: vincular */}
-          <div className="bg-[#0b0c10] border border-white/5 p-3 flex flex-col gap-2">
+          <div className="bg-[#0b0c10] p-3 flex flex-col gap-2">
             <span className="text-[9px] font-mono font-black text-neutral-400 uppercase tracking-widest">
               3 · VINCULALA A LA APP
             </span>
@@ -491,7 +491,7 @@ export default function CloudSyncPanel({
               onChange={(e) => setSheetInput(e.target.value)}
               placeholder="https://docs.google.com/spreadsheets/d/…"
               spellCheck={false}
-              className="w-full bg-pure-black border border-[color:var(--color-line)] text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-electric-blue transition-colors"
+              className="w-full bg-pure-black text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-electric-blue transition-colors"
             />
             <button
               onClick={handleLinkSheet}
@@ -502,7 +502,7 @@ export default function CloudSyncPanel({
           </div>
         </div>
 
-        <p className="text-[8.5px] font-mono text-neutral-600 uppercase leading-relaxed">
+        <p className="text-[8.5px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
           * Tu planilla y tu programa se sincronizan con tu cuenta — los vas a
           tener en cualquier dispositivo donde inicies sesión. Para volver a la
           planilla por defecto, guardá con el campo vacío.
@@ -514,7 +514,7 @@ export default function CloudSyncPanel({
         <label className="text-[10px] font-mono font-black tracking-widest text-[#00f0ff] uppercase flex items-center gap-1.5">
           🧠 INTELIGENCIA ARTIFICIAL (LLAVES PRIVADAS)
         </label>
-        <p className="text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+        <p className="text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
           Elegí el motor de IA y pegá tu propia API key. Se guardan
           <span className="text-emerald-400"> SOLO en este dispositivo</span> (localStorage); no viajan a
           Firestore ni a ningún servidor nuestro. Cada usuario usa su propia llave.
@@ -547,7 +547,7 @@ export default function CloudSyncPanel({
               placeholder="AIza…"
               spellCheck={false}
               autoComplete="off"
-              className="w-full bg-pure-black border border-[color:var(--color-line)] text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
+              className="w-full bg-pure-black text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
             />
           </div>
           <div>
@@ -559,7 +559,7 @@ export default function CloudSyncPanel({
               placeholder="sk-ant-…"
               spellCheck={false}
               autoComplete="off"
-              className="w-full bg-pure-black border border-[color:var(--color-line)] text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
+              className="w-full bg-pure-black text-white font-mono text-[10px] px-2.5 py-2 rounded focus:outline-none focus:border-[#00f0ff]"
             />
           </div>
         </div>
@@ -571,7 +571,7 @@ export default function CloudSyncPanel({
         >
           GUARDAR LLAVES (LOCAL)
         </button>
-        <p className="text-[8.5px] font-mono text-neutral-600 uppercase leading-relaxed">
+        <p className="text-[8.5px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
           * Sin llave configurada, las funciones de IA usan el fallback local heurístico. La llave de
           Claude habilita llamadas directas del navegador a Anthropic con tu propia cuenta.
         </p>
@@ -593,7 +593,7 @@ export default function CloudSyncPanel({
           <label className="text-[10px] font-mono font-black tracking-widest text-amber-500 uppercase flex items-center gap-1.5">
             <FolderUp size={11} /> PROGRAMACIÓN MENSUAL (COACH / IA)
           </label>
-          <p className="text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+          <p className="text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
             Cargá una rutina generada con tu coach o con IA: un archivo JSON
             con la estructura de la plantilla, o un CSV estilo WODForge
             (columnas Semana, Día, Bloque, Ejercicio, Esquema…). El programa
@@ -619,13 +619,13 @@ export default function CloudSyncPanel({
                 type="button"
                 onClick={() => handleExportProgramJSON(currentDatabase)}
                 title="Descargá el programa activo como JSON para que tu coach o la IA genere el próximo mes con la misma estructura"
-                className="flex-1 bg-neutral-950 border border-[color:var(--color-line)] text-neutral-300 hover:text-white hover:border-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 bg-neutral-950 text-neutral-300 hover:text-white hover:border-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <FileJson size={12} /> DESCARGAR PLANTILLA JSON
               </button>
             )}
           </div>
-          <p className="text-[8.5px] font-mono text-neutral-600 uppercase leading-relaxed">
+          <p className="text-[8.5px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
             * Workflow: descargá la plantilla → pedile a tu coach o IA el mes
             siguiente con esa misma estructura → cargá el archivo acá. Para
             compartir tu programa con otros atletas, usá el catálogo público
@@ -633,7 +633,7 @@ export default function CloudSyncPanel({
           </p>
 
           {auditReport && auditReport.issues.length > 0 && (
-            <div className="border border-[color:var(--color-line)] bg-black/50 rounded-sm p-3 space-y-2 text-left">
+            <div className="bg-black/50 rounded-sm p-3 space-y-2 text-left">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[10px] font-mono font-black tracking-widest text-amber-400 uppercase">
                   🛡 Auditoría del JSON
@@ -641,7 +641,7 @@ export default function CloudSyncPanel({
                 <button
                   type="button"
                   onClick={() => setAuditReport(null)}
-                  className="text-[9px] font-mono text-neutral-500 hover:text-white uppercase cursor-pointer"
+                  className="text-[9px] font-mono text-[color:var(--color-label)] hover:text-white uppercase cursor-pointer"
                 >
                   cerrar
                 </button>
@@ -657,7 +657,7 @@ export default function CloudSyncPanel({
                   .slice(0, 20)
                   .map((i, idx) => (
                     <li key={idx} className="text-[9px] font-mono text-rose-300/90 leading-snug">
-                      <span className="text-neutral-500">{i.where}</span>
+                      <span className="text-[color:var(--color-label)]">{i.where}</span>
                     </li>
                   ))}
               </ul>
@@ -699,7 +699,7 @@ export default function CloudSyncPanel({
                   : "VER CATÁLOGO"}
             </button>
           </div>
-          <p className="text-[9px] font-mono text-neutral-500 uppercase leading-relaxed">
+          <p className="text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
             Programas publicados por la comunidad: instalá cualquiera con un
             toque. {currentUser ? "Publicá el tuyo con un título." : "Iniciá sesión para publicar el tuyo."}
           </p>
@@ -714,7 +714,7 @@ export default function CloudSyncPanel({
                 placeholder="Ej. MES 2 — ACTO II: EL DESIERTO"
                 spellCheck={false}
                 maxLength={120}
-                className="flex-1 bg-[#0b0c10] border border-[color:var(--color-line)] text-white font-mono text-[11px] px-3 py-2.5 rounded uppercase focus:outline-none focus:border-[#00f0ff] transition-colors"
+                className="flex-1 bg-[#0b0c10] text-white font-mono text-[11px] px-3 py-2.5 rounded uppercase focus:outline-none focus:border-[#00f0ff] transition-colors"
               />
               <button
                 type="button"
@@ -735,20 +735,20 @@ export default function CloudSyncPanel({
                   ⚠ {catalogError}
                 </p>
               ) : catalogEntries.length === 0 && !catalogLoading ? (
-                <p className="text-[10px] font-mono text-neutral-500 uppercase p-3 border border-white/5 bg-[#0b0c10]">
+                <p className="text-[10px] font-mono text-[color:var(--color-label)] uppercase p-3 bg-[#0b0c10]">
                   El catálogo está vacío — sé el primero en publicar un programa.
                 </p>
               ) : (
                 catalogEntries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-2 bg-[#0b0c10] border border-white/5 p-3"
+                    className="flex flex-col sm:flex-row sm:items-center gap-2 bg-[#0b0c10] p-3"
                   >
                     <div className="flex-1 min-w-0 space-y-0.5">
                       <div className="text-xs font-brutalist tracking-wider text-white truncate uppercase">
                         {entry.title}
                       </div>
-                      <div className="text-[9px] font-mono text-neutral-500 uppercase">
+                      <div className="text-[9px] font-mono text-[color:var(--color-label)] uppercase">
                         {entry.authorName} ·{" "}
                         {entry.weeks} sem · {entry.days} días · {entry.items} ejercicios
                         {entry.updatedAt

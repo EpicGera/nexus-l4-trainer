@@ -84,12 +84,12 @@ export default function WeeklyRpeSection({
             <div className={TXT.label}>
               RPE PROMEDIO POR DÍA
               {WEEK_RPE_TARGET[currentWeek] && (
-                <span className="ml-2 normal-case text-neutral-500" style={{ color: accentColor }}>
+                <span className="ml-2 normal-case text-[color:var(--color-label)]" style={{ color: accentColor }}>
                   · objetivo {WEEK_RPE_TARGET[currentWeek].min}–{WEEK_RPE_TARGET[currentWeek].max}
                 </span>
               )}
             </div>
-            <div className="h-[180px] bg-black/40 border border-white/5 rounded p-2">
+            <div className="h-[180px] bg-black/40 rounded p-2">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
@@ -129,7 +129,7 @@ export default function WeeklyRpeSection({
                         const data = payload[0].payload;
                         if (data.isMissed) {
                           return (
-                            <div className="bg-[color:var(--color-card)] border border-[color:var(--color-line)] p-2 text-[10px] font-mono shadow-md text-left z-50">
+                            <div className="bg-[color:var(--color-card)] p-2 text-[10px] font-mono shadow-md text-left z-50">
                               <p className="font-bold text-white uppercase">{data.name}</p>
                               <p className="text-neutral-400">Día perdido — sin registro</p>
                             </div>
@@ -137,7 +137,7 @@ export default function WeeklyRpeSection({
                         }
                         if (!data.isReal) return null;
                         return (
-                          <div className="bg-[color:var(--color-card)] border border-[color:var(--color-line)] p-2 text-[10px] font-mono shadow-md text-left z-50">
+                          <div className="bg-[color:var(--color-card)] p-2 text-[10px] font-mono shadow-md text-left z-50">
                             <p className="font-bold text-white uppercase">{data.name}</p>
                             <p style={{ color: accentColor }}>
                               RPE: <span className="text-white font-bold">{data.rpe}/10</span>
@@ -170,7 +170,7 @@ export default function WeeklyRpeSection({
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-[10px] font-mono text-neutral-500 leading-relaxed">
+            <p className="text-[10px] font-mono text-[color:var(--color-label)] leading-relaxed">
               Los días sin punto no tienen registros. Un punto gris hueco en 0 es un día marcado como perdido.
             </p>
           </div>
@@ -178,7 +178,7 @@ export default function WeeklyRpeSection({
           {/* Distribution */}
           <div className="space-y-2">
             <div className={TXT.label}>DISTRIBUCIÓN DE INTENSIDAD (RPE 1-10)</div>
-            <div className="h-[180px] bg-black/40 border border-white/5 rounded p-2">
+            <div className="h-[180px] bg-black/40 rounded p-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={distributionData}
@@ -205,7 +205,7 @@ export default function WeeklyRpeSection({
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-[color:var(--color-card)] border border-[color:var(--color-line)] p-2 text-[10px] font-mono shadow-md text-left z-50">
+                          <div className="bg-[color:var(--color-card)] p-2 text-[10px] font-mono shadow-md text-left z-50">
                             <p className="font-bold text-white uppercase">{data.rpeName}</p>
                             <p className="text-neutral-300">
                               {data.frequency} {data.frequency === 1 ? "serie" : "series"}
@@ -224,7 +224,7 @@ export default function WeeklyRpeSection({
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-[10px] font-mono text-neutral-500 leading-relaxed">
+            <p className="text-[10px] font-mono text-[color:var(--color-label)] leading-relaxed">
               Verde: liviano (1-4) · Lima: moderado (5-7) · Rosa: pesado (8-9) · Rojo: máximo (10).
             </p>
           </div>
@@ -233,7 +233,7 @@ export default function WeeklyRpeSection({
 
       {/* Honest day-vs-prior-cycles comparison */}
       {comparison && comparison.hasCurrentReal && (
-        <div className="mt-5 bg-black/50 border border-[color:var(--color-line)] p-4 rounded-sm space-y-3">
+        <div className="mt-5 bg-black/50 p-4 rounded-sm space-y-3">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-white/5 pb-2">
             <span className={TXT.label}>HOY VS. MISMO DÍA EN OTRAS SEMANAS</span>
             <Pill

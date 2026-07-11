@@ -71,26 +71,28 @@ export default function RpeAnalyticsPanel({
       <LensTabs tabs={LENS_TABS} active={lens} onChange={changeLens} accent={accentColor} />
 
       {lens === "intensidad" && (
-        <div className="flex flex-col space-y-5">
-          <HelpNote title="Cómo leer esta lente">
+        // Bento: en ≥lg rejilla de 2 columnas; el chart semanal y la progresión
+        // ocupan la fila completa, fatiga y autorregulación van lado a lado.
+        <div className="flex flex-col space-y-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0 lg:items-start">
+          <HelpNote title="Cómo leer esta lente" className="lg:col-span-2">
             Todos los gráficos se alimentan de lo que <strong>registrás</strong> (cargas, reps y RPE,
             vía INCURSIÓN o carga manual) del capítulo activo. RPE = esfuerzo percibido (1–10);
             RIR = repeticiones en reserva (10 − RPE). Si un gráfico sale vacío, ese tramo aún no tiene registros.
           </HelpNote>
-          <HelpNote title="Ciclo prescrito vs. real">
-            El RPE objetivo de cada semana es tu vara: comparalo con tu RPE real para ver si vas suave,
-            en punto, o pasado. Más abajo, la fatiga acumulada sobre el SNC te avisa cuándo meter recuperación.
-          </HelpNote>
-          <RpeProgressionSection
-            currentWeek={currentWeek}
-            weekIntention={database?.[currentWeek]?.meta?.intention}
-          />
-          <WeeklyRpeSection
-            currentWeek={currentWeek}
-            activeDayId={activeDay?.id ?? null}
-            logsVersion={logsVersion}
-            accentColor={accentColor}
-          />
+          <div className="lg:col-span-2">
+            <RpeProgressionSection
+              currentWeek={currentWeek}
+              weekIntention={database?.[currentWeek]?.meta?.intention}
+            />
+          </div>
+          <div className="lg:col-span-2">
+            <WeeklyRpeSection
+              currentWeek={currentWeek}
+              activeDayId={activeDay?.id ?? null}
+              logsVersion={logsVersion}
+              accentColor={accentColor}
+            />
+          </div>
           <FatigueAndIntensitySection currentWeek={currentWeek} />
           <AutoregulationSection currentWeek={currentWeek} intention={database?.[currentWeek]?.meta?.intention} />
         </div>

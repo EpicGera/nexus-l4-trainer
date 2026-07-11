@@ -160,7 +160,7 @@ export default function VolumeProgressionSection({
             </div>
 
             {/* ONE chart: volume bars + RPE line */}
-            <div className="h-[260px] bg-black/40 border border-white/5 rounded p-3">
+            <div className="h-[260px] bg-black/40 rounded p-3">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                   data={chartData}

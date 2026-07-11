@@ -18,22 +18,22 @@ export default function TightGroupingCard() {
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           placeholder="1:52, 1:54, 1:53, 1:55"
-          className="w-full bg-black/60 border border-[color:var(--color-line)] rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+          className="w-full bg-black/60 rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
         />
       </Field>
 
       {result && meta ? (
         <div className="mt-3 space-y-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="rounded-sm border border-[color:var(--color-line)] bg-black/40 p-2 text-center">
+            <div className="rounded-sm bg-black/40 p-2 text-center">
               <div className="text-[9px] font-mono uppercase text-neutral-400">Rondas</div>
               <div className="text-base font-brutalist text-white">{result.count}</div>
             </div>
-            <div className="rounded-sm border border-[color:var(--color-line)] bg-black/40 p-2 text-center">
+            <div className="rounded-sm bg-black/40 p-2 text-center">
               <div className="text-[9px] font-mono uppercase text-neutral-400">Media</div>
               <div className="text-base font-brutalist text-white">{fmtSec(result.meanSec)}</div>
             </div>
-            <div className="rounded-sm border border-[color:var(--color-line)] bg-black/40 p-2 text-center">
+            <div className="rounded-sm bg-black/40 p-2 text-center">
               <div className="text-[9px] font-mono uppercase text-neutral-400">Spread</div>
               <div className="text-base font-brutalist text-white">{fmtSec(result.spreadSec)}</div>
             </div>
@@ -49,7 +49,7 @@ export default function TightGroupingCard() {
               const rel = result.meanSec > 0 ? s / (result.slowestSec || 1) : 0;
               return (
                 <div key={i} className="flex items-center gap-2">
-                  <span className="text-[9px] font-mono text-neutral-500 w-6 shrink-0">R{i + 1}</span>
+                  <span className="text-[9px] font-mono text-[color:var(--color-label)] w-6 shrink-0">R{i + 1}</span>
                   <div className="flex-1 h-2 rounded-sm bg-[color:var(--color-card-2)] overflow-hidden">
                     <div className="h-full rounded-sm" style={{ width: `${rel * 100}%`, backgroundColor: meta.color, opacity: 0.8 }} />
                   </div>
@@ -67,7 +67,7 @@ export default function TightGroupingCard() {
           </div>
         </div>
       ) : (
-        <p className="mt-2 text-[10px] font-mono text-neutral-500 uppercase">
+        <p className="mt-2 text-[10px] font-mono text-[color:var(--color-label)] uppercase">
           Pegá al menos 2 tiempos para ver la dispersión y el veredicto de pacing.
         </p>
       )}

@@ -725,7 +725,7 @@ export default function WorkoutTimer({
               onClick={() => setIsMuted(!isMuted)}
               aria-label={isMuted ? "Activar sonido" : "Silenciar"}
               aria-pressed={isMuted}
-              className="p-2 sm:p-3 rounded-md bg-neutral-900 border border-[color:var(--color-line)] text-neutral-400 hover:text-white transition-all cursor-pointer"
+              className="p-2 sm:p-3 rounded-md bg-neutral-900 text-neutral-400 hover:text-white transition-all cursor-pointer"
             >
               {isMuted ? <VolumeX size={16} aria-hidden="true" /> : <Volume2 size={16} aria-hidden="true" />}
             </button>
@@ -744,7 +744,7 @@ export default function WorkoutTimer({
             </div>
             <button
               onClick={() => setIsFullscreen(false)}
-              className="p-2 sm:p-3 rounded-md bg-neutral-900 border border-[color:var(--color-line)] text-neutral-400 hover:text-white transition-all cursor-pointer"
+              className="p-2 sm:p-3 rounded-md bg-neutral-900 text-neutral-400 hover:text-white transition-all cursor-pointer"
               aria-label="Salir de pantalla completa"
               title="Salir de pantalla completa"
             >
@@ -806,7 +806,7 @@ export default function WorkoutTimer({
               </div>
 
               {/* PROTOCOLO LABELS AND MANUAL ADJUSTERS (Work, Rest, Rounds) */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-2xl w-full bg-neutral-900 border border-white/5 rounded-xl p-3 sm:p-4 mt-1 shrink-0 shadow-2xl z-10">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-2xl w-full bg-neutral-900 rounded-xl p-3 sm:p-4 mt-1 shrink-0 shadow-2xl z-10">
                 {/* Work Adjuster */}
                 <div className="flex flex-col items-center border-r border-[color:var(--color-line)] pr-2">
                   <span className="text-[9px] sm:text-[10px] font-mono tracking-widest text-neutral-400 uppercase font-bold">
@@ -818,13 +818,13 @@ export default function WorkoutTimer({
                   <div className="flex items-center gap-1 mt-1">
                     <button
                       onClick={() => adjustWork(-10)}
-                      className="min-h-[40px] px-3 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
+                      className="min-h-[40px] px-3 bg-neutral-950 rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
                     >
                       -10
                     </button>
                     <button
                       onClick={() => adjustWork(10)}
-                      className="min-h-[40px] px-3 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
+                      className="min-h-[40px] px-3 bg-neutral-950 rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
                     >
                       +10
                     </button>
@@ -842,13 +842,13 @@ export default function WorkoutTimer({
                   <div className="flex items-center gap-1 mt-1">
                     <button
                       onClick={() => adjustRest(-5)}
-                      className="min-h-[40px] px-3 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
+                      className="min-h-[40px] px-3 bg-neutral-950 rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
                     >
                       -5
                     </button>
                     <button
                       onClick={() => adjustRest(5)}
-                      className="min-h-[40px] px-3 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
+                      className="min-h-[40px] px-3 bg-neutral-950 rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
                     >
                       +5
                     </button>
@@ -866,13 +866,13 @@ export default function WorkoutTimer({
                   <div className="flex items-center gap-1 mt-1">
                     <button
                       onClick={() => adjustRounds(-1)}
-                      className="min-h-[40px] px-3 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
+                      className="min-h-[40px] px-3 bg-neutral-950 rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
                     >
                       -1
                     </button>
                     <button
                       onClick={() => adjustRounds(1)}
-                      className="min-h-[40px] px-3 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
+                      className="min-h-[40px] px-3 bg-neutral-950 rounded text-[11px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-300"
                     >
                       +1
                     </button>
@@ -882,7 +882,7 @@ export default function WorkoutTimer({
             </div>
 
             {/* SECONDARY SIDEBAR: AUXILIARY STOPWATCH */}
-            <div className="lg:w-80 w-full bg-neutral-900/85 p-3 sm:p-4 rounded-xl border border-white/5 flex flex-row lg:flex-col justify-between items-center sm:items-stretch shrink-0 shadow-xl gap-3 sm:gap-4 z-10">
+            <div className="lg:w-80 w-full bg-neutral-900/85 p-3 sm:p-4 rounded-xl flex flex-row lg:flex-col justify-between items-center sm:items-stretch shrink-0 shadow-xl gap-3 sm:gap-4 z-10">
               <div className="flex flex-row lg:flex-col items-center lg:items-stretch gap-4 lg:gap-0 flex-grow">
                 <div className="flex items-center gap-2 border-b-0 lg:border-b border-[color:var(--color-line)] pb-0 lg:pb-2 mb-0 lg:mb-3">
                   <Clock size={15} className="text-[#00F0FF]" />
@@ -920,7 +920,7 @@ export default function WorkoutTimer({
                 </button>
                 <button
                   onClick={stopStopwatch}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-neutral-950 border border-[color:var(--color-line)] text-neutral-400 hover:text-white transition-all text-[10px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-neutral-950 text-neutral-400 hover:text-white transition-all text-[10px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <RotateCcw size={12} />
                   <span>RESET</span>
@@ -1034,7 +1034,7 @@ export default function WorkoutTimer({
 
           <button
             onClick={stopSmartPlay}
-            className="px-4 py-3 rounded-full bg-neutral-900 border border-[color:var(--color-line)] text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
+            className="px-4 py-3 rounded-full bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
           >
             <RotateCcw size={12} />
             <span>REINICIAR AMBOS</span>
@@ -1173,7 +1173,7 @@ export default function WorkoutTimer({
                         ? "text-rose-400 font-black"
                         : smartState === "REST"
                           ? "text-emerald-400 font-black"
-                          : "text-neutral-500"
+                          : "text-[color:var(--color-label)]"
                     }
                   >
                     ({isPaused ? "PAUSA" : smartState})
@@ -1244,10 +1244,10 @@ export default function WorkoutTimer({
             </div>
 
             {/* INLINE MANUAL ADJUSTERS (Work, Rest, Rounds) */}
-            <div className="grid grid-cols-3 gap-2 w-full bg-black/40 border border-white/5 rounded-lg p-2.5 mt-2">
+            <div className="grid grid-cols-3 gap-2 w-full bg-black/40 rounded-lg p-2.5 mt-2">
               {/* Work Adjuster */}
               <div className="flex flex-col items-center border-r border-[color:var(--color-line)] pr-1">
-                <span className="text-[8px] font-mono tracking-widest text-neutral-500 uppercase font-bold">TRABAJO</span>
+                <span className="text-[8px] font-mono tracking-widest text-[color:var(--color-label)] uppercase font-bold">TRABAJO</span>
                 <span className="text-xs font-condensed font-bold text-white mt-0.5">
                   {activeWork ? formatTime(activeWork) : "S/D"}
                 </span>
@@ -1255,18 +1255,18 @@ export default function WorkoutTimer({
                   <button
                     type="button"
                     onClick={() => adjustWork(-10)}
-                    className="p-0.5 px-1.5 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                    className="p-0.5 px-1.5 bg-neutral-950 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
                   >-10</button>
                   <button
                     type="button"
                     onClick={() => adjustWork(10)}
-                    className="p-0.5 px-1.5 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                    className="p-0.5 px-1.5 bg-neutral-950 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
                   >+10</button>
                 </div>
               </div>
               {/* Rest Adjuster */}
               <div className="flex flex-col items-center border-r border-[color:var(--color-line)] px-1">
-                <span className="text-[8px] font-mono tracking-widest text-neutral-500 uppercase font-bold">DESCANSO</span>
+                <span className="text-[8px] font-mono tracking-widest text-[color:var(--color-label)] uppercase font-bold">DESCANSO</span>
                 <span className="text-xs font-condensed font-bold text-emerald-400 mt-0.5">
                   {formatTime(activeRest)}
                 </span>
@@ -1274,18 +1274,18 @@ export default function WorkoutTimer({
                   <button
                     type="button"
                     onClick={() => adjustRest(-5)}
-                    className="p-0.5 px-1.5 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                    className="p-0.5 px-1.5 bg-neutral-950 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
                   >-5</button>
                   <button
                     type="button"
                     onClick={() => adjustRest(5)}
-                    className="p-0.5 px-1.5 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                    className="p-0.5 px-1.5 bg-neutral-950 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
                   >+5</button>
                 </div>
               </div>
               {/* Rounds Adjuster */}
               <div className="flex flex-col items-center pl-1">
-                <span className="text-[8px] font-mono tracking-widest text-neutral-500 uppercase font-bold">RONDA</span>
+                <span className="text-[8px] font-mono tracking-widest text-[color:var(--color-label)] uppercase font-bold">RONDA</span>
                 <span className="text-xs font-condensed font-bold text-[#00F0FF] mt-0.5">
                   {smartRound}/{activeRounds}
                 </span>
@@ -1293,12 +1293,12 @@ export default function WorkoutTimer({
                   <button
                     type="button"
                     onClick={() => adjustRounds(-1)}
-                    className="p-0.5 px-1.5 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                    className="p-0.5 px-1.5 bg-neutral-950 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
                   >-1</button>
                   <button
                     type="button"
                     onClick={() => adjustRounds(1)}
-                    className="p-0.5 px-1.5 bg-neutral-950 border border-[color:var(--color-line)] rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
+                    className="p-0.5 px-1.5 bg-neutral-950 rounded text-[8px] hover:bg-neutral-800 transition-colors cursor-pointer text-neutral-400"
                   >+1</button>
                 </div>
               </div>
@@ -1385,7 +1385,7 @@ export default function WorkoutTimer({
                       className={`text-[9px] px-1.5 py-1 rounded font-mono font-black transition-all cursor-pointer ${
                         timeLeft === s && smartState === "REST"
                           ? "bg-emerald-400 text-black font-black font-mono shadow-md scale-105"
-                          : "bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800"
+                          : "bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800"
                       }`}
                     >
                       {s}s REPOSO
@@ -1397,7 +1397,7 @@ export default function WorkoutTimer({
           </div>
 
           {/* STOPWATCH PANEL */}
-          <div className="flex flex-col p-4 w-full justify-center bg-black/40 rounded-lg border border-white/5">
+          <div className="flex flex-col p-4 w-full justify-center bg-black/40 rounded-lg ">
             <div className="flex justify-between items-start mb-2 gap-2">
               <div className="flex flex-col overflow-hidden">
                 <span className="text-[9px] font-mono tracking-widest text-[#00F0FF] uppercase font-black">
@@ -1474,7 +1474,7 @@ export default function WorkoutTimer({
           <button
             type="button"
             onClick={skipPhase}
-            className="px-4 py-2 rounded-full bg-zinc-900 border border-[color:var(--color-line)] text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
+            className="px-4 py-2 rounded-full bg-zinc-900 text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
           >
             <SkipForward size={11} />
             <span>SALTAR FASE</span>
@@ -1484,7 +1484,7 @@ export default function WorkoutTimer({
         <button
           type="button"
           onClick={stopSmartPlay}
-          className="px-4 py-2 rounded-full bg-zinc-900 border border-[color:var(--color-line)] text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
+          className="px-4 py-2 rounded-full bg-zinc-900 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 cursor-pointer hover:scale-105"
         >
           <RotateCcw size={11} />
           <span>REINICIAR ALL</span>
