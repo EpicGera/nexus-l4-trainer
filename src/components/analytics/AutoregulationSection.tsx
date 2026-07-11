@@ -88,7 +88,7 @@ export default function AutoregulationSection({
       {!score.hasData ? (
         <EmptyState
           message="Sin registros de esta semana"
-          hint="Registrá tus sesiones con INCURSIÓN: el motor compara tu RPE real con la banda objetivo y tu resultado de metcon con el timecap, y propone subir o bajar la carga."
+          hint="Registrá tus sesiones con ANOTAR WOD: el motor compara tu RPE real con la banda objetivo y tu resultado de metcon con el timecap, y propone subir o bajar la carga."
         />
       ) : (
         <div className="space-y-4">

@@ -1460,11 +1460,11 @@ export default function App() {
               type="button"
               onClick={handleExportDayJPG}
               disabled={isExportingJPG}
-              className="flex-grow flex items-center justify-center gap-2.5 px-6 py-4 font-brutalist text-xs sm:text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white shadow-sm hover:shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer text-center"
-              title="Exportar los ejercicios de este día a una imagen en formato IG Story"
+              className="flex-grow flex items-center justify-center gap-2.5 px-6 py-4 lg:px-4 lg:py-2.5 font-brutalist text-xs sm:text-sm lg:text-[11px] tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white shadow-sm hover:shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer text-center"
+              title="Guardar el día como una imagen para compartir"
             >
-              <Share2 size={18} className={`${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
-              <span>{isExportingJPG ? "EXPORTANDO..." : "STORY JPG"}</span>
+              <Share2 size={18} className={`shrink-0 lg:w-[15px] lg:h-[15px] ${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
+              <span>{isExportingJPG ? "EXPORTANDO..." : "CAPTURA DEL DÍA"}</span>
             </button>
             <button
               type="button"
@@ -1473,7 +1473,7 @@ export default function App() {
                 setShowStoryMenu((s) => !s);
               }}
               aria-expanded={showStoryMenu}
-              className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-4 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
+              className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-4 lg:py-2.5 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
               title="Opciones de la imagen: foto de fondo y personalización"
             >
               <Settings2 size={16} />
@@ -1936,19 +1936,16 @@ export default function App() {
               </div>
             )}
 
-            {/* 2. DAY SELECTION FILTER CHIPS */}
-            <div className="w-full bg-[color:var(--color-card-2)] backdrop-blur-md mb-2 md:mb-4 no-print relative border-b border-white/5">
-              {/* Degradiente inferior indicando colores de la semana al deslizador de abajo */}
-              <div
-                className="absolute bottom-0 left-0 right-0 h-1 z-0 shadow-sm"
-                style={{
-                  background: `linear-gradient(90deg, ${midBandColor.bg} 0%, ${activeColorSet.color} 100%)`,
-                }}
-              />
+            {/* 2. DAY SELECTION FILTER CHIPS — "franja central": tono apenas por
+                encima del fondo (bg-hi), consistente en las 4 semanas. */}
+            <div className="w-full bg-[color:var(--color-bg-hi)] backdrop-blur-md mb-2 md:mb-4 no-print relative">
+              {/* Filo inferior blanco puro y uniforme — antes variaba de blanco a
+                  gradiente rojo en semana 4, ahora es el mismo indicador siempre. */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 z-0 bg-white/90 shadow-sm" />
               <div className="mx-auto px-6 md:px-10 relative z-10">
                 <div
                   id="dayNav"
-                  className="flex gap-2 overflow-x-auto py-3 scrollbar-hide text-xl"
+                  className="flex gap-2 overflow-x-auto py-3.5 scrollbar-hide text-xl"
                 >
                   {/* Siempre 7 chips (L→D): un día que el JSON no trae se muestra
                       como chip fantasma clickeable (día vacío) para conservar la
@@ -3145,18 +3142,18 @@ export default function App() {
         </div>
       )}
 
-      {/* 9.7 STRUCTURED LOGGING — WIZARD "INCURSIÓN" */}
+      {/* 9.7 STRUCTURED LOGGING — WIZARD "ANOTAR WOD" */}
       {activeDay && activeVariation && (() => {
         const existingSession = getSessionForDay(activeDay.id);
         return (
         <>
           <button
             onClick={() => setWizardOpen(true)}
-            title={existingSession ? "Editar la sesión registrada" : "Registrar la sesión paso a paso"}
+            title={existingSession ? "Editar el WOD anotado" : "Anotar tu WOD paso a paso, como en la pizarra del box"}
             className="fixed bottom-5 left-5 z-[90] no-print bg-[color:var(--color-sem-red)] text-white hover:-translate-y-0.5 font-brutalist text-xs tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
           >
             {existingSession ? <Pencil size={14} aria-hidden="true" /> : <Swords size={14} aria-hidden="true" />}
-            {existingSession ? "EDITAR INCURSIÓN" : "INCURSIÓN"}
+            {existingSession ? "EDITAR WOD" : "ANOTAR WOD"}
           </button>
           {/* Cerrar un día que no se entrenó: lo marca perdido (sin datos) para
               que no quede pendiente eternamente y cierre el hueco en gráficos.

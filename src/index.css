@@ -14,8 +14,8 @@
   --font-hand: "Caveat", "Segoe Print", cursive;
 
   /* ── Paleta base del revamp ─────────────────────────────────────────── */
-  --color-bg: #2b2b31;        /* fondo de página (v2: apenas más oscuro, sigue > tarjeta) */
-  --color-bg-hi: #33333a;     /* tope del gradiente radial */
+  --color-bg: #242429;        /* fondo de página (v3: más oscuro, sigue > card-2 para que la tarjeta flote) */
+  --color-bg-hi: #2c2c33;     /* tope del gradiente radial / tono "franja" apenas sobre el fondo */
   --color-card: #131318;      /* tarjeta elevada */
   --color-card-2: #1c1c23;    /* tile interno */
 
@@ -91,8 +91,8 @@
 }
 
 body {
-  background-color: #2b2b31;
-  background-image: radial-gradient(130% 90% at 50% -15%, #33333a 0%, #2b2b31 60%);
+  background-color: #242429;
+  background-image: radial-gradient(130% 90% at 50% -15%, #2c2c33 0%, #242429 60%);
   background-attachment: fixed;
   color: #FFFFFF;
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;

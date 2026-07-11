@@ -76,7 +76,7 @@ export default function RpeAnalyticsPanel({
         <div className="flex flex-col space-y-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0 lg:items-start">
           <HelpNote title="Cómo leer esta lente" className="lg:col-span-2">
             Todos los gráficos se alimentan de lo que <strong>registrás</strong> (cargas, reps y RPE,
-            vía INCURSIÓN o carga manual) del capítulo activo. RPE = esfuerzo percibido (1–10);
+            vía ANOTAR WOD o carga manual) del capítulo activo. RPE = esfuerzo percibido (1–10);
             RIR = repeticiones en reserva (10 − RPE). Si un gráfico sale vacío, ese tramo aún no tiene registros.
           </HelpNote>
           <div className="lg:col-span-2">

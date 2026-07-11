@@ -146,7 +146,7 @@ export function useSideQuests(
   }, [activeDay?.id, dailyGoals]);
 
   /**
-   * Valida la misión contra la sesión LOGUEADA (INCURSIÓN). Si pasa, sella la
+   * Valida la misión contra la sesión LOGUEADA (ANOTAR WOD). Si pasa, sella la
    * misión con la recompensa determinista (XP intacto → barra, athleteStats y el
    * personaje del ABISMO leen nexus_daily_quests_v2.xpEarned). Devuelve el detalle
    * de checks para mostrarlo en el panel.
@@ -166,7 +166,7 @@ export function useSideQuests(
       ...sideQuests,
       [dayId]: {
         completed: true,
-        proofText: "Validado por INCURSIÓN",
+        proofText: "Validado por ANOTAR WOD",
         proofFileName: "",
         checkedRom: allChecks,
         checkedBio: allChecks,

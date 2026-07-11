@@ -46,7 +46,7 @@ export default function AchievedStimulusSection() {
       >
         <EmptyState
           message="Todavía no hay sesiones con estímulo registrado"
-          hint="Registrá metcons con INCURSIÓN: cada uno guarda el sistema energético y dominio temporal prescritos, y acá vas a ver cómo se reparte tu entrenamiento real."
+          hint="Registrá metcons con ANOTAR WOD: cada uno guarda el sistema energético y dominio temporal prescritos, y acá vas a ver cómo se reparte tu entrenamiento real."
         />
       </SectionCard>
     );

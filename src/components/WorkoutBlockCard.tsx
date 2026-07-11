@@ -207,7 +207,7 @@ export default function WorkoutBlockCard({
               }
 
               // "-> " set tier — prescription detail of the header above it.
-              // Shown as guidance; logged once against the lift in INCURSIÓN.
+              // Shown as guidance; logged once against the lift in ANOTAR WOD.
               if (entry.role === "subline") {
                 return (
                   <li
@@ -242,7 +242,7 @@ export default function WorkoutBlockCard({
               }
 
               // Plain plan item (the board is a read-only plan; logging happens
-              // in INCURSIÓN). Working Max: if this block's scheme is `% WM` and
+              // in ANOTAR WOD). Working Max: if this block's scheme is `% WM` and
               // the athlete has a 1RM for this lift, append the derived load chip.
               const cleanEx = getCleanExerciseName(formattedItem);
               const wm = resolveWmRange(blockData.scheme, cleanEx);

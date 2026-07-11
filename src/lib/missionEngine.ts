@@ -192,7 +192,7 @@ export function validateMission(
   const checks: MissionCheck[] = [];
 
   const sealed = !!session?.completed;
-  checks.push({ label: "Sesión registrada y sellada (INCURSIÓN)", pass: sealed, critical: true });
+  checks.push({ label: "Sesión registrada y sellada (ANOTAR WOD)", pass: sealed, critical: true });
 
   const workingSets = (session?.sets || []).filter(
     (s) => s.setType === "working" && (s.weightKg != null || s.reps != null),

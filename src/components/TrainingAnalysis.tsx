@@ -330,7 +330,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         <SectionCard title="Análisis Nexus L4" subtitle="Capacidad de trabajo · 3 dimensiones del CrossFit">
           <EmptyState
             message="Todavía no sellaste ninguna incursión"
-            hint="Registrá una sesión con el wizard ⚔ INCURSIÓN y acá vas a ver tu trabajo, potencia, mapa modal, skills, e1RM y carga (ACWR)."
+            hint="Registrá una sesión con el wizard ANOTAR WOD y acá vas a ver tu trabajo, potencia, mapa modal, skills, e1RM y carga (ACWR)."
           />
         </SectionCard>
         <SubstitutionCard />

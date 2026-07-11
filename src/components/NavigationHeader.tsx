@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { LayoutDashboard, TrendingUp, UserCheck, Swords, Plug, Zap, Settings, AlertTriangle } from "lucide-react";
-import { WEEK_ACCENT_COLORS, WEEK_MID_BAND_COLORS } from "../lib/constants";
 
 interface NavigationHeaderProps {
   activeSheet: number;
@@ -55,11 +54,6 @@ export default function NavigationHeader({
 
   const progressPercent = ((activeSheet + 1) / sheets.length) * 100;
   const headerRef = useRef<HTMLElement | null>(null);
-
-  const activeColorSet =
-    WEEK_ACCENT_COLORS[currentWeek] || WEEK_ACCENT_COLORS.w2;
-  const midBandColor =
-    WEEK_MID_BAND_COLORS[currentWeek] || WEEK_MID_BAND_COLORS.w2;
 
   useEffect(() => {
     if (!headerRef.current || !onHeightChange) return;
@@ -226,17 +220,14 @@ export default function NavigationHeader({
         })}
       </div>
 
-      {/* Sheet Interactive Progress Indicator */}
+      {/* Sheet Interactive Progress Indicator — blanco puro y uniforme en las 4
+          semanas (antes variaba: blanco en w1-3, gradiente rojo en w4). */}
       <div className="w-full h-[3px] bg-black/40 relative overflow-hidden">
         <motion.div
-          className="absolute top-0 bottom-0 left-0 shadow-sm"
+          className="absolute top-0 bottom-0 left-0 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
           initial={false}
           animate={{ width: `${progressPercent}%` }}
           transition={{ type: "spring", stiffness: 120, damping: 15 }}
-          style={{
-            background: `linear-gradient(90deg, ${midBandColor.bg} 0%, ${activeColorSet.color} 100%)`,
-            boxShadow: `0 0 10px ${activeColorSet.color}80`,
-          }}
         />
       </div>
     </header>

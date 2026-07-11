@@ -228,7 +228,7 @@ export default function DailyMissionPanel({
                     </div>
                   ))}
                   <p className="text-[7px] font-mono text-[var(--color-ink-faint)] pt-0.5 leading-tight">
-                    Registrá la sesión con INCURSIÓN para completar la misión.
+                    Registrá la sesión con ANOTAR WOD para completar la misión.
                   </p>
                 </div>
               )}
@@ -239,7 +239,7 @@ export default function DailyMissionPanel({
                 }`}
               >
                 <p className="text-[7.5px] font-mono text-[var(--color-ink-muted)] text-left leading-tight">
-                  Registrá tu entrenamiento con **INCURSIÓN** y tocá VALIDAR: la misión se sella con XP y botín si los datos cumplen.
+                  Registrá tu entrenamiento con **ANOTAR WOD** y tocá VALIDAR: la misión se sella con XP y botín si los datos cumplen.
                 </p>
               </div>
             </div>

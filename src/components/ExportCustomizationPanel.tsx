@@ -151,7 +151,7 @@ export default function ExportCustomizationPanel({
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono text-[11px] font-black tracking-widest uppercase bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white rounded shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   <Share2 size={15} className={isExporting ? "animate-spin" : ""} />
-                  {isExporting ? "EXPORTANDO..." : "EXPORTAR STORY JPG"}
+                  {isExporting ? "EXPORTANDO..." : "GUARDAR CAPTURA"}
                 </button>
               )
             )}
