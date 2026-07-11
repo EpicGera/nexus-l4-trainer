@@ -47,7 +47,8 @@ import { loadSessions } from "./lib/sessionStore";
 import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
-import { ProgressBar } from "./components/ui/primitives";
+import { ProgressBar, CoachNote } from "./components/ui/primitives";
+import { computeCoachNotes, noteFor } from "./lib/coachNotes";
 import { BUCKET_COLOR } from "./lib/buckets";
 import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
 import { parseSpecialDay, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation, SPECIAL_TAB } from "./lib/specialDay";
@@ -1960,71 +1961,81 @@ export default function App() {
                       day?.name.charAt(0) ??
                       "·";
 
+                    const selectDay = () => {
+                      setSyncWithRealTime(false);
+                      setAutoFollow(false);
+                      setCurrentDayIndex(idx);
+                    };
+
                     // Día no programado: chip fantasma (punteado, tenue).
                     if (!day) {
                       return (
                         <button
                           key={`empty-${idx}`}
-                          className={`px-5 py-2.5 rounded-none font-brutalist text-lg tracking-[0.2em] transition-all cursor-pointer border border-dashed border-white/20 ${
-                            isActive
-                              ? "text-white/80 bg-white/5"
-                              : "text-white/30 hover:text-white/60 hover:bg-white/5"
+                          onClick={selectDay}
+                          className={`flex flex-col items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-tile)] border border-dashed border-white/15 transition-all cursor-pointer shrink-0 ${
+                            isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
                           }`}
-                          onClick={() => {
-                            setSyncWithRealTime(false);
-                            setAutoFollow(false);
-                            setCurrentDayIndex(idx);
-                          }}
                         >
-                          {label}
+                          <span className="font-mono text-xs font-bold text-white/35">{label}</span>
+                          <span className="w-1.5 h-1.5 rounded-full border border-white/25" />
                         </button>
                       );
                     }
 
                     const isCompleted = completedDays[day.id] === "completed";
                     const isMissed = completedDays[day.id] === "missed";
-
-                    let statusClass =
-                      "text-white/70 hover:bg-[#27272A] hover:text-white bg-[#18181B]";
-                    let activeStyle = {};
-                    if (isMissed) {
-                      statusClass =
-                        "text-neutral-500 line-through hover:text-neutral-300 bg-[#18181B]";
-                    } else if (isCompleted) {
-                      statusClass =
-                        "text-emerald-300 hover:bg-emerald-500/10 hover:text-emerald-100 bg-emerald-500/5";
-                    }
-                    if (isActive) {
-                      if (isCompleted) {
-                        statusClass = "bg-emerald-500 text-black font-black";
-                      } else if (isMissed) {
-                        statusClass =
-                          "bg-neutral-700 text-neutral-300 line-through font-black";
-                      } else {
-                        statusClass = "text-black font-black shadow-md";
-                        activeStyle = {
-                          background: `linear-gradient(135deg, ${midBandColor.bg} 0%, ${activeColorSet.color} 100%)`,
-                          boxShadow: `0 0 15px ${activeColorSet.color}60`,
-                        };
-                      }
-                    }
+                    // "Hoy" visual = el día activo (rojo, levemente torcido — toque humano).
+                    const dot = isCompleted
+                      ? "bg-[color:var(--color-sem-green)] shadow-[0_0_8px_rgba(52,224,140,.7)]"
+                      : isMissed
+                        ? "border-[1.5px] border-[color:var(--color-sem-amber)]"
+                        : "border-[1.5px] border-[color:var(--color-label)]";
 
                     return (
                       <button
                         key={day.id}
-                        className={`px-5 py-2.5 rounded-none font-brutalist text-lg tracking-[0.2em] transition-all cursor-pointer ${statusClass}`}
-                        style={activeStyle}
-                        onClick={() => {
-                          setSyncWithRealTime(false);
-                          setAutoFollow(false);
-                          setCurrentDayIndex(idx);
-                        }}
+                        onClick={selectDay}
+                        className={`flex flex-col items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-tile)] transition-all cursor-pointer shrink-0 ${
+                          isActive
+                            ? "bg-[color:var(--color-sem-red)] -rotate-[1.5deg] scale-105 shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)]"
+                            : "bg-[color:var(--color-card)] shadow-[var(--shadow-card)] hover:bg-[color:var(--color-card-2)]"
+                        }`}
                       >
-                        {label}
+                        <span
+                          className={`font-mono text-xs font-bold ${
+                            isActive
+                              ? "text-white"
+                              : isMissed
+                                ? "text-[color:var(--color-label)] line-through"
+                                : "text-[color:var(--color-ink-2)]"
+                          }`}
+                        >
+                          {label}
+                        </span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-white" : dot}`} />
                       </button>
                     );
                   })}
                 </div>
+                {/* Nota del coach: si se perdió un día ya pasado esta semana. */}
+                {(() => {
+                  const daysArr = activeWeekPlan?.days ?? [];
+                  const missedIdx = daysArr.findIndex(
+                    (d) => d && completedDays[d.id] === "missed",
+                  );
+                  const note = noteFor(
+                    computeCoachNotes({
+                      week: currentWeek,
+                      missedDayIndex: missedIdx >= 0 ? missedIdx : null,
+                      todayIndex: currentDayIndex,
+                    }),
+                    "days",
+                  );
+                  return note ? (
+                    <CoachNote note={note.text} rotate={-1} className="text-right mt-0.5 mb-1" />
+                  ) : null;
+                })()}
               </div>
             </div>
 
@@ -2032,13 +2043,13 @@ export default function App() {
                 vez de una pantalla en blanco (coherencia de la semana). */}
             {!activeDay && activeWeekPlan && (
               <div className="px-4 md:px-8 py-16 text-center">
-                <div className="mx-auto max-w-lg border border-dashed border-[#3F3F46] bg-pure-black/60 p-8">
+                <div className="mx-auto max-w-lg rounded-[var(--radius-card)] bg-[color:var(--color-card)] shadow-[var(--shadow-card)] p-8">
                   <p className="font-brutalist text-3xl md:text-4xl tracking-widest text-white/60 uppercase">
                     Día vacío
                   </p>
-                  <p className="mt-3 font-mono text-[11px] md:text-xs text-neutral-500 uppercase leading-relaxed">
+                  <p className="mt-3 font-mono text-[11px] md:text-xs text-[color:var(--color-ink-2)] uppercase leading-relaxed">
                     El programa de este capítulo no trae este día. Importá un
-                    programa que lo incluya, o usá <span className="text-white/70">+ DÍA ESPECIAL</span> sobre
+                    programa que lo incluya, o usá <span className="text-[color:var(--color-sem-cyan)]">+ DÍA ESPECIAL</span> sobre
                     otro día para agregar un entrenamiento suelto.
                   </p>
                 </div>
@@ -2215,7 +2226,7 @@ export default function App() {
                 </div>
 
                 {/* Desktop Layout Switcher - Elegant Minimalist Pill Segmented Control */}
-                <div className="flex bg-[#000000]/40 rounded-full p-0.5 select-none shadow-[rgba(0,0,0,0.4)_0px_2px_8px] no-print">
+                <div className="flex bg-[color:var(--color-card)] rounded-full p-0.5 select-none shadow-[var(--shadow-card)] no-print">
                   <button
                     type="button"
                     onClick={() => {
@@ -3140,7 +3151,7 @@ export default function App() {
           <button
             onClick={() => setWizardOpen(true)}
             title={existingSession ? "Editar la sesión registrada" : "Registrar la sesión paso a paso"}
-            className="fixed bottom-5 left-5 z-[90] no-print bg-electric-blue text-black hover:bg-white font-brutalist text-xs tracking-widest uppercase px-4 py-3 rounded-sm shadow-lg shadow-electric-blue/20 transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+            className="fixed bottom-5 left-5 z-[90] no-print bg-[color:var(--color-sem-red)] text-white hover:-translate-y-0.5 font-brutalist text-xs tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
           >
             {existingSession ? "✎ EDITAR INCURSIÓN" : "⚔ INCURSIÓN"}
           </button>

@@ -60,7 +60,8 @@ export default function DailyMissionPanel({
           : {}
       }
       transition={{ duration: 0.85, ease: "easeInOut" }}
-      className="mt-3 w-full max-w-xl mx-auto bg-zinc-950/95 text-white p-1.5 md:p-2 shadow-[0_4px_25px_rgba(0,0,0,0.8)] font-mono text-left relative overflow-hidden rounded-none border border-white/5"
+      className="mt-3 w-full max-w-xl mx-auto text-white p-2.5 md:p-3 shadow-[var(--shadow-card)] font-mono text-left relative overflow-hidden rounded-[var(--radius-card)]"
+      style={{ background: "linear-gradient(160deg, #1e1720 0%, var(--color-card) 65%)" }}
     >
       <div className="flex justify-between items-center text-[7.5px] sm:text-[8px] font-bold text-zinc-500 border-b border-white/5 pb-0.5 mb-1.5 uppercase tracking-widest leading-none">
         <span className="flex items-center gap-1">
@@ -73,7 +74,7 @@ export default function DailyMissionPanel({
 
       {/* OBJ. DIARIO: meta del día derivada del JSON del programa */}
       {dailyGoalText && (
-        <div className="mb-1.5 bg-[#18181B] border-l-2 border-amber-500 pl-1.5 py-0.5">
+        <div className="mb-1.5 bg-[color:var(--color-card-2)] border-l-2 border-amber-500 pl-1.5 py-0.5">
           <p className="font-bold text-[9px] sm:text-[9.5px] tracking-wide uppercase text-amber-300 leading-snug break-words">
             {dailyGoalText}
           </p>
@@ -81,7 +82,7 @@ export default function DailyMissionPanel({
       )}
 
       <div className="grid grid-cols-12 gap-x-2 gap-y-1.5 items-center">
-        <div className="col-span-12 sm:col-span-7 flex justify-between items-center gap-1.5 border-b sm:border-b-0 sm:border-r border-[#3F3F46] pb-1 sm:pb-0 sm:pr-2.5">
+        <div className="col-span-12 sm:col-span-7 flex justify-between items-center gap-1.5 border-b sm:border-b-0 sm:border-r border-[color:var(--color-line)] pb-1 sm:pb-0 sm:pr-2.5">
           <div className="flex-1 min-h-[1.2rem] flex items-center">
             <p className="font-bold text-[9.5px] sm:text-[10px] tracking-wide uppercase text-zinc-100 border-l-2 border-[var(--color-accent)] pl-1.5 py-0 w-full whitespace-normal break-words leading-snug">
               {isGeneratingQuest ? (
@@ -97,7 +98,7 @@ export default function DailyMissionPanel({
             <button
               onClick={handleFetchSideQuest}
               disabled={isGeneratingQuest}
-              className="bg-electric-blue/15 text-electric-blue hover:bg-electric-blue/25 disabled:bg-neutral-800 disabled:text-neutral-600 p-0.5 shadow-sm hover:shadow-sm active:scale-95 transition-all cursor-pointer rounded-none shrink-0 group relative overflow-hidden flex items-center justify-center"
+              className="bg-electric-blue/15 text-electric-blue hover:bg-electric-blue/25 disabled:bg-neutral-800 disabled:text-neutral-600 p-0.5 shadow-sm hover:shadow-sm active:scale-95 transition-all cursor-pointer rounded-[var(--radius-tile)] shrink-0 group relative overflow-hidden flex items-center justify-center"
               title="Obtener misión seleccionada por IA según el entreno del día"
               style={{ width: "20px", height: "20px" }}
             >
@@ -112,9 +113,9 @@ export default function DailyMissionPanel({
         <div className="col-span-12 sm:col-span-5">
           {sideQuestCompleted && questData ? (
             <div className="animate-fade-in space-y-1">
-              <div className="bg-amber-500/10 p-1 rounded-none flex justify-between items-center gap-2">
+              <div className="bg-amber-500/10 p-1 rounded-[var(--radius-tile)] flex justify-between items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <div className="bg-amber-500 text-black p-0.5 rounded-none shrink-0">
+                  <div className="bg-amber-500 text-black p-0.5 rounded-[var(--radius-tile)] shrink-0">
                     <Trophy size={9} />
                   </div>
                   <span className="text-[7.5px] font-black text-amber-400 uppercase tracking-wider leading-none">
@@ -123,16 +124,16 @@ export default function DailyMissionPanel({
                 </div>
                 <button
                   onClick={() => handleResetQuest(dayId)}
-                  className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[7px] font-bold uppercase tracking-wider py-0.5 px-1 flex items-center gap-0.5 transition-all rounded-none shrink-0"
+                  className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[7px] font-bold uppercase tracking-wider py-0.5 px-1 flex items-center gap-0.5 transition-all rounded-[var(--radius-tile)] shrink-0"
                   type="button"
                 >
                   <RotateCcw size={7} /> REABRIR
                 </button>
               </div>
 
-              <div className="bg-zinc-900/40 p-1 space-y-0.5 text-[9px] text-left rounded-none font-mono">
+              <div className="bg-zinc-900/40 p-1 space-y-0.5 text-[9px] text-left rounded-[var(--radius-tile)] font-mono">
                 <div className="grid grid-cols-3 gap-0.5">
-                  <div className="bg-black/40 p-0.5 text-center rounded-none">
+                  <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)]">
                     <span className="text-[6.5px] text-zinc-500 block uppercase font-bold leading-none mb-0.5">
                       XP
                     </span>
@@ -140,7 +141,7 @@ export default function DailyMissionPanel({
                       +{questData.xpEarned || rewards.xp}
                     </span>
                   </div>
-                  <div className="bg-black/40 p-0.5 text-center rounded-none">
+                  <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)]">
                     <span className="text-[6.5px] text-zinc-500 block uppercase font-bold leading-none mb-0.5">
                       SCORE
                     </span>
@@ -148,7 +149,7 @@ export default function DailyMissionPanel({
                       {questData.evalScore || 90}/100
                     </span>
                   </div>
-                  <div className="bg-black/40 p-0.5 text-center rounded-none flex flex-col justify-center">
+                  <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)] flex flex-col justify-center">
                     <span className="text-[6.5px] text-zinc-500 block uppercase font-bold leading-none mb-0.5">
                       BOTÍN
                     </span>
@@ -162,17 +163,17 @@ export default function DailyMissionPanel({
                 </div>
 
                 <div className="flex flex-wrap gap-0.5 pt-0.5 text-[6.5px]">
-                  <span className="inline-flex items-center gap-0.5 bg-emerald-500/10 text-emerald-400 font-bold px-1 py-0.2 rounded-none">
+                  <span className="inline-flex items-center gap-0.5 bg-emerald-500/10 text-emerald-400 font-bold px-1 py-0.2 rounded-[var(--radius-tile)]">
                     <Check size={7} /> ROM
                   </span>
-                  <span className="inline-flex items-center gap-0.5 bg-emerald-500/10 text-emerald-400 font-bold px-1 py-0.2 rounded-none">
+                  <span className="inline-flex items-center gap-0.5 bg-emerald-500/10 text-emerald-400 font-bold px-1 py-0.2 rounded-[var(--radius-tile)]">
                     <Check size={7} /> POSTURA
                   </span>
                 </div>
 
                 {questData.aiFeedback && (
                   <div
-                    className="bg-black p-1 rounded-none leading-tight text-zinc-400 text-[8px] line-clamp-2"
+                    className="bg-black p-1 rounded-[var(--radius-tile)] leading-tight text-zinc-400 text-[8px] line-clamp-2"
                     title={questData.aiFeedback}
                   >
                     <p className="italic font-sans leading-tight">
@@ -192,7 +193,7 @@ export default function DailyMissionPanel({
                 </span>
               </div>
 
-              <div className="bg-[#18181B] p-1 border border-[#3F3F46] rounded-none flex items-center justify-between gap-2">
+              <div className="bg-[color:var(--color-card-2)] p-1 border border-[color:var(--color-line)] rounded-[var(--radius-tile)] flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => setIsHelpOpen(!isHelpOpen)}
@@ -213,7 +214,7 @@ export default function DailyMissionPanel({
 
               {/* checks del validador determinista */}
               {validation && !validation.ok && (
-                <div className="bg-[#111113] border border-[#3F3F46] p-1 space-y-0.5 rounded-none">
+                <div className="bg-[#111113] border border-[color:var(--color-line)] p-1 space-y-0.5 rounded-[var(--radius-tile)]">
                   {validation.checks.map((c, i) => (
                     <div key={i} className="flex items-center gap-1 text-[7.5px] font-mono leading-tight">
                       {c.pass ? (
@@ -234,7 +235,7 @@ export default function DailyMissionPanel({
 
               <div
                 className={`transition-all duration-300 overflow-hidden ${
-                  isHelpOpen ? "max-h-[150px] mt-0.5 opacity-100 pt-0.5 border-t border-[#3F3F46]" : "max-h-0 opacity-0 pointer-events-none"
+                  isHelpOpen ? "max-h-[150px] mt-0.5 opacity-100 pt-0.5 border-t border-[color:var(--color-line)]" : "max-h-0 opacity-0 pointer-events-none"
                 }`}
               >
                 <p className="text-[7.5px] font-mono text-[var(--color-ink-muted)] text-left leading-tight">

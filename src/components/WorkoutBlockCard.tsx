@@ -69,7 +69,7 @@ export default function WorkoutBlockCard({
 
   return (
     <section
-      className={`flex flex-col transition-all duration-300 rounded-none min-w-0 break-words h-full bg-zinc-950 shadow-[0_15px_45px_rgba(0,0,0,0.7)] relative overflow-hidden ${
+      className={`flex flex-col transition-all duration-300 rounded-[var(--radius-card)] min-w-0 break-words h-full bg-[color:var(--color-card)] shadow-[var(--shadow-card)] relative overflow-hidden ${
         isColumns ? "gap-5 p-5 xl:p-6 xl:min-h-[680px]" : "gap-4 p-4 sm:p-5"
       }`}
       onTouchStart={handleVariationTouchStart}
@@ -216,7 +216,7 @@ export default function WorkoutBlockCard({
                   >
                     <div
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
-                      className="text-[13px] sm:text-sm font-condensed text-neutral-300 border-l-2 border-[#3F3F46] pl-3 py-0.5"
+                      className="text-[13px] sm:text-sm font-condensed text-neutral-300 border-l-2 border-[color:var(--color-line)] pl-3 py-0.5"
                     />
                   </li>
                 );
