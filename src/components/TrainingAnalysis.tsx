@@ -84,7 +84,7 @@ function ClassifyMovementModal({ name, onClose }: { name: string | null; onClose
               key={m}
               type="button"
               onClick={() => setModality(m)}
-              className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${modality === m ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-[#3F3F46]"}`}
+              className={`flex-1 py-2 rounded-sm border text-[11px] font-mono uppercase cursor-pointer ${modality === m ? "bg-electric-blue text-black border-transparent" : "bg-black/40 text-neutral-300 border-[color:var(--color-line)]"}`}
             >
               {MODALITY_ES[m]}
             </button>
@@ -96,7 +96,7 @@ function ClassifyMovementModal({ name, onClose }: { name: string | null; onClose
           <select
             value={pattern}
             onChange={(e) => setPattern(e.target.value as Pattern)}
-            className="w-full bg-black/60 border border-[#3F3F46] rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
+            className="w-full bg-black/60 border border-[color:var(--color-line)] rounded-sm h-[38px] px-3 text-white font-mono text-sm focus:outline-none focus:border-electric-blue"
           >
             {PATTERNS.map((p) => (
               <option key={p} value={p}>{PATTERN_ES[p] || p}</option>
@@ -228,7 +228,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
             type="button"
             onClick={() => setScope((s) => ({ ...s, kind: k }))}
             className={`text-[10px] font-mono font-black uppercase tracking-wider px-3 py-1.5 rounded-sm cursor-pointer transition-all ${
-              scope.kind === k ? "bg-electric-blue text-black" : "bg-[#18181B] text-neutral-300 hover:bg-[#27272A]"
+              scope.kind === k ? "bg-electric-blue text-black" : "bg-[color:var(--color-card-2)] text-neutral-300 hover:bg-[color:var(--color-card-2)]"
             }`}
           >
             {lbl}
@@ -238,7 +238,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
           <select
             value={scope.chapterId || getActiveChapterId()}
             onChange={(e) => setScope((s) => ({ ...s, chapterId: e.target.value }))}
-            className="bg-black/60 border border-[#3F3F46] rounded-sm h-[30px] px-2 text-white font-mono text-[11px] focus:outline-none focus:border-electric-blue"
+            className="bg-black/60 border border-[color:var(--color-line)] rounded-sm h-[30px] px-2 text-white font-mono text-[11px] focus:outline-none focus:border-electric-blue"
           >
             {chapters.map((c) => (
               <option key={c.id} value={c.id}>
@@ -282,7 +282,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
                   </span>
                   <span className="text-[10px] font-mono text-neutral-400">{count}</span>
                 </div>
-                <div className="h-2 rounded-sm bg-[#18181B] overflow-hidden">
+                <div className="h-2 rounded-sm bg-[color:var(--color-card-2)] overflow-hidden">
                   <div
                     className="h-full rounded-sm"
                     style={{ width: `${(count / max) * 100}%`, backgroundColor: ENERGY_META[es].color, opacity: count > 0 ? 0.85 : 0 }}
@@ -300,7 +300,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
               return (
                 <div
                   key={td}
-                  className="rounded-sm border border-[#3F3F46] p-2 text-center"
+                  className="rounded-sm border border-[color:var(--color-line)] p-2 text-center"
                   style={{ backgroundColor: count > 0 ? "rgba(0,200,255,0.10)" : "rgba(255,255,255,0.03)" }}
                 >
                   <div className="text-[9px] font-mono uppercase text-neutral-400">{TIMEDOMAIN_LABEL[td]}</div>
@@ -379,7 +379,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         <SectionCard title="Sin clasificar" subtitle="Clasificá estos movimientos para el desglose modal/skills completo">
           <div className="space-y-1.5">
             {data.unclassified.map((name) => (
-              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 border border-[#3F3F46] rounded-sm px-3 py-2">
+              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 border border-[color:var(--color-line)] rounded-sm px-3 py-2">
                 <span className="text-[12px] font-mono text-white truncate">{name}</span>
                 <NexusButton variant="ghost" onClick={() => setClassifyName(name)}>Clasificar</NexusButton>
               </div>
@@ -424,7 +424,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
                     return (
                       <td key={td} className="p-1">
                         <div
-                          className="h-9 rounded-sm border border-[#3F3F46] flex items-center justify-center text-[9px] font-mono"
+                          className="h-9 rounded-sm border border-[color:var(--color-line)] flex items-center justify-center text-[9px] font-mono"
                           style={{ backgroundColor: v > 0 ? `rgba(0, 200, 255, ${0.12 + intensity * 0.6})` : "rgba(255,255,255,0.03)" }}
                           title={`${MODALITY_ES[m]} · ${TD_ES[td]}: ${Math.round(v / 1000)} kJ`}
                         >
@@ -457,7 +457,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
         <SectionCard title="e1RM — fuerza estimada" subtitle="1RM proyectado (Epley) de tus mejores series">
           <div className="space-y-1.5">
             {data.topPrs.map(([name, kg]) => (
-              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 border border-[#3F3F46] rounded-sm px-3 py-2">
+              <div key={name} className="flex items-center justify-between gap-2 bg-black/40 border border-[color:var(--color-line)] rounded-sm px-3 py-2">
                 <span className="text-[12px] font-mono text-white truncate">{name}</span>
                 <Pill tone="accent">{Math.round(kg)} kg</Pill>
               </div>
@@ -493,7 +493,7 @@ export default function TrainingAnalysis({ bodyweightKg, database }: { bodyweigh
             {data.intervalGroupings.map((g, i) => {
               const meta = GROUPING_META[g.result.verdict];
               return (
-                <div key={`${g.dayId}-${i}`} className="flex items-center justify-between gap-2 bg-black/40 border border-[#3F3F46] rounded-sm px-3 py-2">
+                <div key={`${g.dayId}-${i}`} className="flex items-center justify-between gap-2 bg-black/40 border border-[color:var(--color-line)] rounded-sm px-3 py-2">
                   <div className="min-w-0">
                     <div className="text-[11px] font-mono text-white">{g.dayId || g.date}</div>
                     <div className="text-[9px] font-mono text-neutral-500">

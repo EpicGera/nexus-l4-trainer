@@ -331,7 +331,7 @@ export function ModalSheet({
         )}
         <div className="flex-1 overflow-y-auto p-5">{children}</div>
         {footer && (
-          <footer className="shrink-0 border-t border-[#3F3F46] p-4 bg-black/40">{footer}</footer>
+          <footer className="shrink-0 border-t border-[color:var(--color-line)] p-4 bg-black/40">{footer}</footer>
         )}
       </div>
     </div>

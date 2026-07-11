@@ -164,7 +164,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
               className={`text-[8.5px] font-mono uppercase font-bold flex items-center gap-1 cursor-pointer transition-all px-1.5 py-0.5 rounded-xs border ${
                 filterHighRpe
                   ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
-                  : "bg-[#18181B] text-neutral-400 hover:text-white border-transparent hover:bg-[#27272A]"
+                  : "bg-[color:var(--color-card-2)] text-neutral-400 hover:text-white border-transparent hover:bg-[color:var(--color-card-2)]"
               }`}
             >
               <ShieldAlert size={10} />
@@ -176,7 +176,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
           <button
             type="button"
             onClick={() => setShowChart(!showChart)}
-            className="text-[8.5px] font-mono hover:text-white uppercase font-bold flex items-center gap-1 cursor-pointer transition-all bg-[#18181B] hover:bg-[#27272A] px-1.5 py-0.5 rounded-xs"
+            className="text-[8.5px] font-mono hover:text-white uppercase font-bold flex items-center gap-1 cursor-pointer transition-all bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded-xs"
             style={{ color: activeColor }}
           >
             <TrendingUp size={10} style={{ color: activeColor }} />
@@ -227,7 +227,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                         if (active && payload && payload.length) {
                           const data = payload[0].payload;
                           return (
-                            <div className="bg-zinc-950 border border-[#3F3F46] p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
+                            <div className="bg-zinc-950 border border-[color:var(--color-line)] p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
                               <p className="font-bold text-white mb-0.5 truncate max-w-[150px]">
                                 {data.fullName}
                               </p>
@@ -280,7 +280,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
           >
             <table className="w-full text-[9px] font-mono text-left border-collapse min-w-[200px]">
               <thead>
-                <tr className="border-b border-[#3F3F46] text-neutral-500 uppercase">
+                <tr className="border-b border-[color:var(--color-line)] text-neutral-500 uppercase">
                   <th className="py-1 pr-2 font-medium">Sesión</th>
                   <th className="py-1 px-2 font-medium">Series (Carga × Reps @ RPE)</th>
                 </tr>
@@ -312,7 +312,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                       <motion.tr
                         key={rowKey}
                         variants={{} as any}
-                        className={`border-b ${sessionAvgRpe > 9 ? "border-rose-500 shadow-sm bg-rose-500/5" : "border-white/5 last:border-b-0 hover:bg-[#18181B]"} transition-all`}
+                        className={`border-b ${sessionAvgRpe > 9 ? "border-rose-500 shadow-sm bg-rose-500/5" : "border-white/5 last:border-b-0 hover:bg-[color:var(--color-card-2)]"} transition-all`}
                         id={`history_row_${rowKey}`}
                       >
                         <td className="py-1.5 pr-2 whitespace-nowrap text-neutral-400 font-bold border-r border-white/5 align-top pt-2.5">
@@ -336,7 +336,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                                   className={`border rounded px-1.5 py-0.5 text-[8.5px] font-mono flex items-center gap-1 shrink-0 ${
                                     isHighRpe
                                       ? "bg-rose-950/30 border-rose-500/30 text-rose-300"
-                                      : "bg-[#18181B] border-[#3F3F46] text-neutral-300"
+                                      : "bg-[color:var(--color-card-2)] border-[color:var(--color-line)] text-neutral-300"
                                   }`}
                                 >
                                   <span className="font-bold text-white">
@@ -421,7 +421,7 @@ export default function HistoryTable({ history }: HistoryTableProps) {
                         (p) => p.dataKey === "rpePromedio",
                       )?.value;
                       return (
-                        <div className="bg-zinc-950 border border-[#3F3F46] p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
+                        <div className="bg-zinc-950 border border-[color:var(--color-line)] p-1.5 font-mono text-[8px] rounded-xs shadow-xl text-left">
                           <p className="font-bold text-white mb-1 uppercase tracking-wider">
                             {data.name} ({data.cargaActual} × {data.repsActual})
                           </p>

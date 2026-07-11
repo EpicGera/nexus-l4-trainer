@@ -32,7 +32,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
   };
 
   const Stat = ({ label, value }: { label: string; value: React.ReactNode }) => (
-    <div className="border border-[#3F3F46] p-3 text-center">
+    <div className="border border-[color:var(--color-line)] p-3 text-center">
       <div className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest mb-1">{label}</div>
       <div className="text-2xl font-brutalist font-black text-white tabular-nums leading-none">{value}</div>
     </div>
@@ -42,12 +42,12 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
       <div className="flex justify-between text-[9px] font-mono text-neutral-400 uppercase tracking-widest mb-0.5">
         <span>{MODAL_LABEL[m]}</span><span>{pct}%</span>
       </div>
-      <div className="h-1.5 bg-[#18181B]"><div className="h-full bg-white" style={{ width: `${pct}%` }} /></div>
+      <div className="h-1.5 bg-[color:var(--color-card-2)]"><div className="h-full bg-white" style={{ width: `${pct}%` }} /></div>
     </div>
   );
 
   return (
-    <div className="w-full border border-[#3F3F46] bg-[#0A0A0A] rounded-none mb-6 relative">
+    <div className="w-full border border-[color:var(--color-line)] bg-[color:var(--color-card)] rounded-none mb-6 relative">
       {onClose && (
         <button onClick={onClose} className="absolute top-2 right-2 text-neutral-500 hover:text-white p-1 cursor-pointer z-10" title="Cerrar recap">
           <X size={16} />
@@ -55,8 +55,8 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
       )}
 
       {/* Nodo exportable */}
-      <div id={nodeId} className="p-6 bg-[#0A0A0A]">
-        <div className="border-b border-[#3F3F46] pb-3 mb-4">
+      <div id={nodeId} className="p-6 bg-[color:var(--color-card)]">
+        <div className="border-b border-[color:var(--color-line)] pb-3 mb-4">
           <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.3em]">NEXUS L4 · RESUMEN</div>
           <h2 className="text-3xl font-brutalist font-black text-white tracking-tight uppercase leading-none mt-1">
             {variant === "month" ? "RECAP DEL MES" : `RECAP · SEMANA ${data.wk!.weekNumber}`}
@@ -88,7 +88,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
               </div>
             </div>
             {data.wk.marks.length > 0 && (
-              <div className="mt-5 pt-3 border-t border-[#3F3F46]">
+              <div className="mt-5 pt-3 border-t border-[color:var(--color-line)]">
                 <div className="text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-2">Mejores marcas (e1RM estimado)</div>
                 <div className="flex flex-wrap gap-2">
                   {data.wk.marks.map((mk) => (
@@ -118,7 +118,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
                     <span>SEM {w.weekNumber}{w.weekNumber === 4 ? " · descarga" : ""}</span>
                     <span>{w.tonnageKg.toLocaleString("es-ES")} kg{w.avgRpe != null ? ` · RPE ${w.avgRpe}` : ""}</span>
                   </div>
-                  <div className="h-2 bg-[#18181B]"><div className={`h-full ${w.weekNumber === 4 ? "bg-signal-red" : "bg-white"}`} style={{ width: `${(w.tonnageKg / max) * 100}%` }} /></div>
+                  <div className="h-2 bg-[color:var(--color-card-2)]"><div className={`h-full ${w.weekNumber === 4 ? "bg-signal-red" : "bg-white"}`} style={{ width: `${(w.tonnageKg / max) * 100}%` }} /></div>
                 </div>
               )); })()}
             </div>
@@ -139,7 +139,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
           </>
         )}
 
-        <div className="mt-5 pt-3 border-t border-[#3F3F46] text-[9px] font-mono text-neutral-600 uppercase tracking-widest text-center">
+        <div className="mt-5 pt-3 border-t border-[color:var(--color-line)] text-[9px] font-mono text-neutral-600 uppercase tracking-widest text-center">
           Resumen del pizarrón · el detalle completo vive en RPE & METAS
         </div>
       </div>

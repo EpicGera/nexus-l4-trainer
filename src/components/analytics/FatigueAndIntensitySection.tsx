@@ -166,7 +166,7 @@ export default function FatigueAndIntensitySection({
                 onClick={() => setRpeTrendRange(days)}
                 className={`px-2.5 py-1.5 rounded transition-all cursor-pointer leading-none ${
                   rpeTrendRange === days
-                    ? "bg-[#27272A] text-white border border-white/40"
+                    ? "bg-[color:var(--color-card-2)] text-white border border-white/40"
                     : "hover:bg-[color:var(--color-card-2)] border border-transparent"
                 }`}
               >

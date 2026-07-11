@@ -353,7 +353,7 @@ export default function DebriefWizard({
 
   // Field renderer helpers
   const inputCls =
-    "bg-[#16161c] text-white border border-[#3F3F46] rounded px-3 h-11 focus:outline-none focus:border-electric-blue font-mono text-center text-base transition-colors";
+    "bg-[#16161c] text-white border border-[color:var(--color-line)] rounded px-3 h-11 focus:outline-none focus:border-electric-blue font-mono text-center text-base transition-colors";
   const labelCls =
     "text-[9px] font-extrabold uppercase tracking-widest text-neutral-400";
 
@@ -426,7 +426,7 @@ export default function DebriefWizard({
       return (
         <>
           <div className="px-5 -mt-1 mb-1">
-            <p className="text-[11px] font-condensed font-bold text-neutral-300 bg-[#18181B] border-l-2 px-3 py-2"
+            <p className="text-[11px] font-condensed font-bold text-neutral-300 bg-[color:var(--color-card-2)] border-l-2 px-3 py-2"
                style={{ borderColor: accent }}>
               {hint}
             </p>
@@ -489,10 +489,10 @@ export default function DebriefWizard({
       <motion.div
         initial={{ scale: 0.92, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="border-2 border-[#3F3F46] bg-[#0a0a0e] w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-[0_0_40px_rgba(0,0,0,0.9)]"
+        className="border-2 border-[color:var(--color-line)] bg-[#0a0a0e] w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-[0_0_40px_rgba(0,0,0,0.9)]"
       >
         {/* HEADER */}
-        <div className="sticky top-0 z-10 bg-[#0a0a0e] border-b border-[#3F3F46] px-5 py-3.5 flex items-center justify-between">
+        <div className="sticky top-0 z-10 bg-[#0a0a0e] border-b border-[color:var(--color-line)] px-5 py-3.5 flex items-center justify-between">
           <div className="min-w-0">
             <div className="text-[9px] font-mono tracking-[0.2em] text-electric-blue uppercase">
               DEBRIEF L4 · {dayName}
@@ -517,7 +517,7 @@ export default function DebriefWizard({
               {step.blockLabel}
             </span>
           </div>
-          <div className="w-full h-1.5 bg-[#18181B] rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-[color:var(--color-card-2)] rounded-full overflow-hidden">
             <motion.div className="h-full rounded-full" style={{ backgroundColor: accent }}
               animate={{ width: `${progressPct}%` }}
               transition={{ type: "spring", stiffness: 120, damping: 20 }} />
@@ -534,9 +534,9 @@ export default function DebriefWizard({
         {renderFields()}
 
         {/* FOOTER */}
-        <div className="sticky bottom-0 bg-[#0a0a0e] border-t border-[#3F3F46] px-5 py-3.5 flex items-center gap-2">
+        <div className="sticky bottom-0 bg-[#0a0a0e] border-t border-[color:var(--color-line)] px-5 py-3.5 flex items-center gap-2">
           <button onClick={goPrev} disabled={current === 0}
-            className="flex items-center gap-1 px-3 h-11 rounded font-mono text-xs font-bold uppercase tracking-wider border border-[#3F3F46] text-neutral-300 hover:bg-[#18181B] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer">
+            className="flex items-center gap-1 px-3 h-11 rounded font-mono text-xs font-bold uppercase tracking-wider border border-[color:var(--color-line)] text-neutral-300 hover:bg-[color:var(--color-card-2)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer">
             <ChevronLeft size={16} /> Atrás
           </button>
           <button onClick={skip}

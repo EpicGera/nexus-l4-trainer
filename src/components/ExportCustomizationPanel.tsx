@@ -49,7 +49,7 @@ const segBtnClass = (active: boolean) =>
   `py-2.5 text-[10px] font-mono font-black tracking-widest uppercase transition-all cursor-pointer rounded-sm ${
     active
       ? "bg-amber-500 text-black shadow-lg"
-      : "text-zinc-400 hover:text-white hover:bg-[#18181B]"
+      : "text-zinc-400 hover:text-white hover:bg-[color:var(--color-card-2)]"
   }`;
 
 export default function ExportCustomizationPanel({

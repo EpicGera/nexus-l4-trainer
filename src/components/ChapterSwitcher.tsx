@@ -98,7 +98,7 @@ export default function ChapterSwitcher() {
   };
 
   return (
-    <div className="mt-5 pt-4 border-t border-[#3F3F46] text-left space-y-3">
+    <div className="mt-5 pt-4 border-t border-[color:var(--color-line)] text-left space-y-3">
       <label className="text-[10px] font-mono font-black tracking-widest text-neutral-300 uppercase flex items-center gap-1.5">
         <BookOpen size={12} /> BIBLIOTECA DE CAPÍTULOS ({chapters.length})
       </label>
@@ -108,7 +108,7 @@ export default function ChapterSwitcher() {
       </p>
 
       {/* Cloud backup status + manual force-save */}
-      <div className="flex items-center justify-between gap-2 border border-[#3F3F46] bg-white/[0.03] px-2.5 py-2 rounded-sm">
+      <div className="flex items-center justify-between gap-2 border border-[color:var(--color-line)] bg-white/[0.03] px-2.5 py-2 rounded-sm">
         <span className="flex items-center gap-1.5 text-[9px] font-mono text-neutral-400 min-w-0">
           {user ? (
             <>
@@ -128,7 +128,7 @@ export default function ChapterSwitcher() {
             onClick={onCloudSave}
             disabled={cloudState === "saving"}
             title="Forzar guardado de todos los capítulos en la nube"
-            className="shrink-0 flex items-center gap-1 text-[9px] font-mono font-black uppercase tracking-wider px-2 py-1 rounded-sm bg-[#27272A] text-neutral-200 hover:bg-white hover:text-black transition-all cursor-pointer disabled:opacity-60"
+            className="shrink-0 flex items-center gap-1 text-[9px] font-mono font-black uppercase tracking-wider px-2 py-1 rounded-sm bg-[color:var(--color-card-2)] text-neutral-200 hover:bg-white hover:text-black transition-all cursor-pointer disabled:opacity-60"
           >
             {cloudState === "saving" ? (
               <><Loader2 size={11} className="animate-spin" /> GUARDANDO</>
@@ -151,7 +151,7 @@ export default function ChapterSwitcher() {
           return (
             <div
               key={c.id}
-              className={`border rounded-sm transition-all ${isActive ? "border-white/25 bg-white/[0.04]" : "border-[#3F3F46] bg-black/40 opacity-60 hover:opacity-100"}`}
+              className={`border rounded-sm transition-all ${isActive ? "border-white/25 bg-white/[0.04]" : "border-[color:var(--color-line)] bg-black/40 opacity-60 hover:opacity-100"}`}
             >
               <div className="flex items-center gap-2 p-2.5">
                 <button
@@ -208,7 +208,7 @@ export default function ChapterSwitcher() {
                     type="button"
                     onClick={() => onActivate(c.id)}
                     title="Activar este capítulo"
-                    className="shrink-0 flex items-center gap-1 text-[9px] font-mono font-black uppercase tracking-wider px-2 py-1.5 rounded-sm bg-[#27272A] text-neutral-200 hover:bg-white hover:text-black transition-all cursor-pointer"
+                    className="shrink-0 flex items-center gap-1 text-[9px] font-mono font-black uppercase tracking-wider px-2 py-1.5 rounded-sm bg-[color:var(--color-card-2)] text-neutral-200 hover:bg-white hover:text-black transition-all cursor-pointer"
                   >
                     <Power size={11} /> ACTIVAR
                   </button>
@@ -246,7 +246,7 @@ export default function ChapterSwitcher() {
 
       {/* Admin-only: title font picker for the active chapter (Fase 2) */}
       {isAdmin && activeChapter && (
-        <div className="mt-4 pt-4 border-t border-[#3F3F46] space-y-2">
+        <div className="mt-4 pt-4 border-t border-[color:var(--color-line)] space-y-2">
           <label className="text-[10px] font-mono font-black tracking-widest text-neutral-300 uppercase flex items-center gap-1.5">
             <Type size={12} /> TIPOGRAFÍA DEL TÍTULO · ADMIN
           </label>
@@ -256,7 +256,7 @@ export default function ChapterSwitcher() {
           <select
             value={activeChapter.theme.fontKey || "default"}
             onChange={(e) => onSetFont(e.target.value)}
-            className="w-full bg-black/50 border border-[#3F3F46] text-neutral-200 text-[11px] font-mono px-2 py-2 rounded-sm focus:outline-none focus:border-white/40 cursor-pointer"
+            className="w-full bg-black/50 border border-[color:var(--color-line)] text-neutral-200 text-[11px] font-mono px-2 py-2 rounded-sm focus:outline-none focus:border-white/40 cursor-pointer"
           >
             {FONT_OPTIONS.map((o) => (
               <option key={o.key} value={o.key}>{o.label}</option>
@@ -264,7 +264,7 @@ export default function ChapterSwitcher() {
           </select>
           {/* live preview in the selected face */}
           <div
-            className="border border-[#3F3F46] bg-black/40 px-3 py-3 text-center text-white text-2xl truncate"
+            className="border border-[color:var(--color-line)] bg-black/40 px-3 py-3 text-center text-white text-2xl truncate"
             style={{ fontFamily: fontFamilyFor(activeChapter.theme.fontKey) || undefined }}
           >
             {activeChapter.title || "NEXUS L4"}
@@ -280,7 +280,7 @@ export default function ChapterSwitcher() {
             type="button"
             onClick={() => fontInputRef.current?.click()}
             title="Subir una fuente propia (.woff2 / .ttf / .otf) — se guarda solo en este dispositivo"
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[10px] font-mono font-black uppercase tracking-wider border border-[#3F3F46] bg-[#18181B] text-neutral-200 hover:bg-[#27272A] cursor-pointer rounded-sm"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[10px] font-mono font-black uppercase tracking-wider border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] text-neutral-200 hover:bg-[color:var(--color-card-2)] cursor-pointer rounded-sm"
           >
             <Upload size={12} /> Subir fuente (.woff2 / .ttf / .otf)
           </button>

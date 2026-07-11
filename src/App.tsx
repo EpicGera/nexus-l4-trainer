@@ -1507,7 +1507,7 @@ export default function App() {
                           className={`px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${
                             sel
                               ? isSpecial ? "bg-signal-red text-white border-signal-red" : "bg-white text-black border-white"
-                              : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[#27272A]"
+                              : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"
                           }`}
                         >
                           {v.tabName}
@@ -1524,7 +1524,7 @@ export default function App() {
                     e.stopPropagation();
                     exportFileInputRef.current?.click();
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] hover:bg-[#27272A] text-white active:scale-95 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white active:scale-95 cursor-pointer"
                   title="Subir una foto ya tomada"
                 >
                   <Camera size={16} />
@@ -1591,7 +1591,7 @@ export default function App() {
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); videoBgInputRef.current?.click(); }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] hover:bg-[#27272A] text-white rounded-sm transition-all cursor-pointer"
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
                         >
                           <Film size={14} />
                           USAR CLIP DE VIDEO
@@ -1614,7 +1614,7 @@ export default function App() {
                             key={fx}
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setVideoEffect(fx); }}
-                            className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[#27272A]"}`}
+                            className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
                           >
                             {fx === "kenburns" ? "Zoom" : fx === "pulse" ? "Pulso" : "Estático"}
                           </button>
@@ -1647,7 +1647,7 @@ export default function App() {
                                   disabled={disabled}
                                   title={disabled ? "Elegí música (o usá un clip con audio) para sincronizar con los beats" : undefined}
                                   onClick={(e) => { e.stopPropagation(); toggleVideoFx(k); }}
-                                  className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all ${disabled ? "opacity-40 cursor-not-allowed bg-[color:var(--color-card-2)] text-[#52525B] border-[color:var(--color-line)]" : on ? "bg-cyan-400 text-black border-cyan-400 cursor-pointer" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[#27272A] cursor-pointer"}`}
+                                  className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all ${disabled ? "opacity-40 cursor-not-allowed bg-[color:var(--color-card-2)] text-[#52525B] border-[color:var(--color-line)]" : on ? "bg-cyan-400 text-black border-cyan-400 cursor-pointer" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)] cursor-pointer"}`}
                                 >
                                   {label}
                                 </button>
@@ -1669,7 +1669,7 @@ export default function App() {
                                 key={String(loop)}
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); setVideoLoop(loop); }}
-                                className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoLoop === loop ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[#27272A]"}`}
+                                className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoLoop === loop ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
                               >
                                 {loop ? "Loop a 15s" : `Clip (${Math.round(videoBgDurationSec)}s)`}
                               </button>
@@ -1694,7 +1694,7 @@ export default function App() {
                               key={d}
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
-                              className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[#27272A]"}`}
+                              className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
                             >
                               {d}s
                             </button>
@@ -1711,7 +1711,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] hover:bg-[#27272A] text-white rounded-sm transition-all cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider border border-[color:var(--color-line)] bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
                       >
                         <Music size={14} />
                         <span className="truncate max-w-[70%]">{audioName || "ELEGIR TEMA"}</span>
@@ -1735,7 +1735,7 @@ export default function App() {
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); toggleAudioPreview(); }}
-                              className={`w-full flex items-center justify-center gap-2 py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${isPreviewingAudio ? "bg-cyan-400 text-black border-cyan-400" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[#27272A]"}`}
+                              className={`w-full flex items-center justify-center gap-2 py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${isPreviewingAudio ? "bg-cyan-400 text-black border-cyan-400" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
                             >
                               {isPreviewingAudio ? "■ Parar" : "▶ Escuchar segmento"}
                             </button>
@@ -2151,7 +2151,7 @@ export default function App() {
                     "DELOAD / DESCARGA"
                   )}
                   {activeWeekPlan?.meta?.gear != null && (
-                    <span className="ml-2 text-[9px] font-mono tracking-normal bg-[#27272A] px-1.5 py-0.5 rounded text-neutral-300 align-middle">
+                    <span className="ml-2 text-[9px] font-mono tracking-normal bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded text-neutral-300 align-middle">
                       {GEAR_LABEL[activeWeekPlan.meta.gear] || `GEAR ${activeWeekPlan.meta.gear}`}
                     </span>
                   )}
@@ -2306,7 +2306,7 @@ export default function App() {
                                       <span className="text-xs sm:text-[13px] font-extrabold tracking-wider truncate" style={isOn ? { color: c } : undefined}>
                                         {b.title || b.key}
                                       </span>
-                                      <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                                      <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                                         {b.items.length}
                                       </span>
                                     </div>
@@ -2357,7 +2357,7 @@ export default function App() {
                             >
                               01. CALENTAMIENTO
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.warmup.items.length} MOV.
                             </span>
                           </div>
@@ -2408,7 +2408,7 @@ export default function App() {
                             >
                               02. FUERZA / OLY
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.strength.items.length} MOVS.
                             </span>
                           </div>
@@ -2459,7 +2459,7 @@ export default function App() {
                             >
                               03. METCON / WOD
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.metcon.items.length} MOVS.
                             </span>
                           </div>
@@ -2510,7 +2510,7 @@ export default function App() {
                             >
                               04. ACCESORIOS / ACC
                             </span>
-                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[#27272A] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
                               {activeVariation.accessories.items.length} MOVS.
                             </span>
                           </div>
@@ -2869,7 +2869,7 @@ export default function App() {
                       document.body.removeChild(a);
                       URL.revokeObjectURL(url);
                     }}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-[color:var(--color-line)] text-[#A1A1AA] hover:bg-[#27272A] hover:text-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-[color:var(--color-line)] text-[#A1A1AA] hover:bg-[color:var(--color-card-2)] hover:text-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
                   >
                     <FileText size={12} /> GUÍA IA (DÍA ESPECIAL)
                   </button>
