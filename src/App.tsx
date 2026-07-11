@@ -3,8 +3,7 @@ import { svgIcons } from "./components/icons/BlockIcons";
 import { getCleanExerciseName } from "./lib/historyUtils";
 import { AthleteState, Database, ProgramBlock } from "./types/workout";
 import { INTENTION_META, GEAR_LABEL } from "./lib/blockMeta";
-import { ensureChaptersInitialized, createChapter, getActiveChapter, getActiveChapterId, updateChapterMeta, ChapterTheme } from "./lib/chapterStore";
-import PalettePicker from "./components/PalettePicker";
+import { ensureChaptersInitialized, createChapter, getActiveChapter, getActiveChapterId, updateChapterMeta, ChapterTheme, THEME_PALETTES } from "./lib/chapterStore";
 import { loadCustomFont } from "./lib/customFont";
 import { SYSTEM_VERSION, SYSTEM_NAME, SYSTEM_TAGLINE } from "./lib/version";
 import { getProgramTodayPosition } from "./lib/programStart";
@@ -48,7 +47,7 @@ import { loadSessions } from "./lib/sessionStore";
 import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
 import WarriorScreen from "./components/WarriorScreen";
 import SessionWizard from "./components/SessionWizard";
-import { ProgressBar, CoachNote } from "./components/ui/primitives";
+import { ProgressBar, CoachNote, SectionCard } from "./components/ui/primitives";
 import { computeCoachNotes, noteFor } from "./lib/coachNotes";
 import { BUCKET_COLOR } from "./lib/buckets";
 import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
@@ -113,6 +112,7 @@ import {
   Film,
   Swords,
   Pencil,
+  Palette,
 } from "lucide-react";
 
 // Firebase core & sync integration
@@ -1884,8 +1884,6 @@ export default function App() {
               exportaciones (TXT mes, Sync Sheets, PDF semana, Programa del día,
               Guía IA) viven en la solapa Perfil & Bio → Datos & Nube. */}
           <div className="flex gap-2 w-full sm:w-auto h-full items-center justify-start sm:justify-end shrink-0">
-            {/* Paleta de color de la programación mensual (10 combinaciones) */}
-            <PalettePicker activeKey={chapterTheme?.key} onSelect={applyPalette} />
             {/* DÍA ESPECIAL: subir JSON de día suelto como pestaña extra del día activo */}
             {activeDay && (
               <>
@@ -2747,10 +2745,53 @@ export default function App() {
             />
 
             {profileLens === "perfil" && (
-              <ProfileSummaryCard
-                athlete={athlete}
-                onEdit={() => setShowProfileModal(true)}
-              />
+              <>
+                <ProfileSummaryCard
+                  athlete={athlete}
+                  onEdit={() => setShowProfileModal(true)}
+                />
+
+                {/* Paleta de color de la programación (10 combinaciones únicas).
+                    Se aplica al capítulo activo: acento, banda y gradiente del
+                    título de cada día. */}
+                <SectionCard
+                  title="PALETA DEL PROGRAMA"
+                  icon={<Palette size={16} className="text-[color:var(--color-sem-cyan)]" />}
+                  subtitle="Elegí los colores de tu programación mensual"
+                >
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                    {THEME_PALETTES.map((t) => {
+                      const sel = t.key === chapterTheme?.key;
+                      return (
+                        <button
+                          key={t.key}
+                          type="button"
+                          onClick={() => applyPalette(t)}
+                          aria-pressed={sel}
+                          title={t.label}
+                          className={`flex flex-col items-center gap-2 p-3 rounded-[var(--radius-tile)] transition-all cursor-pointer ${
+                            sel
+                              ? "bg-[color:var(--color-card-2)] ring-2 ring-[color:var(--color-sem-cyan)]"
+                              : "bg-[color:var(--color-card-2)] hover:brightness-125"
+                          }`}
+                        >
+                          <span
+                            className="w-full h-8 rounded-[4px] ring-1 ring-white/10 relative"
+                            style={{ background: t.titleGradient }}
+                          >
+                            {sel && (
+                              <Check size={14} className="absolute top-1 right-1 text-black drop-shadow" aria-hidden="true" />
+                            )}
+                          </span>
+                          <span className="font-mono text-[10px] font-bold uppercase tracking-wide text-[color:var(--color-ink-2)]">
+                            {t.label ?? t.key}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </SectionCard>
+              </>
             )}
 
             {profileLens === "datos" && (
