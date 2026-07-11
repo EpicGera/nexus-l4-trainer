@@ -1,28 +1,36 @@
-// Tema único para todos los charts de recharts. Estética "dashboard de datos"
-// (excel moderno), no videojuego: grises de estructura, tinta clara legible y
-// UN acento rojo. Reemplaza los neones hardcodeados dispersos por sección.
+// Tema único para todos los charts de recharts (revamp "A×B humanizada").
+// Colores semánticos: cian = dato medido (serie principal), rojo = intensidad/hoy,
+// ámbar = estado/perdido, verde = mejora. Tooltip = tarjeta flotante sin borde.
+// Reemplaza los neones/grises hardcodeados dispersos por sección.
 
 export const CHART = {
-  grid: "#27272A",       // --color-line
-  axis: "#3F3F46",       // --color-line-strong
-  tick: { fill: "#A1A1AA", fontSize: 11, fontFamily: "JetBrains Mono, monospace" },
-  /** orden de prioridad de series: blanco → gris → acento → gris oscuro */
-  series: ["#FAFAFA", "#A1A1AA", "#DC2626", "#52525B"] as const,
-  accent: "#DC2626",
-  accentSoft: "#EF4444",
+  grid: "#26262c",       // --color-line (rejilla tenue sobre tarjeta)
+  axis: "#2f2f38",       // --color-line-strong
+  tick: { fill: "#bcbcca", fontSize: 11, fontFamily: "JetBrains Mono, monospace", fontWeight: 700 },
+  /** orden de prioridad de series: cian (dato) → blanco → rojo → gris */
+  series: ["#35d6f0", "#ffffff", "#ff453a", "#a2a2b0"] as const,
+  accent: "#ff453a",     // --color-sem-red
+  accentSoft: "#ff6b61",
+  cyan: "#35d6f0",       // --color-sem-cyan (dato medido)
+  amber: "#ffb020",      // --color-sem-amber (estado / día perdido)
+  green: "#34e08c",      // --color-sem-green (mejora)
+  missed: "#ffb020",     // aro del día perdido
+  today: "#ff453a",      // punto de hoy
+  pen: "#ffd54a",        // anotación manuscrita del coach
   tooltip: {
-    backgroundColor: "#0A0A0A",
-    border: "1px solid #3F3F46",
-    borderRadius: 2,
+    backgroundColor: "#1c1c23",
+    border: "none",
+    borderRadius: 6,
+    boxShadow: "0 18px 40px -12px rgba(0,0,0,.72)",
     fontSize: 11,
     fontFamily: "JetBrains Mono, monospace",
-    color: "#FAFAFA",
+    color: "#ffffff",
   } as Record<string, string | number>,
 } as const;
 
-/** Props mono para los RadarChart (el polígono se conserva, sin neón). */
+/** Props para los RadarChart: polígono cian (dato medido), relleno translúcido. */
 export const radarProps = {
-  stroke: "#FAFAFA",
-  fill: "#FAFAFA",
-  fillOpacity: 0.08,
+  stroke: "#35d6f0",
+  fill: "#35d6f0",
+  fillOpacity: 0.22,
 } as const;

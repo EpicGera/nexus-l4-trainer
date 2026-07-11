@@ -11,16 +11,18 @@ import { X } from "lucide-react";
  *  - One accent color per section, passed via `accent`.
  */
 
-// PRVN monochrome: la jerarquía la lleva la tipografía (Anton en títulos/números,
-// mono en labels), no el color. Un solo rojo señal (#DC2626) para intensidad/alertas.
+// Revamp "A×B humanizada": tarjetas mate elevadas (sombra, sin borde) sobre un
+// fondo más claro; jerarquía por tipografía (Anton en títulos/números, mono en
+// labels) + 4 colores semánticos. Legibilidad primero: NADA de texto por debajo
+// de --color-label. El toque humano lo dan CoachNote / Scribble / rotaciones.
 export const TXT = {
   sectionTitle:
     "text-sm font-brutalist tracking-[0.12em] text-white uppercase leading-snug",
   sectionSubtitle:
-    "text-[10px] font-mono text-neutral-500 uppercase tracking-wider leading-relaxed",
+    "text-[10px] font-mono text-[color:var(--color-label)] uppercase tracking-wider leading-relaxed font-bold",
   label:
-    "text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-[0.15em]",
-  body: "text-[11px] font-mono text-neutral-300 leading-relaxed",
+    "text-[10px] font-mono font-bold text-[color:var(--color-label)] uppercase tracking-[0.15em]",
+  body: "text-[12px] font-mono text-[color:var(--color-ink-2)] leading-relaxed",
   bigValue: "text-3xl font-brutalist font-black text-white tracking-tight tabular-nums",
 };
 
@@ -47,9 +49,9 @@ export function SectionCard({
   return (
     <section
       id={id}
-      className={`border border-[#3F3F46] bg-[#0A0A0A] rounded-none p-5 text-left ${className}`}
+      className={`bg-[color:var(--color-card)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] p-5 text-left ${className}`}
     >
-      <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-4 pb-3 border-b border-[#3F3F46]">
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-4">
         <div className="space-y-1 min-w-0">
           <h3 className={`${TXT.sectionTitle} flex items-center gap-2`}>
             {icon}
@@ -70,17 +72,17 @@ interface BadgeProps {
 }
 
 const BADGE_TONES: Record<NonNullable<BadgeProps["tone"]>, string> = {
-  neutral: "bg-transparent text-neutral-400 border-[#3F3F46]",
-  good: "bg-white text-black border-transparent",
-  warn: "bg-transparent text-white border-white/40",
-  danger: "bg-signal-red/15 text-signal-red border-signal-red/40",
-  accent: "bg-white text-black border-transparent",
+  neutral: "bg-[color:var(--color-card-2)] text-[color:var(--color-ink-2)]",
+  good: "bg-[color:var(--color-sem-green)] text-black",
+  warn: "bg-[color:var(--color-sem-amber)] text-black",
+  danger: "bg-[color:var(--color-sem-red)] text-white",
+  accent: "bg-white text-black",
 };
 
 export function Pill({ children, tone = "neutral" }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 border px-2 py-1 rounded-sm text-[10px] font-mono font-bold uppercase tracking-wider leading-none ${BADGE_TONES[tone]}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-[var(--radius-tile)] text-[10px] font-mono font-bold uppercase tracking-wider leading-none ${BADGE_TONES[tone]}`}
     >
       {children}
     </span>
@@ -97,16 +99,16 @@ interface StatBoxProps {
 
 const STAT_VALUE_TONES: Record<NonNullable<StatBoxProps["tone"]>, string> = {
   neutral: "text-white",
-  accent: "text-white",
-  good: "text-white",
-  warn: "text-neutral-400",
-  danger: "text-signal-red",
+  accent: "text-[color:var(--color-sem-cyan)]",
+  good: "text-[color:var(--color-sem-green)]",
+  warn: "text-[color:var(--color-sem-amber)]",
+  danger: "text-[color:var(--color-sem-red)]",
 };
 
 /** Compact metric tile: label on top, big value, optional unit & hint. */
 export function StatBox({ label, value, unit, tone = "neutral", hint }: StatBoxProps) {
   return (
-    <div className="bg-transparent border border-[#3F3F46] rounded-none p-3 text-center min-w-0">
+    <div className="bg-[color:var(--color-card-2)] rounded-[var(--radius-tile)] p-3 text-center min-w-0">
       <div className={`${TXT.label} mb-1.5 truncate`} title={label}>
         {label}
       </div>
@@ -115,11 +117,11 @@ export function StatBox({ label, value, unit, tone = "neutral", hint }: StatBoxP
       >
         {value}
         {unit && (
-          <span className="text-[10px] font-mono text-neutral-400 ml-1">{unit}</span>
+          <span className="text-[10px] font-mono text-[color:var(--color-ink-2)] ml-1">{unit}</span>
         )}
       </div>
       {hint && (
-        <div className="text-[10px] font-mono text-neutral-400 mt-1 leading-snug">{hint}</div>
+        <div className="text-[10px] font-mono text-[color:var(--color-ink-2)] mt-1 leading-snug">{hint}</div>
       )}
     </div>
   );
@@ -135,13 +137,13 @@ interface NexusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-white text-black hover:bg-neutral-200 border-transparent font-extrabold",
+    "bg-white text-black hover:-translate-y-px font-extrabold shadow-[var(--shadow-float)]",
   ghost:
-    "bg-transparent text-neutral-300 hover:text-black hover:bg-white border-white/20",
+    "bg-[color:var(--color-card-2)] text-[color:var(--color-ink-2)] hover:text-white hover:bg-[color:#26262e]",
   danger:
-    "bg-transparent text-signal-red hover:text-white hover:bg-signal-red/20 border-signal-red/40",
+    "bg-[color:var(--color-sem-red)] text-white hover:-translate-y-px shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)]",
   good:
-    "bg-transparent text-white hover:text-black hover:bg-white border-white/30",
+    "bg-[color:var(--color-sem-green)] text-black hover:-translate-y-px shadow-[0_10px_26px_-6px_rgba(52,224,140,.5)]",
 };
 
 /** Uniform action button: same height, font and padding for every action in the app. */
@@ -155,7 +157,7 @@ export function NexusButton({
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-1.5 border px-3 py-2 min-h-[34px] rounded-sm text-[10px] font-mono font-bold uppercase tracking-wider leading-none transition-all active:scale-95 cursor-pointer disabled:opacity-30 disabled:pointer-events-none ${BUTTON_VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[34px] rounded-[var(--radius-tile)] text-[10px] font-mono font-bold uppercase tracking-wider leading-none transition-all active:scale-95 cursor-pointer disabled:opacity-30 disabled:pointer-events-none ${BUTTON_VARIANTS[variant]} ${className}`}
       {...rest}
     >
       {icon}
@@ -174,13 +176,13 @@ interface EmptyStateProps {
 export function EmptyState({ message, hint, className = "" }: EmptyStateProps) {
   return (
     <div
-      className={`border-2 border-dashed border-[#3F3F46] rounded-sm p-6 text-center space-y-1.5 ${className}`}
+      className={`border-2 border-dashed border-[color:var(--color-line-strong)] rounded-[var(--radius-card)] p-6 text-center space-y-1.5 ${className}`}
     >
-      <p className="text-[11px] font-mono font-bold text-neutral-400 uppercase tracking-wider">
+      <p className="text-[11px] font-mono font-bold text-[color:var(--color-label)] uppercase tracking-wider">
         {message}
       </p>
       {hint && (
-        <p className="text-[10px] font-mono text-neutral-400 leading-relaxed max-w-md mx-auto">
+        <p className="text-[10px] font-mono text-[color:var(--color-ink-2)] leading-relaxed max-w-md mx-auto">
           {hint}
         </p>
       )}
@@ -222,11 +224,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           spellCheck={false}
-          className={`w-full bg-black/60 border border-[#3F3F46] rounded-sm h-[38px] px-3 ${unit ? "pr-10" : ""} text-white font-mono text-sm focus:outline-none focus:border-electric-blue transition-colors placeholder:text-neutral-600 ${className}`}
+          className={`w-full bg-[color:var(--color-card-2)] rounded-[var(--radius-tile)] h-[38px] px-3 ${unit ? "pr-10" : ""} text-white font-mono text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-sem-cyan)] transition-shadow placeholder:text-[color:var(--color-ink-faint)] ${className}`}
           {...rest}
         />
         {unit && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-neutral-400 uppercase pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[color:var(--color-label)] uppercase pointer-events-none">
             {unit}
           </span>
         )}
@@ -237,10 +239,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 type BarTone = "accent" | "good" | "warn" | "danger";
 const BAR_TONES: Record<BarTone, string> = {
-  accent: "bg-white",
-  good: "bg-white",
-  warn: "bg-neutral-500",
-  danger: "bg-signal-red",
+  accent: "bg-[color:var(--color-sem-cyan)]",
+  good: "bg-[color:var(--color-sem-green)]",
+  warn: "bg-[color:var(--color-sem-amber)]",
+  danger: "bg-[color:var(--color-sem-red)]",
 };
 
 interface ProgressBarProps {
@@ -254,7 +256,7 @@ interface ProgressBarProps {
 export function ProgressBar({ value, tone = "accent", className = "" }: ProgressBarProps) {
   const pct = Math.max(0, Math.min(1, value)) * 100;
   return (
-    <div className={`w-full bg-[#18181B] rounded-full h-1.5 overflow-hidden ${className}`}>
+    <div className={`w-full bg-black/50 rounded-full h-1.5 overflow-hidden ${className}`}>
       <div
         className={`h-full rounded-full transition-all duration-500 ${BAR_TONES[tone]}`}
         style={{ width: `${pct}%` }}
@@ -304,15 +306,15 @@ export function ModalSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title || "Diálogo"}
-        className={`relative flex flex-col bg-zinc-950 border border-[#3F3F46] shadow-2xl overflow-hidden ${
+        className={`relative flex flex-col bg-[color:var(--color-card)] shadow-[var(--shadow-card)] overflow-hidden ${
           fullScreen
-            ? "w-full h-full sm:h-[92vh] sm:max-w-2xl sm:rounded-sm"
-            : "w-full sm:max-w-lg max-h-[90vh] rounded-sm"
+            ? "w-full h-full sm:h-[92vh] sm:max-w-2xl sm:rounded-[var(--radius-card)]"
+            : "w-full sm:max-w-lg max-h-[90vh] rounded-[var(--radius-card)]"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         {(title || subtitle) && (
-          <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-[#3F3F46] shrink-0">
+          <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-[color:var(--color-line)] shrink-0">
             <div className="space-y-1 min-w-0">
               {title && <h3 className={TXT.sectionTitle}>{title}</h3>}
               {subtitle && <p className={TXT.sectionSubtitle}>{subtitle}</p>}
@@ -336,11 +338,10 @@ export function ModalSheet({
   );
 }
 
-// RPE es la única señal funcional por color: escala de gris (fácil) → rojo (duro).
+// RPE por color: fácil (blanco) → medio (ámbar) → duro (rojo señal).
 function rpeTier(v: number): string {
-  if (v >= 9) return "bg-signal-red";
-  if (v >= 8.5) return "bg-signal-red/70";
-  if (v >= 8) return "bg-neutral-300";
+  if (v >= 9) return "bg-[color:var(--color-sem-red)]";
+  if (v >= 8) return "bg-[color:var(--color-sem-amber)]";
   return "bg-white";
 }
 
@@ -365,10 +366,10 @@ export function RpeDial({ value, onChange, values = [6, 7, 8, 9, 10], className 
             aria-checked={sel}
             aria-label={`RPE ${v}`}
             onClick={() => onChange(v)}
-            className={`flex-1 min-w-0 py-2 rounded-sm border text-sm font-mono font-bold transition-colors cursor-pointer ${
+            className={`flex-1 min-w-0 py-2 rounded-[var(--radius-tile)] text-sm font-mono font-bold transition-colors cursor-pointer ${
               sel
-                ? `${rpeTier(v)} text-black border-transparent`
-                : "bg-black/40 text-neutral-300 border-[#3F3F46] hover:border-white/30"
+                ? `${rpeTier(v)} text-black`
+                : "bg-[color:var(--color-card-2)] text-[color:var(--color-ink-2)] hover:bg-[color:#26262e]"
             }`}
           >
             {v}
@@ -376,5 +377,70 @@ export function RpeDial({ value, onChange, values = [6, 7, 8, 9, 10], className 
         );
       })}
     </div>
+  );
+}
+
+// ── Toque humano: notas del coach, tick de sección, círculo de birome ──────
+
+interface CoachNoteProps {
+  /** Texto de la nota; si es null/"" no renderiza nada (el silencio también es humano). */
+  note?: string | null;
+  /** Grados de rotación para que parezca escrito a mano (leve). */
+  rotate?: number;
+  className?: string;
+}
+
+/** Nota manuscrita del coach (amarillo birome, tipografía Caveat). La generan las
+ *  reglas de coachNotes.ts a partir de datos reales — no es decoración fija. */
+export function CoachNote({ note, rotate = 0, className = "" }: CoachNoteProps) {
+  if (!note) return null;
+  return (
+    <p
+      className={`font-hand text-[color:var(--color-pen)] text-[15px] leading-[1.25] ${className}`}
+      style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
+    >
+      {note}
+    </p>
+  );
+}
+
+type TickTone = "red" | "cyan" | "amber" | "green" | "white";
+const TICK_TONES: Record<TickTone, string> = {
+  red: "bg-[color:var(--color-sem-red)] text-white shadow-[0_5px_14px_-3px_rgba(255,69,58,.55)]",
+  cyan: "bg-[color:var(--color-sem-cyan)] text-black shadow-[0_5px_14px_-3px_rgba(53,214,240,.55)]",
+  amber: "bg-[color:var(--color-sem-amber)] text-black shadow-[0_5px_14px_-3px_rgba(255,176,32,.55)]",
+  green: "bg-[color:var(--color-sem-green)] text-black shadow-[0_5px_14px_-3px_rgba(52,224,140,.55)]",
+  white: "bg-white text-black",
+};
+
+/** Cuadradito de icono al lado del título de sección: da color semántico y peso. */
+export function Tick({ tone = "cyan", children }: { tone?: TickTone; children: React.ReactNode }) {
+  return (
+    <span
+      className={`inline-grid place-items-center w-5 h-5 rounded-[4px] text-[11px] shrink-0 ${TICK_TONES[tone]}`}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** Elipse "de birome" que rodea un valor a mano. Posicionar el contenedor
+ *  padre en `relative`; esto se estira sobre él (absolute inset). */
+export function Scribble({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={`absolute pointer-events-none ${className}`}
+      style={{ inset: "-9px -12px" }}
+      viewBox="0 0 120 80"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <ellipse
+        cx="60" cy="40" rx="54" ry="33"
+        fill="none" stroke="var(--color-pen)" strokeWidth="2" strokeLinecap="round"
+        transform="rotate(-4 60 40)" opacity="0.85"
+        strokeDasharray="230 40"
+      />
+    </svg>
   );
 }

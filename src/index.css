@@ -1,40 +1,71 @@
 @import "tailwindcss";
 
-/* PRVN monochrome system: black canvas, white type, gray structure, ONE signal
-   red (#DC2626) for RPE/alertas/PRs. Los tokens legacy (electric-blue/neon-pink)
-   se REMAPEAN acá para que toda la app herede la paleta sin tocar cada archivo. */
+/* REVAMP "A×B humanizada" (dirección E): el fondo de página es MÁS CLARO que
+   las tarjetas → las tarjetas mate oscuras FLOTAN con sombra (sin borde). Cuatro
+   colores semánticos fuertes (rojo=intensidad · cian=datos · ámbar=estado ·
+   verde=mejora) + birome del coach (--color-pen). Los tokens legacy (signal-red,
+   surface-*, electric-blue, pure-black) se REMAPEAN a esta paleta para que toda
+   la app herede la piel nueva sin tocar cada archivo. */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-brutalist: "Anton", "Impact", sans-serif;
   --font-condensed: "Roboto Condensed", sans-serif;
+  --font-hand: "Caveat", "Segoe Print", cursive;
 
-  --color-pure-black: #0A0A0A;
+  /* ── Paleta base del revamp ─────────────────────────────────────────── */
+  --color-bg: #33333b;        /* fondo de página (claro, para que la tarjeta flote) */
+  --color-bg-hi: #3c3c45;     /* tope del gradiente radial */
+  --color-card: #131318;      /* tarjeta elevada */
+  --color-card-2: #1c1c23;    /* tile interno */
+
+  --color-ink: #ffffff;       /* títulos / valores */
+  --color-ink-2: #e8e8ee;     /* cuerpo / secundario */
+  --color-label: #bcbcca;     /* labels mono bold — mínimo permitido en texto */
+
+  /* semánticos (cada color SIGNIFICA algo, no decora) */
+  --color-sem-red: #ff453a;   /* intensidad / alerta / hoy / PRs */
+  --color-sem-cyan: #35d6f0;  /* datos / medición / bloque activo */
+  --color-sem-amber: #ffb020; /* estado / atención / XP / rango */
+  --color-sem-green: #34e08c; /* mejora / OK / completado */
+  --color-pen: #ffd54a;       /* birome del coach (notas manuscritas) */
+
+  /* radios y elevación → habilitan rounded-card/tile y shadow-card/float */
+  --radius-card: 7px;
+  --radius-tile: 5px;
+  --shadow-card: 0 18px 40px -12px rgb(0 0 0 / 0.72), 0 4px 12px rgb(0 0 0 / 0.45);
+  --shadow-float: 0 10px 26px -6px rgb(0 0 0 / 0.6);
+
+  /* ── Tokens legacy REMAPEADOS a la paleta nueva ─────────────────────── */
+  --color-pure-black: #131318;   /* antes fondo; ahora superficie de tarjeta */
   --color-pure-white: #FFFFFF;
-  --color-signal-red: #DC2626;
-  /* legacy tokens remapeados a la paleta monocroma */
-  --color-electric-blue: #FFFFFF;
-  --color-neon-pink: #DC2626;
+  --color-signal-red: #ff453a;
+  --color-electric-blue: #35d6f0; /* focus ring + .cue + .tab-btn.active → cian */
+  --color-neon-pink: #ff453a;
 
-  /* ── Dashboard "excel moderno": superficies, tinta y líneas ──────────────
-     Reglas de contraste (WCAG, sobre surface-0 #0A0A0A):
-       · Texto de cuerpo → usar --color-ink-muted (#A1A1AA ≈ 7:1) como mínimo.
-       · --color-ink-faint (#71717A ≈ 4.4:1) SOLO para labels ≥12px en bold.
-       · Rojo en texto chico → --color-accent-soft (#EF4444 ≈ 5.9:1);
-         --color-accent (#DC2626 ≈ 4.6:1) solo para texto grande o rellenos. */
-  --color-surface-0: #0A0A0A;
-  --color-surface-1: #111113;
-  --color-surface-2: #18181B;
-  --color-ink: #FAFAFA;
-  --color-ink-muted: #A1A1AA;
-  --color-ink-faint: #71717A;
-  --color-line: #27272A;
-  --color-line-strong: #3F3F46;
-  --color-accent: #DC2626;
-  --color-accent-soft: #EF4444;
+  --color-surface-0: #131318;
+  --color-surface-1: #16161c;
+  --color-surface-2: #1c1c23;
+  --color-ink-muted: #cdcdd6;  /* subido de #A1A1AA → legible sobre tarjeta */
+  --color-ink-faint: #a2a2b0;  /* subido de #71717A → legible */
+  --color-line: #26262c;
+  --color-line-strong: #2f2f38; /* suavizado de #3F3F46 → menos "jaula" */
+  --color-accent: #ff453a;
+  --color-accent-soft: #ff6b61;
 
   --shadow-blue-glow: 0 0 0 1px rgba(255, 255, 255, 0.25);
-  --shadow-pink-glow: 0 0 12px 1px rgba(220, 38, 38, 0.4);
+  --shadow-pink-glow: 0 0 12px 1px rgba(255, 69, 58, 0.45);
+}
+
+/* Resaltador del coach: barrido irregular como marcador sobre el texto. */
+.mark-hl {
+  background: linear-gradient(104deg, transparent 1.5%, rgba(255, 213, 74, 0.38) 7%, rgba(255, 213, 74, 0.38) 93%, transparent 98.5%);
+  padding: 0 0.1em;
+}
+
+/* Nota manuscrita del coach. */
+.font-hand {
+  font-family: var(--font-hand);
 }
 
 /* Badges legacy: monocromo + rojo señal */
@@ -59,7 +90,9 @@
 }
 
 body {
-  background-color: #0A0A0A;
+  background-color: #33333b;
+  background-image: radial-gradient(130% 90% at 50% -15%, #3c3c45 0%, #33333b 60%);
+  background-attachment: fixed;
   color: #FFFFFF;
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;

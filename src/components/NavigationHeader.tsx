@@ -87,7 +87,7 @@ export default function NavigationHeader({
   return (
     <header
       ref={headerRef}
-      className="app-header fixed top-0 left-0 right-0 z-50 bg-[#0A0A0E]/95 border-b-2 border-[#3F3F46] no-print backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.85)] select-none"
+      className="app-header fixed top-0 left-0 right-0 z-50 bg-[color:var(--color-card)]/95 no-print backdrop-blur-md shadow-[0_10px_34px_-6px_rgba(0,0,0,0.85)] select-none"
       style={{
         paddingTop: "env(safe-area-inset-top, 0px)",
       }}
@@ -98,7 +98,7 @@ export default function NavigationHeader({
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer"
             onClick={() => setShowProfileModal(true)}
           >
-            <img src="/logo.svg" alt="Nexus L4 Emblem" className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] shrink-0" />
+            <img src="/logo.svg" alt="Nexus L4 Emblem" className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] shrink-0 -rotate-3" />
             <div className="border-l-2 border-white/40 px-1 sm:px-3 py-0.5 sm:py-1 transition-colors">
               <span className="text-white font-brutalist text-[5.5px] min-[320px]:text-[6.5px] min-[350px]:text-[7.5px] min-[375px]:text-[10px] sm:text-xs md:text-sm tracking-widest font-extrabold uppercase ">
                 NEXUS L4 MASTER
@@ -109,7 +109,7 @@ export default function NavigationHeader({
             </span>
           </div>
 
-          <div className="bg-[#14141A] rounded px-1.5 py-0.5 flex items-center xl:hidden mt-0">
+          <div className="bg-[color:var(--color-card-2)] rounded-[var(--radius-tile)] px-1.5 py-0.5 flex items-center xl:hidden mt-0">
             <span className="text-[7.5px] min-[320px]:text-[8px] min-[375px]:text-[9px] sm:text-[10px] font-mono font-bold text-neutral-300">
               HOJA {activeSheet + 1}/{sheets.length}
             </span>
@@ -140,7 +140,7 @@ export default function NavigationHeader({
             </span>
           </div>
 
-          <div className="flex items-center gap-1 bg-[#18181B] px-1.5 sm:px-3 py-0.5 rounded shrink-0 hidden md:flex">
+          <div className="flex items-center gap-1 bg-[color:var(--color-card-2)] px-1.5 sm:px-3 py-0.5 rounded-[var(--radius-tile)] shrink-0 hidden md:flex">
             <span className="text-[8.5px] sm:text-[10px] font-mono shrink-0">
               {syncWithRealTime ? (
                 <span className="text-white font-bold flex items-center gap-1">
@@ -179,7 +179,7 @@ export default function NavigationHeader({
             )}
           </button>
 
-          <div className="bg-[#14141A] rounded px-2 py-0.5 items-center gap-1 shrink-0 hidden md:flex">
+          <div className="bg-[color:var(--color-card-2)] rounded-[var(--radius-tile)] px-2 py-0.5 items-center gap-1 shrink-0 hidden md:flex">
             <span className="text-[9px] font-mono font-bold text-neutral-300">
               HOJA {activeSheet + 1}/{sheets.length}
             </span>
@@ -196,15 +196,15 @@ export default function NavigationHeader({
               key={index}
               id={`nav-header-tab-${sheet.id}`}
               onClick={() => setActiveSheet(index)}
-              className={`flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 rounded transition-all duration-300 relative cursor-pointer outline-none focus:outline-none ${
+              className={`flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 rounded-[var(--radius-tile)] transition-all duration-300 relative cursor-pointer outline-none focus:outline-none ${
                 isActive
-                  ? "bg-[#27272A] text-white font-black"
-                  : "text-neutral-500 hover:text-white hover:bg-[#18181B]"
+                  ? "bg-[color:var(--color-card-2)] text-white font-black"
+                  : "text-[color:var(--color-label)] hover:text-white hover:bg-[color:var(--color-card-2)]"
               }`}
             >
               <div className="flex items-center gap-1 sm:gap-1.5 justify-center">
                 <span
-                  className={`${isActive ? "text-white" : "text-neutral-500"} scale-90 sm:scale-100`}
+                  className={`${isActive ? "text-[color:var(--color-sem-red)]" : "text-[color:var(--color-label)]"} scale-90 sm:scale-100`}
                 >
                   {sheet.icon}
                 </span>
@@ -218,7 +218,7 @@ export default function NavigationHeader({
               {isActive && (
                 <motion.div
                   layoutId="activeSheetHeaderIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-white"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[color:var(--color-sem-red)]"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
@@ -228,7 +228,7 @@ export default function NavigationHeader({
       </div>
 
       {/* Sheet Interactive Progress Indicator */}
-      <div className="w-full h-[3px] bg-[#18181B] relative overflow-hidden">
+      <div className="w-full h-[3px] bg-black/40 relative overflow-hidden">
         <motion.div
           className="absolute top-0 bottom-0 left-0 shadow-sm"
           initial={false}
