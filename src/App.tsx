@@ -34,6 +34,7 @@ import RpeAnalyticsPanel from "./components/RpeAnalyticsPanel";
 import ProfileSummaryCard from "./components/ProfileSummaryCard";
 import ProgramCalendarCard from "./components/ProgramCalendarCard";
 import StrengthMarksCard from "./components/StrengthMarksCard";
+import BlockImagesCard from "./components/BlockImagesCard";
 import LensTabs from "./components/ui/LensTabs";
 import ShareCardOverlay from "./components/ShareCardOverlay";
 import WorkoutBlockCard from "./components/WorkoutBlockCard";
@@ -329,25 +330,26 @@ export default function App() {
     });
   };
 
-  // Fondos temáticos de bloque: solo lectura desde acá (el picker vivía en el
-  // modal de perfil, eliminado — nexus_bg_* siguen pintando con sus defaults).
-  const [enableThemedBackgrounds] = useState<boolean>(() => {
-    const saved = localStorage.getItem("nexus_enable_themed_backgrounds");
-    return saved !== "false"; // Default to true
-  });
-  const [warmupBg] = useState<string>(() => {
+  // Fondos temáticos de bloque: el picker vive ahora en Perfil & Bio → Perfil
+  // (BlockImagesCard), no en un modal.
+  const [enableThemedBackgrounds, setEnableThemedBackgrounds] =
+    useState<boolean>(() => {
+      const saved = localStorage.getItem("nexus_enable_themed_backgrounds");
+      return saved !== "false"; // Default to true
+    });
+  const [warmupBg, setWarmupBg] = useState<string>(() => {
     return (
       localStorage.getItem("nexus_bg_warmup") ||
       "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop"
     );
   });
-  const [strengthBg] = useState<string>(() => {
+  const [strengthBg, setStrengthBg] = useState<string>(() => {
     return (
       localStorage.getItem("nexus_bg_strength") ||
       "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop"
     );
   });
-  const [metconBg] = useState<string>(() => {
+  const [metconBg, setMetconBg] = useState<string>(() => {
     const saved = localStorage.getItem("nexus_bg_metcon");
     if (
       saved ===
@@ -360,7 +362,7 @@ export default function App() {
       "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop"
     );
   });
-  const [accessoriesBg] = useState<string>(() => {
+  const [accessoriesBg, setAccessoriesBg] = useState<string>(() => {
     const saved = localStorage.getItem("nexus_bg_accessories");
     if (
       saved ===
@@ -1453,15 +1455,15 @@ export default function App() {
             ref={exportFileInputRef}
             onChange={handleBgImageUpload}
           />
-          <div className="flex w-full lg:w-auto lg:inline-flex overflow-hidden rounded-sm">
+          <div className="flex w-full overflow-hidden rounded-sm">
             <button
               type="button"
               onClick={handleExportDayJPG}
               disabled={isExportingJPG}
-              className="flex-grow lg:flex-grow-0 flex items-center justify-center gap-2 px-5 py-3 lg:px-3.5 lg:py-2 font-brutalist text-sm sm:text-base lg:text-sm tracking-wide font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white shadow-sm hover:shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer text-center"
+              className="flex-grow flex items-center justify-center gap-2.5 px-6 py-4 font-brutalist text-xs sm:text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white shadow-sm hover:shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer text-center"
               title="Guardar el día como una imagen para compartir"
             >
-              <Camera size={17} className={`shrink-0 lg:w-4 lg:h-4 ${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
+              <Camera size={18} className={`${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
               <span>{isExportingJPG ? "EXPORTANDO..." : "CAPTURA DEL DÍA"}</span>
             </button>
             <button
@@ -1471,7 +1473,7 @@ export default function App() {
                 setShowStoryMenu((s) => !s);
               }}
               aria-expanded={showStoryMenu}
-              className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-3 lg:py-2 font-brutalist text-sm tracking-wide font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
+              className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-4 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
               title="Opciones de la imagen: foto de fondo y personalización"
             >
               <Settings2 size={16} />
@@ -2745,6 +2747,19 @@ export default function App() {
                 <ProgramCalendarCard />
 
                 <StrengthMarksCard athlete={athlete} handleUpdateAthlete={handleUpdateAthlete} />
+
+                <BlockImagesCard
+                  enableThemedBackgrounds={enableThemedBackgrounds}
+                  setEnableThemedBackgrounds={setEnableThemedBackgrounds}
+                  warmupBg={warmupBg}
+                  setWarmupBg={setWarmupBg}
+                  strengthBg={strengthBg}
+                  setStrengthBg={setStrengthBg}
+                  metconBg={metconBg}
+                  setMetconBg={setMetconBg}
+                  accessoriesBg={accessoriesBg}
+                  setAccessoriesBg={setAccessoriesBg}
+                />
 
                 {/* Paleta de color de la programación (10 combinaciones únicas).
                     Se aplica al capítulo activo: acento, banda y gradiente del
