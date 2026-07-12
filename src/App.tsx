@@ -330,51 +330,23 @@ export default function App() {
     });
   };
 
-  // Fondos temáticos de bloque: el picker vive ahora en Perfil & Bio → Perfil
-  // (BlockImagesCard), no en un modal.
+  // Fondos temáticos de bloque: imágenes propias en public/images/ (no más
+  // URLs de Unsplash). El picker vive en Perfil & Bio → Perfil (BlockImagesCard).
+  // Migración: cualquier valor guardado que sea una URL vieja de Unsplash se
+  // pisa con el default local — el usuario nunca eligió esas, eran un fallback.
+  const localOr = (key: string, file: string) => {
+    const saved = localStorage.getItem(key);
+    return saved && !saved.startsWith("https://images.unsplash.com") ? saved : `/images/${file}`;
+  };
   const [enableThemedBackgrounds, setEnableThemedBackgrounds] =
     useState<boolean>(() => {
       const saved = localStorage.getItem("nexus_enable_themed_backgrounds");
       return saved !== "false"; // Default to true
     });
-  const [warmupBg, setWarmupBg] = useState<string>(() => {
-    return (
-      localStorage.getItem("nexus_bg_warmup") ||
-      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop"
-    );
-  });
-  const [strengthBg, setStrengthBg] = useState<string>(() => {
-    return (
-      localStorage.getItem("nexus_bg_strength") ||
-      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop"
-    );
-  });
-  const [metconBg, setMetconBg] = useState<string>(() => {
-    const saved = localStorage.getItem("nexus_bg_metcon");
-    if (
-      saved ===
-      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop"
-    ) {
-      return "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop";
-    }
-    return (
-      saved ||
-      "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop"
-    );
-  });
-  const [accessoriesBg, setAccessoriesBg] = useState<string>(() => {
-    const saved = localStorage.getItem("nexus_bg_accessories");
-    if (
-      saved ===
-      "https://images.unsplash.com/photo-1605296867304-46d5465a25f1?q=80&w=800&auto=format&fit=crop"
-    ) {
-      return "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop";
-    }
-    return (
-      saved ||
-      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop"
-    );
-  });
+  const [warmupBg, setWarmupBg] = useState<string>(() => localOr("nexus_bg_warmup", "warmup_bg.png"));
+  const [strengthBg, setStrengthBg] = useState<string>(() => localOr("nexus_bg_strength", "strength_bg.png"));
+  const [metconBg, setMetconBg] = useState<string>(() => localOr("nexus_bg_metcon", "metcon_bg.png"));
+  const [accessoriesBg, setAccessoriesBg] = useState<string>(() => localOr("nexus_bg_accessories", "accessories_bg.png"));
 
   // Completed state tracking. Tres estados por día: "completed" (registrado),
   // "missed" (día perdido, cerrado sin datos) o ausente (pendiente). Persistido
@@ -1447,7 +1419,7 @@ export default function App() {
   const renderDayExportActions = (columns = false) => (
     <>
       {activeDay && (
-        <div className={`mt-6 no-print w-full${columns ? " col-span-full" : ""}`}>
+        <div className={`no-print${columns ? " col-span-full" : ""}`}>
           <input
             type="file"
             accept="image/*"
@@ -1455,15 +1427,17 @@ export default function App() {
             ref={exportFileInputRef}
             onChange={handleBgImageUpload}
           />
-          <div className="flex w-full overflow-hidden rounded-sm">
+          {/* Flotantes, esquina inferior derecha — mismo tamaño que ANOTAR WOD
+              y DÍA PERDIDO (bottom-left). */}
+          <div className="fixed bottom-[4.5rem] right-5 z-[90] flex overflow-hidden rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)]">
             <button
               type="button"
               onClick={handleExportDayJPG}
               disabled={isExportingJPG}
-              className="flex-grow flex items-center justify-center gap-2.5 px-6 py-4 font-brutalist text-xs sm:text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white shadow-sm hover:shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer text-center"
+              className="flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white active:scale-95 disabled:opacity-50 cursor-pointer text-center"
               title="Guardar el día como una imagen para compartir"
             >
-              <Camera size={18} className={`${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
+              <Camera size={16} className={`shrink-0 ${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
               <span>{isExportingJPG ? "EXPORTANDO..." : "CAPTURA DEL DÍA"}</span>
             </button>
             <button
@@ -1473,11 +1447,10 @@ export default function App() {
                 setShowStoryMenu((s) => !s);
               }}
               aria-expanded={showStoryMenu}
-              className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-4 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
+              className={`shrink-0 flex items-center justify-center gap-1.5 px-3 py-3 font-brutalist text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
               title="Opciones de la imagen: foto de fondo y personalización"
             >
               <Settings2 size={16} />
-              <span>OPCIONES</span>
               <ChevronDown size={14} className={`transition-transform duration-200 ${showStoryMenu ? "rotate-180" : ""}`} />
             </button>
           </div>
@@ -3199,9 +3172,9 @@ export default function App() {
               <button
                 onClick={() => unmarkDayMissed(activeDay.id)}
                 title="Deshacer: volver a día pendiente"
-                className="fixed bottom-[4.5rem] left-5 z-[90] no-print bg-transparent border border-neutral-600 text-neutral-400 hover:text-white hover:border-white font-brutalist text-[10px] tracking-widest uppercase px-3 py-2 rounded-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                className="fixed bottom-5 right-5 z-[90] no-print bg-black text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
               >
-<RotateCcw size={12} aria-hidden="true" /> PERDIDO · DESHACER
+                <RotateCcw size={16} aria-hidden="true" /> DESHACER
               </button>
             ) : (
               <button
@@ -3211,9 +3184,9 @@ export default function App() {
                   }
                 }}
                 title="No entrené este día: cerrarlo como perdido"
-                className="fixed bottom-[4.5rem] left-5 z-[90] no-print bg-transparent border border-neutral-700 text-[color:var(--color-label)] hover:text-neutral-300 hover:border-neutral-500 font-brutalist text-[10px] tracking-widest uppercase px-3 py-2 rounded-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                className="fixed bottom-5 right-5 z-[90] no-print bg-black text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
               >
-<X size={12} aria-hidden="true" /> DÍA PERDIDO
+                <X size={16} aria-hidden="true" /> DÍA PERDIDO
               </button>
             )
           )}

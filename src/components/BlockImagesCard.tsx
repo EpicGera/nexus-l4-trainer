@@ -1,32 +1,13 @@
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, RotateCcw } from "lucide-react";
 import { SectionCard, TXT } from "./ui/primitives";
 
-const PRESETS = [
-  {
-    name: "Noir Chalk & Iron 🏋️‍♂️",
-    d: "Estilo rústico, magnesio y halterofilia clásica",
-    warmup: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop",
-    strength: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop",
-    metcon: "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop",
-    accessories: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    name: "Cyber CrossFit 🧬",
-    d: "Fondo futurista de fibra y luces cibernéticas",
-    warmup: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop",
-    strength: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800&auto=format&fit=crop",
-    metcon: "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop",
-    accessories: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    name: "Raw Carbon 🍌",
-    d: "Inspirado en texturas de fibra e imagen de alta potencia",
-    warmup: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop",
-    strength: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=800&auto=format&fit=crop",
-    metcon: "https://images.unsplash.com/photo-1434596994096-19d4e89a7ec5?q=80&w=800&auto=format&fit=crop",
-    accessories: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop",
-  },
-];
+/** Set local (public/images/) — reemplaza los presets viejos de Unsplash. */
+const LOCAL_DEFAULTS = {
+  warmup: "/images/warmup_bg.png",
+  strength: "/images/strength_bg.png",
+  metcon: "/images/metcon_bg.png",
+  accessories: "/images/accessories_bg.png",
+};
 
 interface BlockImagesCardProps {
   enableThemedBackgrounds: boolean;
@@ -43,8 +24,9 @@ interface BlockImagesCardProps {
 
 /**
  * Imágenes de fondo de cada bloque del pizarrón (calentamiento/fuerza/metcon/
- * accesorios): 3 presets o URL manual por bloque. Antes vivía en el modal
- * "Editar perfil" (eliminado); misma función, ahora como tarjeta directa.
+ * accesorios). Antes vivía en el modal "Editar perfil" (eliminado); misma
+ * función, ahora como tarjeta directa. Set propio en public/images/ por
+ * default — sin URLs externas de Unsplash.
  */
 export default function BlockImagesCard({
   enableThemedBackgrounds,
@@ -58,15 +40,15 @@ export default function BlockImagesCard({
   accessoriesBg,
   setAccessoriesBg,
 }: BlockImagesCardProps) {
-  const applyPreset = (preset: (typeof PRESETS)[number]) => {
-    setWarmupBg(preset.warmup);
-    setStrengthBg(preset.strength);
-    setMetconBg(preset.metcon);
-    setAccessoriesBg(preset.accessories);
-    localStorage.setItem("nexus_bg_warmup", preset.warmup);
-    localStorage.setItem("nexus_bg_strength", preset.strength);
-    localStorage.setItem("nexus_bg_metcon", preset.metcon);
-    localStorage.setItem("nexus_bg_accessories", preset.accessories);
+  const restoreLocalDefaults = () => {
+    setWarmupBg(LOCAL_DEFAULTS.warmup);
+    setStrengthBg(LOCAL_DEFAULTS.strength);
+    setMetconBg(LOCAL_DEFAULTS.metcon);
+    setAccessoriesBg(LOCAL_DEFAULTS.accessories);
+    localStorage.setItem("nexus_bg_warmup", LOCAL_DEFAULTS.warmup);
+    localStorage.setItem("nexus_bg_strength", LOCAL_DEFAULTS.strength);
+    localStorage.setItem("nexus_bg_metcon", LOCAL_DEFAULTS.metcon);
+    localStorage.setItem("nexus_bg_accessories", LOCAL_DEFAULTS.accessories);
   };
 
   const fields: {
@@ -75,10 +57,10 @@ export default function BlockImagesCard({
     set: (v: string) => void;
     key: string;
   }[] = [
-    { label: "Fondo calentamiento (URL)", value: warmupBg, set: setWarmupBg, key: "nexus_bg_warmup" },
-    { label: "Fondo fuerza / oly (URL)", value: strengthBg, set: setStrengthBg, key: "nexus_bg_strength" },
-    { label: "Fondo metcon (URL)", value: metconBg, set: setMetconBg, key: "nexus_bg_metcon" },
-    { label: "Fondo accesorios (URL)", value: accessoriesBg, set: setAccessoriesBg, key: "nexus_bg_accessories" },
+    { label: "Fondo calentamiento", value: warmupBg, set: setWarmupBg, key: "nexus_bg_warmup" },
+    { label: "Fondo fuerza / oly", value: strengthBg, set: setStrengthBg, key: "nexus_bg_strength" },
+    { label: "Fondo metcon", value: metconBg, set: setMetconBg, key: "nexus_bg_metcon" },
+    { label: "Fondo accesorios", value: accessoriesBg, set: setAccessoriesBg, key: "nexus_bg_accessories" },
   ];
 
   return (
@@ -106,26 +88,15 @@ export default function BlockImagesCard({
     >
       {enableThemedBackgrounds && (
         <div className="space-y-3">
-          <div className="space-y-1">
-            <div className={TXT.label}>Plantillas de gráficas temáticas</div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-              {PRESETS.map((preset) => (
-                <button
-                  key={preset.name}
-                  type="button"
-                  onClick={() => applyPreset(preset)}
-                  className="text-[9px] font-mono bg-[color:var(--color-card-2)] text-[color:var(--color-ink-2)] rounded-[var(--radius-tile)] p-1.5 hover:brightness-125 transition-all text-left flex flex-col justify-between h-[52px] cursor-pointer"
-                >
-                  <span className="font-bold text-white block truncate w-full">{preset.name}</span>
-                  <span className="text-[7.5px] text-[color:var(--color-label)] line-clamp-2 leading-tight">
-                    {preset.d}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={restoreLocalDefaults}
+            className="flex items-center gap-1.5 text-[9px] font-mono font-black uppercase tracking-wider bg-[color:var(--color-sem-cyan)]/10 text-[color:var(--color-sem-cyan)] hover:bg-[color:var(--color-sem-cyan)] hover:text-black transition-all px-3 py-1.5 rounded-[var(--radius-tile)] cursor-pointer"
+          >
+            <RotateCcw size={11} aria-hidden="true" /> Restaurar imágenes Nexus
+          </button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {fields.map((f) => (
               <div key={f.key} className="space-y-1">
                 <label className="text-[9px] text-[color:var(--color-label)] block font-mono uppercase">
