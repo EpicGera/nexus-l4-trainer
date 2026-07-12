@@ -13,7 +13,7 @@ import {
   Line,
 } from "recharts";
 import { ShieldAlert, TrendingUp } from "lucide-react";
-import { ACCENT_COLORS_MAP } from "../lib/constants";
+import { CHART } from "../lib/chartTheme";
 
 interface LogSet {
   weight: string;
@@ -140,14 +140,9 @@ export default function HistoryTable({ history }: HistoryTableProps) {
     );
   }, [rpeComparisonData]);
 
-  // Dynamically find current system accent color
-  const activeColor = useMemo(() => {
-    const savedColorId = localStorage.getItem("nexus_custom_accent_color");
-    if (savedColorId && ACCENT_COLORS_MAP[savedColorId]) {
-      return ACCENT_COLORS_MAP[savedColorId].color;
-    }
-    return "#1F51FF"; // default electric-blue
-  }, []);
+  // Color de dato del sistema (antes leía un selector de acento muerto que
+  // colapsaba a blanco/gris; ahora usa el cian de chartTheme directamente).
+  const activeColor = CHART.cyan;
 
   return (
     <div className="w-full mt-2">

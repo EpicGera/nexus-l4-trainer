@@ -39,16 +39,6 @@ export const WEEK_ACCENT_COLORS: Record<string, { color: string; shadow: string 
   w4: { color: "#DC2626", shadow: "0 0 0 1px rgba(220,38,38,0.35)" }, // deload marcada en rojo señal
 };
 
-// Claves legacy remapeadas a la paleta monocroma (blanco/grises + rojo señal).
-export const ACCENT_COLORS_MAP: Record<string, { color: string; shadow: string }> = {
-  "electric-blue": { color: "#FFFFFF", shadow: "0 0 0 1px rgba(255,255,255,0.25)" },
-  "neon-green": { color: "#FFFFFF", shadow: "0 0 0 1px rgba(255,255,255,0.25)" },
-  "royal-purple": { color: "#A3A3A3", shadow: "0 0 0 1px rgba(163,163,163,0.3)" },
-  "neon-pink": { color: "#DC2626", shadow: "0 0 12px 1px rgba(220,38,38,0.4)" },
-  "neon-orange": { color: "#DC2626", shadow: "0 0 12px 1px rgba(220,38,38,0.4)" },
-  "neon-cyan": { color: "#D4D4D4", shadow: "0 0 0 1px rgba(212,212,212,0.3)" },
-};
-
 // High-contrast, vibrant complementary colored bands in perfect dualistic balance with each week's glowing accent border
 export const WEEK_MID_BAND_COLORS: Record<
   string,

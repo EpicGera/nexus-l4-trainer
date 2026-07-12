@@ -83,7 +83,7 @@ export default function WorkoutBlockCard({
             style={{
               backgroundImage: `url('${backgroundImage}')`,
               backgroundSize: "cover",
-              backgroundPosition: "center 25%",
+              backgroundPosition: "center",
               opacity: 0.7,
             }}
           />

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { DayVariation, AthleteState, EnergySystem, BlockTimeDomain } from "../types/workout";
+import { DayVariation, EnergySystem, BlockTimeDomain } from "../types/workout";
 import {
   LoggedSet,
   MetconFormat,
@@ -21,7 +21,7 @@ import { getCleanExerciseName, isCueOrNote } from "../lib/historyUtils";
 import { resolveBlockItems } from "../lib/blockGrouping";
 import { parseSplits } from "../lib/tightGrouping";
 import { expandMetconWork } from "../lib/metconWork";
-import { getSuggestedRpe, getBiomechanicalTips } from "../lib/biomechanicsAdvisor";
+import { getSuggestedRpe } from "../lib/biomechanicsAdvisor";
 import { getOneRepMaxes, estimateOneRepMaxesFromLogs, resolveWmRange, wmRangeLabel, setOneRepMax } from "../lib/workingMax";
 import {
   ModalSheet,
@@ -263,17 +263,6 @@ export default function SessionWizard({
     return out;
   }, []);
 
-  // Athlete profile (level + gear) — drives the L4 biomechanics tips per station.
-  const athlete = useMemo<AthleteState>(() => {
-    try {
-      const saved = localStorage.getItem("nexus_athlete_state");
-      if (saved) return JSON.parse(saved) as AthleteState;
-    } catch {
-      /* storage restricted — fall through to the empty profile */
-    }
-    return { identity: "", level: "", restriction: "", condition: "", equipment: { grebas: "", amuleto: "", filtro: "" } };
-  }, []);
-
   // First metcon-bucket block — source of the prescribed-stimulus snapshot
   // attached to the logged metcon result (energy system / time domain).
   const metconBlock = useMemo(
@@ -328,7 +317,6 @@ export default function SessionWizard({
   const [inDist, setInDist] = useState("");
   const [inTime, setInTime] = useState("");
   const [inRpe, setInRpe] = useState<number | null>(8);
-  const [showGuide, setShowGuide] = useState(false); // L4 biomechanics tips toggle
   const [showKind, setShowKind] = useState(false); // "tipo de dato" reclassify toggle
 
   // metcon
@@ -461,7 +449,6 @@ export default function SessionWizard({
     if (!open) return;
     setStepIdx(0);
     setSealed(null);
-    setShowGuide(false);
     if (initialSession && initialSession.sets.length) {
       // Distribute the saved sets across stations sharing an exerciseId (e.g. the
       // two deadlift tiers each get half), so the athlete can fix them in place.
@@ -834,7 +821,6 @@ export default function SessionWizard({
           ? getSuggestedRpe(inW, max1RM)
           : null;
       const snapRpe = rpeSug ? Math.max(6, Math.min(10, Math.round(parseFloat(rpeSug.rpe)))) : null;
-      const tips = getBiomechanicalTips(activeStation.name, athlete);
       // Prescribed load from a "% WM" scheme + the athlete's 1RM (board shows the
       // same chip) — tap to drop the midpoint into the weight field.
       const wmRange =
@@ -857,37 +843,6 @@ export default function SessionWizard({
             </div>
             {activeStation.scheme && <Pill tone="accent">{activeStation.scheme}</Pill>}
           </div>
-          {tips.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowGuide((v) => !v)}
-                aria-expanded={showGuide}
-                className="w-full flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-neutral-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <span><span aria-hidden="true">⚕️</span> Guía L4 ({tips.length})</span>
-                <span className="ml-auto">{showGuide ? "▲" : "▼"}</span>
-              </button>
-              {showGuide && (
-                <ul className="mt-2 space-y-2">
-                  {tips.map((tip, i) => (
-                    <li
-                      key={i}
-                      className="text-[12px] font-condensed text-neutral-300 leading-relaxed border-l-2 border-electric-blue/40 pl-3"
-                    >
-                      {tip.split("**").map((part, j) =>
-                        j % 2 ? (
-                          <strong key={j} className="text-white">{part}</strong>
-                        ) : (
-                          <span key={j}>{part.replace(/\*/g, "")}</span>
-                        ),
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
           <div>
             <button
               type="button"

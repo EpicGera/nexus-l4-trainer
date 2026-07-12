@@ -32,13 +32,14 @@ import BrandInspirationAccordion from "./components/BrandInspirationAccordion";
 import HistoryTable from "./components/HistoryTable";
 import RpeAnalyticsPanel from "./components/RpeAnalyticsPanel";
 import ProfileSummaryCard from "./components/ProfileSummaryCard";
+import ProgramCalendarCard from "./components/ProgramCalendarCard";
+import StrengthMarksCard from "./components/StrengthMarksCard";
 import LensTabs from "./components/ui/LensTabs";
 import ShareCardOverlay from "./components/ShareCardOverlay";
 import WorkoutBlockCard from "./components/WorkoutBlockCard";
 import TelemetryBoard from "./components/TelemetryBoard";
 import ResetConfirmModal from "./components/ResetConfirmModal";
 import Toast from "./components/Toast";
-import ProfileModal from "./components/ProfileModal";
 import OnboardingWizard from "./components/OnboardingWizard";
 import RecapPanel from "./components/RecapPanel";
 import { needsOnboarding } from "./lib/athleteProfile";
@@ -131,7 +132,6 @@ import { tagChapterInspiration } from "./services/aiService";
 import {
   WEEK_COLOR_MAPPING,
   WEEK_ACCENT_COLORS,
-  ACCENT_COLORS_MAP,
   WEEK_MID_BAND_COLORS,
   resolveBlockBrand,
   MASTER_ACHIEVEMENTS,
@@ -225,7 +225,6 @@ export default function App() {
   });
   const [showResetModal, setShowResetModal] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
   // Onboarding de atleta nuevo: se auto-dispara la 1ª vez, cuando no hay
   // señales de uso previo (sin peso, sin 1RMs, sin sesiones).
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
@@ -254,17 +253,6 @@ export default function App() {
     handleToggleSync,
   } = useCloudSync(setCurrentWeek, setCurrentDayIndex);
 
-  const [tempAthlete, setTempAthlete] = useState<AthleteState>(() => {
-    const saved = localStorage.getItem("nexus_athlete_state");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // Fallback
-      }
-    }
-    return DEFAULT_ATHLETE;
-  });
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
@@ -273,11 +261,6 @@ export default function App() {
   // directly beneath it instead of scrolling away under it (Fase 7). Measured
   // inside ActiveDayHeader (a wrapper here would break its position:sticky).
   const [dayHeaderHeight, setDayHeaderHeight] = useState<number>(0);
-
-  // Selector de color de acento para la temática del panel clínico
-  const [customAccentColor, setCustomAccentColor] = useState<string>(() => {
-    return localStorage.getItem("nexus_custom_accent_color") || "default";
-  });
 
   // Mouse position and scroll tracker for #uiDayTitle reactive gradient backdrop
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
@@ -346,25 +329,25 @@ export default function App() {
     });
   };
 
-  // Background configurations & toggle setting
-  const [enableThemedBackgrounds, setEnableThemedBackgrounds] =
-    useState<boolean>(() => {
-      const saved = localStorage.getItem("nexus_enable_themed_backgrounds");
-      return saved !== "false"; // Default to true
-    });
-  const [warmupBg, setWarmupBg] = useState<string>(() => {
+  // Fondos temáticos de bloque: solo lectura desde acá (el picker vivía en el
+  // modal de perfil, eliminado — nexus_bg_* siguen pintando con sus defaults).
+  const [enableThemedBackgrounds] = useState<boolean>(() => {
+    const saved = localStorage.getItem("nexus_enable_themed_backgrounds");
+    return saved !== "false"; // Default to true
+  });
+  const [warmupBg] = useState<string>(() => {
     return (
       localStorage.getItem("nexus_bg_warmup") ||
       "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop"
     );
   });
-  const [strengthBg, setStrengthBg] = useState<string>(() => {
+  const [strengthBg] = useState<string>(() => {
     return (
       localStorage.getItem("nexus_bg_strength") ||
       "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop"
     );
   });
-  const [metconBg, setMetconBg] = useState<string>(() => {
+  const [metconBg] = useState<string>(() => {
     const saved = localStorage.getItem("nexus_bg_metcon");
     if (
       saved ===
@@ -377,7 +360,7 @@ export default function App() {
       "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop"
     );
   });
-  const [accessoriesBg, setAccessoriesBg] = useState<string>(() => {
+  const [accessoriesBg] = useState<string>(() => {
     const saved = localStorage.getItem("nexus_bg_accessories");
     if (
       saved ===
@@ -686,7 +669,6 @@ export default function App() {
         try {
           const parsed = JSON.parse(savedAthlete);
           setAthlete(parsed);
-          setTempAthlete(parsed);
         } catch (e) {
           console.error(e);
         }
@@ -1047,6 +1029,14 @@ export default function App() {
   const startEditingName = () => {
     setTempName(athlete.identity);
     setIsEditingName(true);
+  };
+
+  // Logo del header / accesos rápidos → Perfil & Bio, lente Perfil (antes abría
+  // el modal "Editar perfil", eliminado).
+  const openProfileTab = () => {
+    handleSetActiveSheetWithDirection(2);
+    setProfileLens("perfil");
+    localStorage.setItem("nexus_profile_lens", "perfil");
   };
 
   const saveName = () => {
@@ -1809,7 +1799,7 @@ export default function App() {
         realTime={realTime}
         handleToggleSync={handleToggleSync}
         activeDayName={activeWeekPlan?.days[currentDayIndex]?.name}
-        setShowProfileModal={setShowProfileModal}
+        onOpenProfile={openProfileTab}
         onHeightChange={setHeaderHeight}
       />
 
@@ -2748,8 +2738,13 @@ export default function App() {
               <>
                 <ProfileSummaryCard
                   athlete={athlete}
-                  onEdit={() => setShowProfileModal(true)}
+                  handleUpdateAthlete={handleUpdateAthlete}
+                  onRecalibrate={() => setShowOnboarding(true)}
                 />
+
+                <ProgramCalendarCard />
+
+                <StrengthMarksCard athlete={athlete} handleUpdateAthlete={handleUpdateAthlete} />
 
                 {/* Paleta de color de la programación (10 combinaciones únicas).
                     Se aplica al capítulo activo: acento, banda y gradiente del
@@ -2949,8 +2944,6 @@ export default function App() {
               manualSyncState={manualSyncState}
               setManualSyncState={setManualSyncState}
               setShowResetModal={setShowResetModal}
-              setShowProfileModal={setShowProfileModal}
-              setTempAthlete={setTempAthlete}
               handleExportLocalHistory={handleExportLocalHistory}
               handleExportLocalHistoryCSV={handleExportLocalHistoryCSV}
               activeColorSet={activeColorSet}
@@ -3091,29 +3084,6 @@ export default function App() {
           />
         )}
 
-        {showProfileModal && (
-          <ProfileModal
-            key="profile-modal"
-            onRecalibrate={() => setShowOnboarding(true)}
-            tempAthlete={tempAthlete}
-            setTempAthlete={setTempAthlete}
-            unlockedAchievements={unlockedAchievements}
-            customAccentColor={customAccentColor}
-            setCustomAccentColor={setCustomAccentColor}
-            enableThemedBackgrounds={enableThemedBackgrounds}
-            setEnableThemedBackgrounds={setEnableThemedBackgrounds}
-            warmupBg={warmupBg}
-            setWarmupBg={setWarmupBg}
-            strengthBg={strengthBg}
-            setStrengthBg={setStrengthBg}
-            metconBg={metconBg}
-            setMetconBg={setMetconBg}
-            accessoriesBg={accessoriesBg}
-            setAccessoriesBg={setAccessoriesBg}
-            handleUpdateAthlete={handleUpdateAthlete}
-            onClose={() => setShowProfileModal(false)}
-          />
-        )}
       </AnimatePresence>
 
       {/* 9. DECORATION COMPACT FOOTER — pb clears the floating buttons. */}

@@ -10,7 +10,8 @@ interface NavigationHeaderProps {
   realTime: Date;
   handleToggleSync: () => void;
   activeDayName?: string;
-  setShowProfileModal: (show: boolean) => void;
+  /** Navega a Perfil & Bio → lente Perfil (antes abría el modal "Editar perfil"). */
+  onOpenProfile: () => void;
   onHeightChange?: (height: number) => void;
 }
 
@@ -22,7 +23,7 @@ export default function NavigationHeader({
   realTime,
   handleToggleSync,
   activeDayName,
-  setShowProfileModal,
+  onOpenProfile,
   onHeightChange,
 }: NavigationHeaderProps) {
   const sheets = [
@@ -90,7 +91,7 @@ export default function NavigationHeader({
         <div className="flex w-full xl:w-auto justify-between items-center gap-1 flex-wrap">
           <div
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer"
-            onClick={() => setShowProfileModal(true)}
+            onClick={onOpenProfile}
           >
             <img src="/logo.svg" alt="Nexus L4 Emblem" className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] shrink-0 -rotate-3" />
             <div className="border-l-2 border-white/40 px-1 sm:px-3 py-0.5 sm:py-1 transition-colors">

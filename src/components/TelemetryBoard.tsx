@@ -46,8 +46,6 @@ interface TelemetryBoardProps {
   manualSyncState: "idle" | "syncing" | "success" | "error";
   setManualSyncState: React.Dispatch<React.SetStateAction<"idle" | "syncing" | "success" | "error">>;
   setShowResetModal: (show: boolean) => void;
-  setShowProfileModal: (show: boolean) => void;
-  setTempAthlete: (athlete: AthleteState) => void;
   handleExportLocalHistory: () => void;
   handleExportLocalHistoryCSV: () => void;
   activeColorSet: { color: string; hover?: string; pulse?: string; text?: string; shadow?: string };
@@ -64,8 +62,6 @@ export default function TelemetryBoard({
   manualSyncState,
   setManualSyncState,
   setShowResetModal,
-  setShowProfileModal,
-  setTempAthlete,
   handleExportLocalHistory,
   handleExportLocalHistoryCSV,
 }: TelemetryBoardProps) {
@@ -360,7 +356,7 @@ export default function TelemetryBoard({
         <SectionCard
           title="ATLETA"
           icon={<UserCheck size={15} className="text-cyan-300" />}
-          subtitle="Tu identidad y estado clínico"
+          subtitle="Editable en Perfil & Bio → Perfil"
         >
           <div className="space-y-3">
             <div>
@@ -370,26 +366,11 @@ export default function TelemetryBoard({
               </div>
             </div>
             <div>
-              <div className={TXT.label}>CONDICIÓN CLÍNICA</div>
-              <div className="text-[12px] font-condensed font-bold text-amber-400 leading-snug">
-                {athlete.condition}
-              </div>
-            </div>
-            <div>
               <div className={TXT.label}>RESTRICCIÓN ACTIVA</div>
               <div className="text-[12px] font-condensed font-bold text-neutral-300 leading-snug">
                 {athlete.restriction}
               </div>
             </div>
-            <NexusButton
-              variant="ghost"
-              onClick={() => {
-                setTempAthlete(athlete);
-                setShowProfileModal(true);
-              }}
-            >
-              ⚙️ EDITAR PERFIL COMPLETO
-            </NexusButton>
           </div>
         </SectionCard>
 

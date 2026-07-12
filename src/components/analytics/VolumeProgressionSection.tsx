@@ -11,7 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { Dumbbell, FileText } from "lucide-react";
-import { ACCENT_COLORS_MAP, WEEK_ACCENT_COLORS } from "../../lib/constants";
+import { WEEK_ACCENT_COLORS } from "../../lib/constants";
 import { SectionCard, Pill, StatBox, EmptyState, NexusButton, TXT } from "../ui/primitives";
 import { CHART } from "../../lib/chartTheme";
 
@@ -86,11 +86,9 @@ export default function VolumeProgressionSection({
   const isW4Overdoing =
     !!deload && deload.volume > 0 && loadAvg > 0 && deload.volume > loadAvg * 0.75;
 
-  let accentColor = "#FFFFFF";
-  const savedColorId = localStorage.getItem("nexus_custom_accent_color");
-  if (savedColorId && ACCENT_COLORS_MAP[savedColorId]) {
-    accentColor = ACCENT_COLORS_MAP[savedColorId].color;
-  }
+  // Color de dato del sistema (antes leía un selector de acento muerto que
+  // colapsaba a blanco/gris; ahora usa el cian de chartTheme directamente).
+  const accentColor = CHART.cyan;
 
   return (
     <div className="space-y-5">
