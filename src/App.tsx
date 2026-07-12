@@ -1427,9 +1427,9 @@ export default function App() {
             ref={exportFileInputRef}
             onChange={handleBgImageUpload}
           />
-          {/* Flotantes, esquina inferior derecha — mismo tamaño que ANOTAR WOD
-              y DÍA PERDIDO (bottom-left). */}
-          <div className="fixed bottom-[4.5rem] right-5 z-[90] flex overflow-hidden rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)]">
+          {/* Flotante, centrado abajo — misma fila que ANOTAR WOD (izquierda)
+              y DÍA PERDIDO (derecha). */}
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[90] flex overflow-hidden rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)]">
             <button
               type="button"
               onClick={handleExportDayJPG}

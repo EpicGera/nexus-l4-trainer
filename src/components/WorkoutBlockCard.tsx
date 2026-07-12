@@ -77,7 +77,10 @@ export default function WorkoutBlockCard({
       onTouchEnd={handleVariationTouchEnd}
     >
       {enableThemedBackgrounds && (
-        <div className="absolute inset-x-0 top-0 h-[380px] pointer-events-none z-0">
+        // Llena TODA la tarjeta (antes era una franja fija de 380px arriba).
+        // Scrim más oscuro y parejo en toda la altura para que el texto siga
+        // legible incluso en tarjetas altas (isColumns puede pasar 680px).
+        <div className="absolute inset-0 pointer-events-none z-0">
           <div
             className="absolute inset-0 transition-opacity duration-300"
             style={{
@@ -87,7 +90,7 @@ export default function WorkoutBlockCard({
               opacity: 0.7,
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/10 via-zinc-950/70 to-zinc-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/55 via-zinc-950/78 to-zinc-950/92" />
         </div>
       )}
 
