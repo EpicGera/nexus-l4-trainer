@@ -4,9 +4,11 @@
 
 import { BlockBucket } from "../types/workout";
 
+// Tokens de DESIGN.md, no hex sueltos: mismo mapeo mono+acento, ahora
+// trazable a --color-label / --color-ink / --color-sem-red.
 export const BUCKET_COLOR: Record<BlockBucket, string> = {
-  warmup: "#71717A",      // gris — preparación, bajo énfasis
-  strength: "#FAFAFA",    // blanco — el trabajo principal
-  metcon: "#DC2626",      // acento — el estímulo que define el día
-  accessories: "#A1A1AA", // gris claro — soporte
+  warmup: "var(--color-ink-faint)",  // gris — preparación, bajo énfasis
+  strength: "var(--color-ink)",      // blanco — el trabajo principal
+  metcon: "var(--color-sem-red)",    // acento — el estímulo que define el día (intensidad)
+  accessories: "var(--color-label)", // gris claro — soporte
 };

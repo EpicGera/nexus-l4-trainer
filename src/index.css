@@ -10,7 +10,7 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-brutalist: "Anton", "Impact", sans-serif;
-  --font-condensed: "Roboto Condensed", sans-serif;
+  --font-condensed: "Inter", ui-sans-serif, system-ui, sans-serif; /* Mapped to Inter to reduce font clash */
   --font-hand: "Caveat", "Segoe Print", cursive;
 
   /* ── Paleta base del revamp ─────────────────────────────────────────── */

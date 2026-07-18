@@ -1,0 +1,3215 @@
+﻿import React, { useState, useEffect, useMemo, useRef } from "react";
+import { svgIcons } from "./components/icons/BlockIcons";
+import { getCleanExerciseName } from "./lib/historyUtils";
+import { AthleteState, Database, ProgramBlock } from "./types/workout";
+import { INTENTION_META, GEAR_LABEL } from "./lib/blockMeta";
+import { ensureChaptersInitialized, createChapter, getActiveChapter, getActiveChapterId, updateChapterMeta, ChapterTheme, THEME_PALETTES } from "./lib/chapterStore";
+import { loadCustomFont } from "./lib/customFont";
+import { SYSTEM_VERSION, SYSTEM_NAME, SYSTEM_TAGLINE } from "./lib/version";
+import { getProgramTodayPosition } from "./lib/programStart";
+import { getDayReward } from "./lib/sideQuests";
+import { useSideQuests } from "./hooks/useSideQuests";
+import { useCloudSync } from "./hooks/useCloudSync";
+import { useSheetSwipe } from "./hooks/useSheetSwipe";
+import { useVariationSwipe } from "./hooks/useVariationSwipe";
+import { useExportPanel } from "./hooks/useExportPanel";
+import {
+  fetchWorkoutsFromSheet,
+  loadCachedWorkouts,
+  saveCachedWorkouts,
+  backfillLocalLogsFromDatabase,
+  getDefaultProgram,
+  isUsingCustomSheet,
+} from "./lib/sheetImport";
+import { deriveDayGoal } from "./lib/missionEngine";
+import guiaDiaEspecial from "../docs/GUIA-dia-especial.md?raw";
+import Confetti from "./components/Confetti";
+import { AchievementNotification } from "./components/AchievementNotification";
+import WorkoutTimer from "./components/WorkoutTimer";
+import BrzyckiCalculator from "./components/BrzyckiCalculator";
+import NavigationHeader from "./components/NavigationHeader";
+import BrandInspirationAccordion from "./components/BrandInspirationAccordion";
+import HistoryTable from "./components/HistoryTable";
+import RpeAnalyticsPanel from "./components/RpeAnalyticsPanel";
+import ProfileSummaryCard from "./components/ProfileSummaryCard";
+import ProgramCalendarCard from "./components/ProgramCalendarCard";
+import StrengthMarksCard from "./components/StrengthMarksCard";
+import BlockImagesCard from "./components/BlockImagesCard";
+import LensTabs from "./components/ui/LensTabs";
+import ShareCardOverlay from "./components/ShareCardOverlay";
+import WorkoutBlockCard from "./components/WorkoutBlockCard";
+import TelemetryBoard from "./components/TelemetryBoard";
+import ResetConfirmModal from "./components/ResetConfirmModal";
+import Toast from "./components/Toast";
+import OnboardingWizard from "./components/OnboardingWizard";
+import RecapPanel from "./components/RecapPanel";
+import { needsOnboarding } from "./lib/athleteProfile";
+import { getOneRepMaxes } from "./lib/workingMax";
+import { loadSessions } from "./lib/sessionStore";
+import ExportCustomizationPanel from "./components/ExportCustomizationPanel";
+import WarriorScreen from "./components/WarriorScreen";
+import SessionWizard from "./components/SessionWizard";
+import { ProgressBar, CoachNote, SectionCard } from "./components/ui/primitives";
+import { computeCoachNotes, noteFor } from "./lib/coachNotes";
+import { BUCKET_COLOR } from "./lib/buckets";
+import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
+import { parseSpecialDay, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation, SPECIAL_TAB } from "./lib/specialDay";
+import { getMonthlyVolumeStats } from "./lib/exportService";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  AreaChart,
+  Area,
+  ComposedChart,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Legend,
+} from "recharts";
+import {
+  CheckCircle2,
+  Sparkles,
+  Award,
+  Upload,
+  FileText,
+  Check,
+  RotateCcw,
+  Edit2,
+  Zap,
+  Trophy,
+  ShieldAlert,
+  BadgeCheck,
+  Dices,
+  Dumbbell,
+  TrendingUp,
+  UserCheck,
+  LayoutDashboard,
+  Camera,
+  Share2,
+  Settings2,
+  ChevronDown,
+  List,
+  Columns,
+  Rows3,
+  CloudLightning,
+  ShieldCheck,
+  LogOut,
+  Clock,
+  Users,
+  X,
+  Maximize,
+  MousePointer2,
+  Music,
+  Film,
+  Swords,
+  Pencil,
+  Palette,
+} from "lucide-react";
+
+// Firebase core & sync integration
+import { auth, googleProvider, googleSignIn, getAccessToken } from "./lib/firebase";
+import { signInWithPopup, signOut } from "firebase/auth";
+import { pushAllLocalToCloud } from "./lib/syncEngine";
+import { getAutoFollow, setAutoFollow, DayStatus, readDayStatus } from "./lib/storageKeys";
+import { pushAthleteStats } from "./lib/athleteStats";
+import { exportToGoogleSheets } from "./lib/sheets";
+
+// Custom extracted components to optimize monolith App.tsx size
+import DailyMissionPanel from "./components/DailyMissionPanel";
+import ActiveDayHeader from "./components/ActiveDayHeader";
+import CloudSyncPanel from "./components/CloudSyncPanel";
+import { tagChapterInspiration } from "./services/aiService";
+import {
+  WEEK_COLOR_MAPPING,
+  WEEK_ACCENT_COLORS,
+  WEEK_MID_BAND_COLORS,
+  resolveBlockBrand,
+  MASTER_ACHIEVEMENTS,
+} from "./lib/constants";
+
+// Neutral defaults for a fresh install — each athlete sets their own profile.
+const DEFAULT_ATHLETE: AthleteState = {
+  identity: "ATLETA NEXUS",
+  level: "Atleta de Box // En Progresión ⚡",
+  restriction: "RPE 8/10 MÁX (Control Biomecánico Sano)",
+  condition: "Listo para entrenar",
+  equipment: {
+    grebas: "Rodilleras de Neoprene",
+    amuleto: "Calleras",
+    filtro: "Muñequeras",
+  },
+};
+
+const formatItemWithTeamVolume = (itemText: string, size: number) => {
+  return itemText;
+};
+
+// Adaptive grid column count for the "GRILLA" full-program view (up to 6).
+// Static literals so Tailwind v4 keeps these classes in the build.
+const FULLVIEW_XL_COLS: Record<number, string> = {
+  1: "xl:grid-cols-1",
+  2: "xl:grid-cols-2",
+  3: "xl:grid-cols-3",
+  4: "xl:grid-cols-4",
+  5: "xl:grid-cols-5",
+  6: "xl:grid-cols-6",
+};
+
+export default function App() {
+  // --- STATE ---
+  const [realTime, setRealTime] = useState(new Date());
+
+  const [currentWeek, setCurrentWeek] = useState<string>(() => {
+    if (getAutoFollow()) {
+      // posición REAL del programa (ancla del capítulo), no semana calendario
+      return getProgramTodayPosition().week;
+    }
+    const saved = localStorage.getItem("nexus_current_week_slug");
+    return saved && ["w1", "w2", "w3", "w4"].includes(saved) ? saved : "w2";
+  });
+
+  const [currentDayIndex, setCurrentDayIndex] = useState<number>(() => {
+    if (getAutoFollow()) {
+      return getProgramTodayPosition().dayIndex;
+    }
+    const saved = localStorage.getItem("nexus_current_day_idx");
+    return saved ? Math.max(0, Math.min(6, parseInt(saved, 10))) : 0;
+  });
+
+  // Active chapter theme — drives the app-wide accent so each chapter has its own
+  // emphasis color (Fase 2). Refreshed on chapter change / cloud sync.
+  const [chapterTheme, setChapterTheme] = useState<ChapterTheme | null>(
+    () => getActiveChapter()?.theme || null,
+  );
+  const [teamSize, setTeamSize] = useState<number>(() => {
+    const saved = localStorage.getItem("nexus_team_size");
+    return saved ? Math.max(1, Math.min(4, parseInt(saved, 10))) : 1;
+  });
+  const [desktopLayout, setDesktopLayout] = useState<"sidebar" | "grid" | "papiro">(
+    () => {
+      const saved = localStorage.getItem("nexus_desktop_layout");
+      if (saved === "sidebar" || saved === "grid" || saved === "papiro") return saved;
+      if (saved === "columns") return "grid"; // migrate the old obsolete 4-column view
+      return "sidebar";
+    },
+  );
+  const [activeBlockTab, setActiveBlockTab] = useState<
+    "warmup" | "strength" | "metcon" | "accessories"
+  >("warmup");
+  // Active tab key for the flexible-block sidebar (programs with blocks[]).
+  const [activeFlexKey, setActiveFlexKey] = useState<string>("");
+  const [rpeViewMode, setRpeViewMode] = useState<"full" | "condensed">("full");
+  const [trainingCycle, setTrainingCycle] = useState<
+    "fase1" | "fase2" | "fase3"
+  >("fase1");
+  const [athlete, setAthlete] = useState<AthleteState>(() => {
+    const saved = localStorage.getItem("nexus_athlete_state");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // Fallback
+      }
+    }
+    return DEFAULT_ATHLETE;
+  });
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  // Onboarding de atleta nuevo: se auto-dispara la 1ª vez, cuando no hay
+  // señales de uso previo (sin peso, sin 1RMs, sin sesiones).
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
+    try {
+      return needsOnboarding({
+        hasBodyweight: !!localStorage.getItem("nexus_bodyweight_kg"),
+        hasOneRm: Object.keys(getOneRepMaxes()).length > 0,
+        hasSessions: loadSessions().length > 0,
+      });
+    } catch {
+      return false;
+    }
+  });
+  const [profileLens, setProfileLens] = useState<"perfil" | "datos" | "logros">(
+    () => (localStorage.getItem("nexus_profile_lens") as "perfil" | "datos" | "logros") || "perfil",
+  );
+  const {
+    currentUser,
+    isCloudSyncing,
+    setIsCloudSyncing,
+    syncStatus,
+    syncWithRealTime,
+    setSyncWithRealTime,
+    manualSyncState,
+    setManualSyncState,
+    handleToggleSync,
+  } = useCloudSync(setCurrentWeek, setCurrentDayIndex);
+
+
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState("");
+  const [headerHeight, setHeaderHeight] = useState<number>(115);
+  // Measured height of the sticky day-title band, so the variation tabs can pin
+  // directly beneath it instead of scrolling away under it (Fase 7). Measured
+  // inside ActiveDayHeader (a wrapper here would break its position:sticky).
+  const [dayHeaderHeight, setDayHeaderHeight] = useState<number>(0);
+
+  // Mouse position and scroll tracker for #uiDayTitle reactive gradient backdrop
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Gamified achievements states
+  const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>(
+    () => {
+      const saved = localStorage.getItem("nexus_unlocked_achievements");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+      return [];
+    },
+  );
+  const [activeAchievement, setActiveAchievement] = useState<{
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    rarity: string;
+    color: string;
+  } | null>(null);
+
+  const checkAndUnlockAchievement = (id: string) => {
+    setUnlockedAchievements((prev) => {
+      if (prev.includes(id)) return prev;
+      const next = [...prev, id];
+      
+      // Defer side effects outside the react state update/render lifecycle
+      setTimeout(() => {
+        localStorage.setItem("nexus_unlocked_achievements", JSON.stringify(next));
+
+        const found = MASTER_ACHIEVEMENTS.find((a) => a.id === id);
+        if (found) {
+          // Trigger screen pop for exactly 3 seconds as requested
+          setActiveAchievement(found);
+          setTimeout(() => {
+            setActiveAchievement(null);
+          }, 3000);
+
+          // Toast de logro (antes iba al overlay del CoachChat, ya retirado).
+          window.dispatchEvent(
+            new CustomEvent("nexus_toast", {
+              detail: {
+                message: `¡Meta Alcanzada! Desbloqueaste la insignia: ${found.title}`,
+                kind: "success",
+                durationMs: 5000,
+              },
+            }),
+          );
+        }
+      }, 0);
+
+      return next;
+    });
+  };
+
+  // Fondos temáticos de bloque: imágenes propias en public/images/ (no más
+  // URLs de Unsplash). El picker vive en Perfil & Bio → Perfil (BlockImagesCard).
+  // Migración: cualquier valor guardado que sea una URL vieja de Unsplash se
+  // pisa con el default local — el usuario nunca eligió esas, eran un fallback.
+  const localOr = (key: string, file: string) => {
+    const saved = localStorage.getItem(key);
+    return saved && !saved.startsWith("https://images.unsplash.com") ? saved : `/images/${file}`;
+  };
+  const [enableThemedBackgrounds, setEnableThemedBackgrounds] =
+    useState<boolean>(() => {
+      const saved = localStorage.getItem("nexus_enable_themed_backgrounds");
+      return saved !== "false"; // Default to true
+    });
+  const [warmupBg, setWarmupBg] = useState<string>(() => localOr("nexus_bg_warmup", "warmup_bg.png"));
+  const [strengthBg, setStrengthBg] = useState<string>(() => localOr("nexus_bg_strength", "strength_bg.png"));
+  const [metconBg, setMetconBg] = useState<string>(() => localOr("nexus_bg_metcon", "metcon_bg.png"));
+  const [accessoriesBg, setAccessoriesBg] = useState<string>(() => localOr("nexus_bg_accessories", "accessories_bg.png"));
+
+  // Completed state tracking. Tres estados por día: "completed" (registrado),
+  // "missed" (día perdido, cerrado sin datos) o ausente (pendiente). Persistido
+  // en la clave bare `w1d1` como "true" | "missed" (rueda por el sync engine).
+  const [completedDays, setCompletedDays] = useState<Record<string, DayStatus>>(
+    () => {
+      const result: Record<string, DayStatus> = {};
+      ["w1", "w2", "w3", "w4"].forEach((week) => {
+        for (let d = 1; d <= 7; d++) {
+          const dayId = `${week}d${d}`;
+          result[dayId] = readDayStatus(localStorage.getItem(dayId));
+        }
+      });
+      return result;
+    },
+  );
+
+  const activeColorSet = useMemo(() => {
+    // Chapter accent drives the global emphasis color (--color-electric-blue);
+    // fall back to the per-week palette when no chapter theme is available.
+    if (chapterTheme?.accent) {
+      return { color: chapterTheme.accent, shadow: `0 0 15px 2px ${chapterTheme.accent}99` };
+    }
+    return WEEK_ACCENT_COLORS[currentWeek] || WEEK_ACCENT_COLORS.w2;
+  }, [chapterTheme, currentWeek]);
+
+  const midBandColor = useMemo(() => {
+    if (chapterTheme?.band) {
+      // La banda es SIEMPRE fondo oscuro + texto blanco: el titleGradient
+      // (que puede ser claro) es para texto de título, no para fondo — usarlo
+      // como bg producía blanco-sobre-blanco. Deriva un gradiente oscuro del band.
+      const band = /^#f/i.test(chapterTheme.band) ? "#141414" : chapterTheme.band;
+      return {
+        bg: band,
+        text: "#ffffff",
+        bgStyle: { background: `linear-gradient(90deg, ${band} 0%, #0A0A0A 100%)` },
+      };
+    }
+    return WEEK_MID_BAND_COLORS[currentWeek] || WEEK_MID_BAND_COLORS.w2;
+  }, [chapterTheme, currentWeek]);
+
+  // El usuario elige la paleta de color de su programación: se persiste en el
+  // capítulo activo y refresca el acento global (accent/banda/gradiente del título).
+  const applyPalette = (theme: ChapterTheme) => {
+    updateChapterMeta(getActiveChapterId(), { theme });
+    setChapterTheme(theme);
+  };
+
+  const activeBgColorClass = useMemo(() => {
+    return WEEK_COLOR_MAPPING[currentWeek] || "bg-neon-pink";
+  }, [currentWeek]);
+
+  const stats = useMemo(() => {
+    return getMonthlyVolumeStats();
+  }, [completedDays]);
+
+  const globalRpeAvg = useMemo(() => {
+    let totalPoints = 0;
+    let totalCount = 0;
+    Object.keys(stats.weeklyRpeSum).forEach((wk) => {
+      totalPoints += stats.weeklyRpeSum[wk];
+      totalCount += stats.weeklyRpeCount[wk];
+    });
+    return totalCount > 0 ? totalPoints / totalCount : 0;
+  }, [stats]);
+
+  // Workout program: defaults to the codegen'd snapshot, but can be refreshed
+  // live from the Google Sheet (cached to localStorage across reloads).
+  const [database, setDatabase] = useState<Database>(
+    () => loadCachedWorkouts() || getDefaultProgram(),
+  );
+  
+  // Auto-extract historical logs from imported program text to feed the analytics charts
+  useEffect(() => {
+    backfillLocalLogsFromDatabase(database);
+    // Sesiones viejas: expandir su metcon (prescripción × rondas reales) para
+    // que el cardio ya registrado entre al análisis retroactivamente, y
+    // reparar snapshots clasificados por el deriva viejo (total vs esfuerzo).
+    repairMetconSnapshots(database);
+    backfillMetconDerivedSets(database);
+  }, [database]);
+
+  // The Google Sheet is the source of truth for what's been done: a day with
+  // logged RPE comes back as `isCompleted`. Reflect that in the UI's completed
+  // map (union only — never un-complete a day the athlete marked locally) and
+  // persist it so it survives reloads and roams via the sync engine.
+  useEffect(() => {
+    setCompletedDays((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      Object.values(database).forEach((week) => {
+        week.days.forEach((day) => {
+          // Un día con RPE registrado en la hoja está completado — pisa incluso
+          // un "missed" previo (había datos reales, estaba mal marcado perdido).
+          if (day.isCompleted && next[day.id] !== "completed") {
+            next[day.id] = "completed";
+            try {
+              localStorage.setItem(day.id, "true");
+            } catch {
+              /* storage restricted — ignore */
+            }
+            changed = true;
+          }
+        });
+      });
+      return changed ? next : prev;
+    });
+  }, [database]);
+
+  const [isRefreshingSheet, setIsRefreshingSheet] = useState(false);
+
+  const activeWeekPlan = database[currentWeek];
+  const activeDay = activeWeekPlan?.days[currentDayIndex];
+
+  // La ESPECIAL suplanta al día programado: si existe, es la pestaña por defecto.
+  const specialIdx = activeDay?.variations.findIndex((v) => v.tabName === SPECIAL_TAB) ?? -1;
+
+  const {
+    currentVariationIndex,
+    setCurrentVariationIndex,
+    handleVariationTouchStart,
+    handleVariationTouchMove,
+    handleVariationTouchEnd,
+  } = useVariationSwipe(
+    currentWeek,
+    currentDayIndex,
+    activeDay?.variations.length || 0,
+    specialIdx >= 0 ? specialIdx : 0,
+  );
+
+  const activeVariation =
+    activeDay?.variations[currentVariationIndex] || activeDay?.variations[0];
+
+  const {
+    dailyGoals,
+    setDailyGoals,
+    sideQuests,
+    setSideQuests,
+    isGeneratingQuest,
+    lightningFlash,
+    setLightningFlash,
+    totalSideQuestXp,
+    earnedLootList,
+    dayTitleAlertTrigger,
+    handleFetchSideQuest,
+    handleAutoValidate,
+    handleResetQuest,
+  } = useSideQuests(
+    activeDay,
+    activeVariation,
+    checkAndUnlockAchievement,
+    database?.[currentWeek]?.meta,
+  );
+
+  const handleRefreshFromSheet = async () => {
+    setIsRefreshingSheet(true);
+    try {
+      const fresh = await fetchWorkoutsFromSheet();
+      setDatabase(fresh);
+      saveCachedWorkouts(fresh);
+      window.dispatchEvent(new Event("nexus_logs_updated"));
+    } catch (e: any) {
+      console.error("Refresh from sheet failed:", e);
+      alert(e?.message || "No se pudo refrescar desde la hoja.");
+    } finally {
+      setIsRefreshingSheet(false);
+    }
+  };
+
+
+  const {
+    isExportingJPG,
+    setIsExportingJPG,
+    isExportingSheets,
+    setIsExportingSheets,
+    showStoryMenu,
+    setShowStoryMenu,
+    exportBgImage,
+    setExportBgImage,
+    exportLayout,
+    setExportLayout,
+    exportVerticalLayout,
+    setExportVerticalLayout,
+    exportCardWidth,
+    setExportCardWidth,
+    exportAthleteName,
+    setExportAthleteName,
+    exportInspiration,
+    setExportInspiration,
+    exportCardBlur,
+    setExportCardBlur,
+    exportCardOpacity,
+    setExportCardOpacity,
+    exportTheme,
+    setExportTheme,
+    exportPhotoFilter,
+    setExportPhotoFilter,
+    exportCardHeightLimit,
+    setExportCardHeightLimit,
+    isFullscreenPreview,
+    setIsFullscreenPreview,
+    blockPositions,
+    setBlockPositions,
+    previewScale,
+    setPreviewScale,
+    storyVariation,
+    storyVariationTab,
+    setStoryVariationTab,
+    videoMode,
+    setVideoMode,
+    videoEffect,
+    setVideoEffect,
+    videoFx,
+    toggleVideoFx,
+    videoDurationSec,
+    setVideoDurationSec,
+    audioName,
+    audioBuffer,
+    audioOffsetSec,
+    setAudioOffsetSec,
+    handleAudioFile,
+    videoBgFile,
+    videoBgName,
+    videoBgUrl,
+    videoBgDurationSec,
+    clipExportSec,
+    videoLoop,
+    setVideoLoop,
+    isPreviewingAudio,
+    toggleAudioPreview,
+    handleVideoBgFile,
+    clearVideoBg,
+    isExportingVideo,
+    videoProgress,
+    handleExportDayVideo,
+    exportFileInputRef,
+    cameraInputRef,
+    handleTakePhoto,
+    isFxProcessing,
+    handleMonthTextExport,
+    handleExportGoogleSheets,
+    handleBatchPDFExport,
+    handleGenerateMonthlyReportPDF,
+    handleBgImageUpload,
+    handleExportDayJPG,
+    handleExportDayMarkdown,
+    handleExportLocalHistory,
+    handleExportLocalHistoryCSV,
+  } = useExportPanel(athlete, currentWeek, completedDays, activeDay, activeVariation);
+
+  const getDerivedInspiration = (tabName: string) => {
+    const upper = tabName.toUpperCase();
+    if (
+      upper.includes("HAEDO") ||
+      upper.includes("LUK") ||
+      upper.includes("BALDE")
+    )
+      return "HAEDO INSPIRED";
+    if (upper.includes("SAN JUSTO") || upper.includes("VALENTIN"))
+      return "MAYHEM INSPIRED";
+    if (upper.includes("MODO SOLO")) return "PRVN INSPIRED";
+    if (upper.includes("MURPH")) return "HERO WOD INSPIRED";
+    return "PRVN / HWPO INSPIRED";
+  };
+
+  // --- INTRO GLITCH ---
+  const [isIntroGlitching, setIsIntroGlitching] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsIntroGlitching(false);
+    }, 850);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const reloadAllLocalStorageState = () => {
+      const checkSync = getAutoFollow();
+      setSyncWithRealTime(checkSync);
+
+      // Refresh the active chapter theme so the app-wide accent follows the
+      // chapter (this handler runs on nexus_chapter_changed and cloud sync).
+      setChapterTheme(getActiveChapter()?.theme || null);
+
+      // NOTE: do NOT re-derive currentWeek/currentDayIndex here. This handler
+      // runs on every `nexus_cloud_synced` (the realtime Firestore listener
+      // fires periodically), so recomputing the week/day from `now` would yank
+      // the user's manual navigation back to "today" mid-session — the bug where
+      // scrolling week 3/4 snapped to w2d1. The initial week/day is set once by
+      // the useState initializers; manual nav and the sync toggle own it after.
+
+      const savedAthlete = localStorage.getItem("nexus_athlete_state");
+      if (savedAthlete) {
+        try {
+          const parsed = JSON.parse(savedAthlete);
+          setAthlete(parsed);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Reload completed days with the same defaults as the initial mount
+      const completed: Record<string, DayStatus> = {};
+      ["w1", "w2", "w3", "w4"].forEach((week) => {
+        for (let d = 1; d <= 7; d++) {
+          const dayId = `${week}d${d}`;
+          completed[dayId] = readDayStatus(localStorage.getItem(dayId));
+        }
+      });
+      setCompletedDays(completed);
+
+      const savedGoals = localStorage.getItem("nexus_daily_goals");
+      if (savedGoals) {
+        try {
+          setDailyGoals(JSON.parse(savedGoals));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const savedQuests = localStorage.getItem("nexus_daily_quests_v2");
+      if (savedQuests) {
+        try {
+          setSideQuests(JSON.parse(savedQuests));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Pull the cloud-synced program into view (cross-device roaming): the
+      // sync engine writes nexus_workouts_override to localStorage, so reflect
+      // it in state here instead of waiting for a manual page reload.
+      const syncedProgram = loadCachedWorkouts();
+      if (syncedProgram) setDatabase(syncedProgram);
+
+      // Force logs visual logger re-renders
+      setLogsVersion((v) => v + 1);
+    };
+
+    // Initialize the chapter library (wraps any pre-existing program as c1) and
+    // reload board state whenever the active chapter changes (snapshot/restore).
+    ensureChaptersInitialized(JSON.stringify(loadCachedWorkouts() || getDefaultProgram()));
+    setChapterTheme(getActiveChapter()?.theme || null);
+    loadCustomFont(); // re-inject an admin-uploaded title font, if any
+    window.addEventListener("nexus_cloud_synced", reloadAllLocalStorageState);
+    window.addEventListener("nexus_chapter_changed", reloadAllLocalStorageState);
+    return () => {
+      window.removeEventListener(
+        "nexus_cloud_synced",
+        reloadAllLocalStorageState,
+      );
+      window.removeEventListener(
+        "nexus_chapter_changed",
+        reloadAllLocalStorageState,
+      );
+    };
+  }, []);
+
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const [logsVersion, setLogsVersion] = useState(0);
+  const [confettiTrigger, setConfettiTrigger] = useState<number>(0);
+  const [rpeTrendRange, setRpeTrendRange] = useState<number>(30);
+  const [lastLoggingPercentage, setLastLoggingPercentage] = useState<number>(0);
+  const [completedCompExercises, setCompletedCompExercises] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [showRpeDemo, setShowRpeDemo] = useState<boolean>(true);
+
+  const {
+    activeSheet,
+    transitionDirection,
+    handleNextSheet,
+    handlePrevSheet,
+    handleSetActiveSheetWithDirection,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useSheetSwipe();
+
+  useEffect(() => {
+    const handleLogsUpdate = () => {
+      setLogsVersion((prev) => prev + 1);
+    };
+    window.addEventListener("nexus_logs_updated", handleLogsUpdate);
+    window.addEventListener("storage", handleLogsUpdate);
+    return () => {
+      window.removeEventListener("nexus_logs_updated", handleLogsUpdate);
+      window.removeEventListener("storage", handleLogsUpdate);
+    };
+  }, []);
+
+  // Real-time dynamic stopwatch tick
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRealTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Keep the canonical athlete-stats doc (users/{uid}/profile/stats) fresh:
+  // debounce-push whenever training data changes and a user is signed in.
+  useEffect(() => {
+    if (!currentUser) return;
+    const timer = setTimeout(() => {
+      pushAthleteStats(currentUser.uid).catch((e) =>
+        console.warn("No se pudo actualizar el perfil de stats:", e),
+      );
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [currentUser, logsVersion, completedDays, unlockedAchievements, sideQuests, athlete]);
+
+  // On sign-in, pull the latest program + completion state from the athlete's
+  // linked Google Sheet so previously completed days appear automatically.
+  // Only runs when the user explicitly linked their own sheet (opt-in) and a
+  // token is already granted — so we never read a shared/default sheet and
+  // never force a second popup. The manual "Refrescar" button can prompt.
+  useEffect(() => {
+    if (!currentUser || !isUsingCustomSheet()) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token || cancelled) return;
+        const fresh = await fetchWorkoutsFromSheet();
+        if (cancelled) return;
+        setDatabase(fresh);
+        saveCachedWorkouts(fresh);
+        window.dispatchEvent(new Event("nexus_logs_updated"));
+      } catch (e) {
+        console.warn("Auto-refresh desde la hoja falló:", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser]);
+
+  // Enforce automatic synchronization when enabled
+  useEffect(() => {
+    if (syncWithRealTime) {
+      // Today's program week + day. When a program start date is set, the week
+      // is computed from elapsed days since the start (see lib/programStart);
+      // otherwise it falls back to the legacy calendar-based week.
+      const { week: computedWeekStr, dayIndex: computedDayIdx } =
+        getProgramTodayPosition(realTime);
+
+      if (currentWeek !== computedWeekStr) {
+        setCurrentWeek(computedWeekStr);
+      }
+      if (currentDayIndex !== computedDayIdx) {
+        setCurrentDayIndex(computedDayIdx);
+      }
+    }
+  }, [realTime, syncWithRealTime, currentWeek, currentDayIndex]);
+
+  // --- SAVE TO LOCALSTORAGE ---
+  useEffect(() => {
+    localStorage.setItem("nexus_current_week_slug", currentWeek);
+  }, [currentWeek]);
+
+  useEffect(() => {
+    localStorage.setItem("nexus_current_day_idx", String(currentDayIndex));
+  }, [currentDayIndex]);
+
+  // --- COLLAPSIBLE QUICK HISTORY FOR THE 4 TRAINING BLOCKS ---
+  const [expandedBlockHistory, setExpandedBlockHistory] = useState<
+    Record<string, boolean>
+  >({
+    warmup: false,
+    strength: false,
+    metcon: false,
+    accessories: false,
+  });
+
+  // Extract a compact version keeping reps and protocol but stripping cue text
+  const getCompactSidebarText = (itemText: string): string => {
+    let cleaned = itemText.replace(
+      /<span\s+class(?:Name)?=['"]cue['"]>[\s\S]*?<\/span>/gi,
+      "",
+    );
+    cleaned = cleaned.replace(/<[^>]*>/g, "").trim();
+    return cleaned;
+  };
+
+  const markDayComplete = (dayId: string) => {
+    setCompletedDays((prev) => {
+      if (prev[dayId] === "completed") return prev;
+      const nextMap: Record<string, DayStatus> = { ...prev, [dayId]: "completed" };
+      setTimeout(() => {
+        setConfettiTrigger((v) => v + 1);
+        localStorage.setItem(dayId, "true");
+        window.dispatchEvent(new Event("nexus_logs_updated"));
+
+        let totalCompleted = 0;
+        Object.keys(database).forEach((week) => {
+          database[week].days.forEach((day) => {
+            if (nextMap[day.id] === "completed") totalCompleted++;
+          });
+        });
+        if (totalCompleted >= 1) checkAndUnlockAchievement("first_day");
+        if (totalCompleted >= 5) checkAndUnlockAchievement("five_days");
+
+        let weekCount = 0;
+        for (let d = 1; d <= 7; d++) {
+          if (nextMap[`${currentWeek}d${d}`] === "completed") weekCount++;
+        }
+        if (weekCount === 7) checkAndUnlockAchievement("perfect_week");
+      }, 0);
+      return nextMap;
+    });
+  };
+
+  // Día perdido: cerrar un día que no se entrenó, sin generar datos. Cierra el
+  // hueco en los gráficos (punto en 0 en vez de salto) y no suma XP ni %.
+  const markDayMissed = (dayId: string) => {
+    setCompletedDays((prev) => {
+      if (prev[dayId] === "missed") return prev;
+      localStorage.setItem(dayId, "missed");
+      window.dispatchEvent(new Event("nexus_logs_updated"));
+      return { ...prev, [dayId]: "missed" };
+    });
+  };
+
+  // Deshacer "perdido" → vuelve a pendiente (nunca toca un día ya completado).
+  const unmarkDayMissed = (dayId: string) => {
+    setCompletedDays((prev) => {
+      if (prev[dayId] !== "missed") return prev;
+      localStorage.setItem(dayId, "false");
+      window.dispatchEvent(new Event("nexus_logs_updated"));
+      const { [dayId]: _drop, ...rest } = prev;
+      return { ...rest, [dayId]: false };
+    });
+  };
+
+  // Calculate dynamic RPG XP
+  const getXpProgress = () => {
+    let totalCompleted = 0;
+    Object.keys(database).forEach((week) => {
+      database[week].days.forEach((day) => {
+        if (completedDays[day.id] === "completed") {
+          totalCompleted++;
+        }
+      });
+    });
+    // Escalado de XP (base de 100 XP por día completado) + 800 XP base + XP de Side Quests
+    const currentXp = 800 + totalCompleted * 100 + totalSideQuestXp;
+    const percentage = Math.min((currentXp / 2000) * 100, 100);
+    return { currentXp, percentage };
+  };
+
+
+  const { currentXp, percentage: xpPercentage } = getXpProgress();
+
+  // Weekly Completion: Count how many of the 7 days are complete for currentWeek (w1, w2, w3, w4)
+  const weeklyCompletionInfo = useMemo(() => {
+    let completedCount = 0;
+    for (let d = 1; d <= 7; d++) {
+      if (completedDays[`${currentWeek}d${d}`] === "completed") {
+        completedCount++;
+      }
+    }
+    const percentage = Math.min(100, Math.round((completedCount / 7) * 100));
+    return { completedCount, percentage };
+  }, [completedDays, currentWeek]);
+
+  // Active Day Logging Achievement: Percentage of physical exercises that have at least one saved log
+  const activeDayLoggingPercentage = useMemo(() => {
+    if (!activeDay || !activeVariation) return 0;
+
+    const allExercises: string[] = [
+      ...(activeVariation.warmup?.items || []),
+      ...(activeVariation.strength?.items || []),
+      ...(activeVariation.metcon?.items || []),
+      ...(activeVariation.accessories?.items || []),
+    ];
+
+    if (allExercises.length === 0) return 0;
+
+    let loggedCount = 0;
+    allExercises.forEach((item) => {
+      // Build the exact key the loggers write (clean name + underscores),
+      // otherwise no log is ever found and the percentage stays at 0.
+      const cleanName = getCleanExerciseName(item).replace(/\s+/g, "_");
+      const key = `nexus_logs_${activeDay.id}_${cleanName}`;
+      const val = localStorage.getItem(key);
+      if (val) {
+        try {
+          const sets = JSON.parse(val);
+          if (Array.isArray(sets) && sets.length > 0) {
+            loggedCount++;
+          }
+        } catch {
+          // ignore
+        }
+      }
+    });
+
+    return Math.min(100, Math.round((loggedCount / allExercises.length) * 100));
+  }, [activeDay, activeVariation, logsVersion]);
+
+  // Trigger celebration particles when the active day's routines are 100% completed
+  useEffect(() => {
+    if (
+      activeDayLoggingPercentage === 100 &&
+      lastLoggingPercentage < 100 &&
+      lastLoggingPercentage > 0
+    ) {
+      setConfettiTrigger((prev) => prev + 1);
+    }
+    setLastLoggingPercentage(activeDayLoggingPercentage);
+  }, [activeDayLoggingPercentage, lastLoggingPercentage]);
+
+  // Reset progress handlers
+  const handleConfirmReset = () => {
+    localStorage.clear();
+    const resetting: Record<string, DayStatus> = {};
+    ["w1", "w2", "w3", "w4"].forEach((week) => {
+      for (let d = 1; d <= 7; d++) {
+        const dayId = `${week}d${d}`;
+        resetting[dayId] = false;
+        localStorage.setItem(dayId, "false");
+      }
+    });
+    setCompletedDays(resetting);
+    setCurrentWeek("w2");
+    setCurrentDayIndex(0);
+    setCurrentVariationIndex(0);
+    setAthlete(DEFAULT_ATHLETE);
+    setShowResetModal(false);
+  };
+
+  const handleUpdateAthlete = (updated: AthleteState) => {
+    setAthlete(updated);
+    localStorage.setItem("nexus_athlete_state", JSON.stringify(updated));
+    setTimeout(() => {
+      window.dispatchEvent(new Event("nexus_athlete_updated"));
+    }, 0);
+
+    // Check for level/discipline-based achievements
+    if (updated.level) {
+      const lvlUpper = updated.level.toUpperCase();
+      if (lvlUpper.includes("HWPO GRIND")) {
+        setTimeout(() => checkAndUnlockAchievement("fraser_grind"), 600);
+      } else if (
+        lvlUpper.includes("HAEDO ADAPTIVE") ||
+        lvlUpper.includes("BALDE")
+      ) {
+        setTimeout(() => checkAndUnlockAchievement("adaptive_coke"), 600);
+      }
+    }
+  };
+
+  const startEditingName = () => {
+    setTempName(athlete.identity);
+    setIsEditingName(true);
+  };
+
+  // Logo del header / accesos rápidos → Perfil & Bio, lente Perfil (antes abría
+  // el modal "Editar perfil", eliminado).
+  const openProfileTab = () => {
+    handleSetActiveSheetWithDirection(2);
+    setProfileLens("perfil");
+    localStorage.setItem("nexus_profile_lens", "perfil");
+  };
+
+  const saveName = () => {
+    setIsEditingName(false);
+    if (tempName.trim()) {
+      handleUpdateAthlete({
+        ...athlete,
+        identity: tempName.trim().toUpperCase(),
+      });
+    }
+  };
+
+  const renderExplicitTimeCapBlock = (
+    schemeText: string,
+    blockType: "warmup" | "strength" | "metcon" | "accessories",
+    isColumns = false,
+  ) => {
+    if (!schemeText) return null;
+
+    let summaryText = schemeText.trim();
+
+    // Helper functions for common shortening
+    const cleanStr = (s: string) =>
+      s
+        .replace(/MINUTOS|MINS/gi, "MIN")
+        .replace(/SEGUNDOS|SECS/gi, "SEG")
+        .replace(/RONDAS/gi, "RONDAS")
+        .replace(/SERIES/gi, "SERIES");
+
+    let mainText = cleanStr(summaryText);
+    let restText = "";
+
+    // 1. Separate Rest/Pausa/Descanso text to a secondary line
+    if (mainText.includes("|")) {
+      const parts = mainText.split("|");
+      mainText = parts[0].trim();
+      restText = parts.slice(1).join(" | ").trim();
+    } else {
+      const restRegex =
+        /\b(\d+["']?\s*(?:S|SEG|SECS|SEGUNDOS|M|MIN)?\s*(?:REST|PAUSA|DESCANSO).*)|(?:REST|PAUSA|DESCANSO)\b(.*)/i;
+      const match = mainText.match(restRegex);
+      if (match) {
+        restText = match[0].trim();
+        mainText = mainText.replace(restRegex, "").trim();
+      }
+    }
+
+    // Clean up trailing/leading junk from maintext
+    mainText = mainText.replace(/(^[-/,]+|[-/,]+$)/g, "").trim();
+
+    const mainTextUpper = mainText.toUpperCase();
+    const restTextUpper = restText.toUpperCase();
+    const hasCap =
+      /(?:CAP|TIME CAP|TC)\s*\d+/i.test(mainTextUpper) ||
+      /(?:CAP|TIME CAP|TC)\s*\d+/i.test(restTextUpper);
+
+    // 2. Default Time Caps injected as secondary text if missing and needed
+    if (blockType === "warmup") {
+      if (!hasCap && !mainTextUpper.includes("MIN")) {
+        restText += (restText ? " | " : "") + "10 MIN CAP";
+      }
+    } else if (blockType === "strength") {
+      if (!hasCap) {
+        restText += (restText ? " | " : "") + "15 MIN CAP";
+      }
+      if (
+        !restTextUpper.includes("DESCANSO") &&
+        !mainTextUpper.includes("DESCANSO") &&
+        !restTextUpper.includes("REST") &&
+        !mainTextUpper.includes("REST") &&
+        !mainTextUpper.includes("PAUSA") &&
+        !restTextUpper.includes("PAUSA")
+      ) {
+        restText +=
+          (restText ? " | " : "") + "DESCANSO ENTRE SERIES: 90S - 120S";
+      }
+    } else if (blockType === "metcon") {
+      if (
+        !mainTextUpper.includes("AMRAP") &&
+        !mainTextUpper.includes("FOR TIME") &&
+        !mainTextUpper.includes("EMOM") &&
+        !mainTextUpper.includes("TABATA")
+      ) {
+        if (mainTextUpper.includes("RONDAS")) {
+          mainText = `FOR TIME: ${mainText}`;
+        }
+      }
+      if (!hasCap && !mainTextUpper.includes("MIN")) {
+        restText += (restText ? " | " : "") + "15 MIN CAP";
+      }
+    } else if (blockType === "accessories") {
+      if (!hasCap) {
+        restText += (restText ? " | " : "") + "12 MIN CAP";
+      }
+      if (
+        !restTextUpper.includes("DESCANSO") &&
+        !mainTextUpper.includes("DESCANSO") &&
+        !restTextUpper.includes("REST") &&
+        !mainTextUpper.includes("REST") &&
+        !mainTextUpper.includes("PAUSA") &&
+        !restTextUpper.includes("PAUSA")
+      ) {
+        restText +=
+          (restText ? " | " : "") + "DESCANSO ENTRE SERIES: 60S - 90S";
+      }
+    }
+
+    return (
+      <div
+        style={{ ...midBandColor.bgStyle, color: midBandColor.text }}
+        className={`px-3 py-2.5 font-mono flex flex-col justify-center w-full min-h-[54px] uppercase select-none rounded-none text-center leading-[1.05] gap-1 border-l-[6px] border-white/60`}
+      >
+        <span
+          className={`font-brutalist not-italic tracking-[0.01em] uppercase ${
+            isColumns
+              ? "text-[18px] xl:text-[20px]"
+              : "text-[19px] md:text-[22px] lg:text-[25px]"
+          } drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]`}
+          title={mainText}
+        >
+          {mainText}
+        </span>
+        {restText && (
+          <span
+            className={`font-sans font-bold tracking-[0.18em] uppercase opacity-90 ${
+              isColumns
+                ? "text-[10px] xl:text-[11px]"
+                : "text-[11px] md:text-[12px] lg:text-[13px]"
+            }`}
+          >
+            {restText}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  // Single source of props for the story card: the hidden export template and
+  // the live preview inside the editor panel stay perfectly in sync.
+  const shareCardProps =
+    activeDay && storyVariation
+      ? {
+          activeDay,
+          activeVariation: storyVariation,
+          currentWeek,
+          exportBgImage,
+          exportTheme,
+          exportLayout,
+          exportAthleteName,
+          exportInspiration,
+          exportCardOpacity,
+          exportCardBlur,
+          exportCardWidth,
+          exportVerticalLayout,
+          exportPhotoFilter,
+          exportCardHeightLimit,
+          teamSize,
+          activeColorSet,
+          midBandColor,
+          formatItemWithTeamVolume,
+          getDerivedInspiration,
+          blockPositions,
+          setBlockPositions,
+        }
+      : null;
+
+  const renderExportCustomizationPanel = () => {
+    return (
+      <ExportCustomizationPanel
+        exportBgImage={exportBgImage}
+        setExportBgImage={setExportBgImage}
+        exportLayout={exportLayout}
+        setExportLayout={setExportLayout}
+        exportVerticalLayout={exportVerticalLayout}
+        setExportVerticalLayout={setExportVerticalLayout}
+        exportCardWidth={exportCardWidth}
+        setExportCardWidth={setExportCardWidth}
+        exportAthleteName={exportAthleteName}
+        setExportAthleteName={setExportAthleteName}
+        exportTheme={exportTheme}
+        setExportTheme={setExportTheme}
+        exportInspiration={exportInspiration}
+        setExportInspiration={setExportInspiration}
+        exportCardBlur={exportCardBlur}
+        setExportCardBlur={setExportCardBlur}
+        exportCardOpacity={exportCardOpacity}
+        setExportCardOpacity={setExportCardOpacity}
+        exportCardHeightLimit={exportCardHeightLimit}
+        setExportCardHeightLimit={setExportCardHeightLimit}
+        exportPhotoFilter={exportPhotoFilter}
+        setExportPhotoFilter={setExportPhotoFilter}
+        onExport={handleExportDayJPG}
+        isExporting={isExportingJPG}
+        clipMode={videoMode && !!videoBgFile}
+        onExportVideo={handleExportDayVideo}
+        isExportingVideo={isExportingVideo}
+        isFullscreenPreview={isFullscreenPreview}
+        setIsFullscreenPreview={setIsFullscreenPreview}
+        preview={
+          shareCardProps ? (
+            videoMode && videoBgUrl ? (
+              // preview WYSIWYG: el clip se reproduce detrás de la tarjeta transparente
+              <div className="relative overflow-hidden rounded">
+                <video
+                  src={videoBgUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                />
+                <div className="relative">
+                  <ShareCardOverlay {...shareCardProps} previewMode transparentBase />
+                </div>
+              </div>
+            ) : (
+              <ShareCardOverlay {...shareCardProps} previewMode />
+            )
+          ) : null
+        }
+      />
+    );
+  };
+
+  const renderWarmupBlock = (isColumns = false) => {
+    return (
+      <WorkoutBlockCard
+        blockType="warmup"
+        activeVariation={activeVariation!}
+        activeDay={activeDay}
+        isColumns={isColumns}
+        enableThemedBackgrounds={enableThemedBackgrounds}
+        backgroundImage={warmupBg}
+        icon={svgIcons.warmup}
+        globalRpeAvg={globalRpeAvg}
+        teamSize={teamSize}
+        currentVariationIndex={currentVariationIndex}
+        formatItemWithTeamVolume={formatItemWithTeamVolume}
+        renderExplicitTimeCapBlock={renderExplicitTimeCapBlock}
+        handleVariationTouchStart={handleVariationTouchStart}
+        handleVariationTouchMove={handleVariationTouchMove}
+        handleVariationTouchEnd={handleVariationTouchEnd}
+      />
+    );
+  };
+
+  const renderStrengthBlock = (isColumns = false) => {
+    return (
+      <WorkoutBlockCard
+        blockType="strength"
+        activeVariation={activeVariation!}
+        activeDay={activeDay}
+        isColumns={isColumns}
+        enableThemedBackgrounds={enableThemedBackgrounds}
+        backgroundImage={strengthBg}
+        icon={svgIcons.strength}
+        globalRpeAvg={globalRpeAvg}
+        teamSize={teamSize}
+        currentVariationIndex={currentVariationIndex}
+        formatItemWithTeamVolume={formatItemWithTeamVolume}
+        renderExplicitTimeCapBlock={renderExplicitTimeCapBlock}
+        handleVariationTouchStart={handleVariationTouchStart}
+        handleVariationTouchMove={handleVariationTouchMove}
+        handleVariationTouchEnd={handleVariationTouchEnd}
+        isHistoryExpanded={expandedBlockHistory.strength}
+        onToggleHistory={() =>
+          setExpandedBlockHistory((prev) => ({
+            ...prev,
+            strength: !prev.strength,
+          }))
+        }
+      />
+    );
+  };
+
+  const renderMetconBlock = (isColumns = false) => {
+    return (
+      <WorkoutBlockCard
+        blockType="metcon"
+        activeVariation={activeVariation!}
+        activeDay={activeDay}
+        isColumns={isColumns}
+        enableThemedBackgrounds={enableThemedBackgrounds}
+        backgroundImage={metconBg}
+        icon={svgIcons.metcon}
+        globalRpeAvg={globalRpeAvg}
+        teamSize={teamSize}
+        currentVariationIndex={currentVariationIndex}
+        formatItemWithTeamVolume={formatItemWithTeamVolume}
+        renderExplicitTimeCapBlock={renderExplicitTimeCapBlock}
+        handleVariationTouchStart={handleVariationTouchStart}
+        handleVariationTouchMove={handleVariationTouchMove}
+        handleVariationTouchEnd={handleVariationTouchEnd}
+        isHistoryExpanded={expandedBlockHistory.metcon}
+        onToggleHistory={() =>
+          setExpandedBlockHistory((prev) => ({
+            ...prev,
+            metcon: !prev.metcon,
+          }))
+        }
+      />
+    );
+  };
+
+  const renderAccessoriesBlock = (isColumns = false) => {
+    return (
+      <WorkoutBlockCard
+        blockType="accessories"
+        activeVariation={activeVariation!}
+        activeDay={activeDay}
+        isColumns={isColumns}
+        enableThemedBackgrounds={enableThemedBackgrounds}
+        backgroundImage={accessoriesBg}
+        icon={svgIcons.accessories}
+        globalRpeAvg={globalRpeAvg}
+        teamSize={teamSize}
+        currentVariationIndex={currentVariationIndex}
+        formatItemWithTeamVolume={formatItemWithTeamVolume}
+        renderExplicitTimeCapBlock={renderExplicitTimeCapBlock}
+        handleVariationTouchStart={handleVariationTouchStart}
+        handleVariationTouchMove={handleVariationTouchMove}
+        handleVariationTouchEnd={handleVariationTouchEnd}
+        isHistoryExpanded={expandedBlockHistory.accessories}
+        onToggleHistory={() =>
+          setExpandedBlockHistory((prev) => ({
+            ...prev,
+            accessories: !prev.accessories,
+          }))
+        }
+      />
+    );
+  };
+
+  // Generic renderer for a flexible, ordered program block. Themes the card by
+  // the block's bucket (icon/background) and gives each block a unique key slot
+  // so two blocks sharing a bucket (e.g. skill + strength) don't collide.
+  const blockBgByBucket = {
+    warmup: warmupBg,
+    strength: strengthBg,
+    metcon: metconBg,
+    accessories: accessoriesBg,
+  } as const;
+  const renderBlockCard = (b: ProgramBlock, isColumns = false) => (
+    <WorkoutBlockCard
+      key={b.key}
+      blockType={b.bucket}
+      block={b}
+      keySuffix={b.key}
+      activeVariation={activeVariation!}
+      activeDay={activeDay}
+      isColumns={isColumns}
+      enableThemedBackgrounds={enableThemedBackgrounds}
+      backgroundImage={blockBgByBucket[b.bucket]}
+      icon={svgIcons[b.bucket]}
+      globalRpeAvg={globalRpeAvg}
+      teamSize={teamSize}
+      currentVariationIndex={currentVariationIndex}
+      formatItemWithTeamVolume={formatItemWithTeamVolume}
+      renderExplicitTimeCapBlock={renderExplicitTimeCapBlock}
+      handleVariationTouchStart={handleVariationTouchStart}
+      handleVariationTouchMove={handleVariationTouchMove}
+      handleVariationTouchEnd={handleVariationTouchEnd}
+    />
+  );
+
+  // ── Día especial por JSON: entra como pestaña ESPECIAL del día activo ────
+  const specialFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const audioInputRef = React.useRef<HTMLInputElement | null>(null);
+  const videoBgInputRef = React.useRef<HTMLInputElement | null>(null);
+  const toast = (message: string, kind: "success" | "error" = "success") =>
+    window.dispatchEvent(new CustomEvent("nexus_toast", { detail: { message, kind, durationMs: 5000 } }));
+
+  const handleSpecialDayFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !activeDay) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        // acepta JSON o TEXTO PLANO (detecta el formato solo)
+        const { variation, audit } = parseSpecialDay(String(reader.result));
+        const next = injectSpecialVariation(database, activeDay.id, variation);
+        setDatabase(next);
+        saveCachedWorkouts(next);
+        const warns = audit.issues.filter((i) => i.severity !== "error").length;
+        toast(`Pestaña ESPECIAL activa en ${activeDay.name}${warns ? ` (${warns} avisos)` : ""} — hoy entrenás esto`);
+      } catch (err: any) {
+        toast(err?.message || "No se pudo importar el día especial", "error");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleRemoveSpecialDay = () => {
+    if (!activeDay) return;
+    const next = removeSpecialVariation(database, activeDay.id);
+    setDatabase(next);
+    saveCachedWorkouts(next);
+    toast(`Pestaña ESPECIAL quitada de ${activeDay.name}`);
+  };
+
+
+  // Day share actions — STORY JPG (primary) with the "+ FOTO" attach folded in
+  // as a borderless secondary. (PROGRAMA DEL DÍA / Markdown lives in the month
+  // toolbar now.) Single source of truth for every board layout.
+  const renderDayExportActions = (columns = false) => (
+    <>
+      {activeDay && (
+        <div className={`no-print${columns ? " col-span-full" : ""}`}>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={exportFileInputRef}
+            onChange={handleBgImageUpload}
+          />
+          {/* Flotante, centrado abajo — misma fila que ANOTAR WOD (izquierda)
+              y DÍA PERDIDO (derecha). */}
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[90] flex overflow-hidden rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)]">
+            <button
+              type="button"
+              onClick={handleExportDayJPG}
+              disabled={isExportingJPG}
+              className="flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white active:scale-95 disabled:opacity-50 cursor-pointer text-center"
+              title="Guardar el día como una imagen para compartir"
+            >
+              <Camera size={16} className={`shrink-0 ${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
+              <span>{isExportingJPG ? "EXPORTANDO..." : "CAPTURA DEL DÍA"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowStoryMenu((s) => !s);
+              }}
+              aria-expanded={showStoryMenu}
+              className={`shrink-0 flex items-center justify-center gap-1.5 px-3 py-3 font-brutalist text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
+              title="Opciones de la imagen: foto de fondo y personalización"
+            >
+              <Settings2 size={16} />
+              <ChevronDown size={14} className={`transition-transform duration-200 ${showStoryMenu ? "rotate-180" : ""}`} />
+            </button>
+          </div>
+
+          {showStoryMenu && (
+            <div className="mt-2 space-y-3 bg-black/40 p-3 rounded-sm">
+              {/* web: input con capture abre la cámara del teléfono; nativo usa el plugin */}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                ref={cameraInputRef}
+                onChange={handleBgImageUpload}
+              />
+              {/* Selector explícito de variación para la Story (incl. ESPECIAL) */}
+              {activeDay.variations.length > 1 && (
+                <div className="space-y-1.5">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Día a compartir</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeDay.variations.map((v) => {
+                      const sel = (storyVariationTab ?? activeVariation?.tabName) === v.tabName;
+                      const isSpecial = v.tabName === SPECIAL_TAB;
+                      return (
+                        <button
+                          key={v.tabName}
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setStoryVariationTab(v.tabName); }}
+                          className={`px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${
+                            sel
+                              ? isSpecial ? "bg-signal-red text-white border-signal-red" : "bg-white text-black border-white"
+                              : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"
+                          }`}
+                        >
+                          {v.tabName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    exportFileInputRef.current?.click();
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white active:scale-95 cursor-pointer"
+                  title="Subir una foto ya tomada"
+                >
+                  <Camera size={16} />
+                  <span>{exportBgImage ? "CAMBIAR FOTO" : "SUBIR FOTO"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleTakePhoto();
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 bg-white text-black hover:bg-neutral-200 active:scale-95 cursor-pointer"
+                  title="Tomar la foto ahora con la cámara"
+                >
+                  <Camera size={16} />
+                  <span>TOMAR FOTO</span>
+                </button>
+              </div>
+              {isFxProcessing && (
+                <div className="text-[10px] font-mono text-[#A1A1AA] uppercase tracking-widest animate-pulse text-center">
+                  Detectando personas y aplicando efecto…
+                </div>
+              )}
+
+              {/* ── VIDEO (Fase A): movimiento + música local ─────────────── */}
+              <div className="space-y-2.5 border-t border-[color:var(--color-line)] pt-3">
+                <div className="grid grid-cols-2 gap-1 bg-black/60 p-1 rounded-sm">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setVideoMode(false); }}
+                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${!videoMode ? "bg-white text-black" : "text-[#A1A1AA] hover:bg-[color:var(--color-card-2)]"}`}
+                  >
+                    Foto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setVideoMode(true); }}
+                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${videoMode ? "bg-white text-black" : "text-[#A1A1AA] hover:bg-[color:var(--color-card-2)]"}`}
+                  >
+                    Video
+                  </button>
+                </div>
+
+                {videoMode && (
+                  <div className="space-y-2.5">
+                    {/* FONDO: foto animada (default) o clip de video real */}
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Fondo</div>
+                      <input type="file" accept="video/*" className="hidden" ref={videoBgInputRef} onChange={handleVideoBgFile} />
+                      {videoBgFile ? (
+                        <div className="flex items-center gap-2 px-3 py-2.5 border border-signal-red/40 bg-signal-red/10 rounded-sm">
+                          <Film size={14} className="text-signal-red shrink-0" />
+                          <span className="truncate flex-1 font-mono text-[10px] text-white">{videoBgName}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); clearVideoBg(); }}
+                            className="text-white/50 hover:text-white cursor-pointer shrink-0"
+                            aria-label="Quitar clip de video"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); videoBgInputRef.current?.click(); }}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
+                        >
+                          <Film size={14} />
+                          USAR CLIP DE VIDEO
+                        </button>
+                      )}
+                      {!videoBgFile && (
+                        <div className="text-[8px] font-mono text-white/35 leading-snug">
+                          Sin clip: se anima la foto del fondo. Con clip: la tarjeta va encima del video.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Movimiento solo aplica a la foto animada */}
+                    {!videoBgFile && (
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Movimiento</div>
+                      <div className="grid grid-cols-3 gap-1">
+                        {(["kenburns", "pulse", "none"] as const).map((fx) => (
+                          <button
+                            key={fx}
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setVideoEffect(fx); }}
+                            className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                          >
+                            {fx === "kenburns" ? "Zoom" : fx === "pulse" ? "Pulso" : "Estático"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    )}
+
+                    {/* Efectos combinables — se aplican al exportar (no en el
+                        preview). Destellos/Shake requieren música o audio del clip. */}
+                    {(() => {
+                      const hasAudioSource = !!audioBuffer || !!videoBgFile;
+                      const fxButtons: { k: "beatFlash" | "beatShake" | "stardust" | "retro70s"; label: string; needsAudio: boolean }[] = [
+                        { k: "beatFlash", label: "Destellos", needsAudio: true },
+                        { k: "beatShake", label: "Shake", needsAudio: true },
+                        { k: "stardust", label: "Stardust", needsAudio: false },
+                        { k: "retro70s", label: "Glitch 70s", needsAudio: false },
+                      ];
+                      return (
+                        <div className="space-y-1.5">
+                          <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Efectos (al exportar)</div>
+                          <div className="grid grid-cols-2 gap-1">
+                            {fxButtons.map(({ k, label, needsAudio }) => {
+                              const disabled = needsAudio && !hasAudioSource;
+                              const on = !!videoFx[k];
+                              return (
+                                <button
+                                  key={k}
+                                  type="button"
+                                  disabled={disabled}
+                                  title={disabled ? "Elegí música (o usá un clip con audio) para sincronizar con los beats" : undefined}
+                                  onClick={(e) => { e.stopPropagation(); toggleVideoFx(k); }}
+                                  className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all ${disabled ? "opacity-40 cursor-not-allowed bg-[color:var(--color-card-2)] text-[#52525B] border-[color:var(--color-line)]" : on ? "bg-cyan-400 text-black border-cyan-400 cursor-pointer" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)] cursor-pointer"}`}
+                                >
+                                  {label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
+                      {videoBgFile ? (
+                        videoBgDurationSec != null && videoBgDurationSec < 15 ? (
+                          // clip corto: elegir dejarlo tal cual o loopearlo hasta 15s
+                          <div className="grid grid-cols-2 gap-1">
+                            {([false, true] as const).map((loop) => (
+                              <button
+                                key={String(loop)}
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setVideoLoop(loop); }}
+                                className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoLoop === loop ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                              >
+                                {loop ? "Loop a 15s" : `Clip (${Math.round(videoBgDurationSec)}s)`}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="px-3 py-2 rounded-sm bg-[color:var(--color-card-2)] font-mono text-[10px] text-white/80">
+                            {clipExportSec}s{" "}
+                            <span className="text-white/60">
+                              ({videoBgDurationSec == null
+                                ? "duración del clip"
+                                : videoBgDurationSec > 15
+                                  ? "clip recortado a 15s"
+                                  : "duración del clip"})
+                            </span>
+                          </div>
+                        )
+                      ) : (
+                        <div className="grid grid-cols-2 gap-1">
+                          {([10, 15] as const).map((d) => (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
+                              className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                            >
+                              {d}s
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">
+                        Música (archivo local){videoBgFile && !audioBuffer ? " — reemplaza el audio del clip" : ""}
+                      </div>
+                      <input type="file" accept="audio/*" className="hidden" ref={audioInputRef} onChange={handleAudioFile} />
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
+                      >
+                        <Music size={14} />
+                        <span className="truncate max-w-[70%]">{audioName || "ELEGIR TEMA"}</span>
+                      </button>
+                      {audioBuffer && (() => {
+                        const segLen = videoBgFile ? clipExportSec : videoDurationSec;
+                        const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+                        return (
+                          <div className="space-y-1.5">
+                            <label className="block text-[9px] font-mono text-white/50 uppercase tracking-widest">
+                              Usar de {fmt(audioOffsetSec)} a {fmt(audioOffsetSec + segLen)}
+                              <input
+                                type="range"
+                                min={0}
+                                max={Math.max(0, Math.floor(audioBuffer.duration - segLen))}
+                                value={audioOffsetSec}
+                                onChange={(e) => setAudioOffsetSec(Number(e.target.value))}
+                                className="w-full accent-white mt-1"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); toggleAudioPreview(); }}
+                              className={`w-full flex items-center justify-center gap-2 py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${isPreviewingAudio ? "bg-cyan-400 text-black border-cyan-400" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                            >
+                              {isPreviewingAudio ? "■ Parar" : "▶ Escuchar segmento"}
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); void handleExportDayVideo(); }}
+                      disabled={isExportingVideo}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-widest font-extrabold uppercase bg-signal-red hover:brightness-110 text-white rounded-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Share2 size={15} className={isExportingVideo ? "animate-spin" : ""} />
+                      {isExportingVideo ? `RENDERIZANDO ${videoProgress}%` : "EXPORTAR VIDEO"}
+                    </button>
+                    {isExportingVideo && <ProgressBar value={videoProgress / 100} />}
+                  </div>
+                )}
+              </div>
+
+              {renderExportCustomizationPanel()}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+
+
+  return (
+    <div
+      style={
+        {
+          "--color-electric-blue": activeColorSet.color,
+          "--shadow-blue-glow": activeColorSet.shadow,
+          "--header-height": `${headerHeight}px`,
+          paddingTop: `calc(${headerHeight}px + env(safe-area-inset-top, 0px))`, // Explicit pt-safe padding calculation preventing menu overlaps and including env(safe-area-inset-top)
+        } as React.CSSProperties
+      }
+      className="text-white font-sans min-h-screen flex flex-col app-content-wrapper select-none relative overflow-x-clip pt-safe"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <Confetti trigger={confettiTrigger} />
+      <AnimatePresence>
+        {activeAchievement && (
+          <AchievementNotification
+            achievement={activeAchievement}
+            onClose={() => setActiveAchievement(null)}
+          />
+        )}
+      </AnimatePresence>
+      <NavigationHeader
+        activeSheet={activeSheet}
+        setActiveSheet={handleSetActiveSheetWithDirection}
+        syncWithRealTime={syncWithRealTime}
+        currentWeek={currentWeek}
+        realTime={realTime}
+        handleToggleSync={handleToggleSync}
+        activeDayName={activeWeekPlan?.days[currentDayIndex]?.name}
+        onOpenProfile={openProfileTab}
+        onHeightChange={setHeaderHeight}
+      />
+
+      {/* Dynamic Lightning Flash Overlay */}
+      <AnimatePresence>
+        {lightningFlash && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 0.95, 0.4, 1, 0],
+              backgroundColor: [
+                "rgba(251,191,36,0)",
+                "rgba(251,191,36,0.95)",
+                "rgba(34,212,238,0.9)",
+                "rgba(255,255,255,1)",
+                "rgba(0,0,0,0)",
+              ],
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.1, ease: "easeInOut" }}
+            className="fixed inset-0 z-[9999] pointer-events-none flex flex-col items-center justify-center border-[20px] border-amber-400"
+          >
+            <div className="text-center text-black font-mono select-none drop-shadow-sm filter p-8 bg-amber-400 border-4 border-black rotate-[-2deg] max-w-lg mx-4">
+              <div className="text-8xl md:text-9xl">⚡</div>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mt-4">
+                NUEVO PR REGISTRADO
+              </h2>
+              <p className="text-sm md:text-md font-bold font-mono tracking-widest mt-2 uppercase bg-black text-white px-4 py-1.5 inline-block">
+                SISTEMA VALIDADO • CAPACIDAD INCREMENTADA
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Dynamic hot brutalist backstripe column inside the board canvas with color matching the active week */}
+      <div
+        aria-hidden="true"
+        className={`fixed top-0 bottom-0 left-[43%] w-[14%] -z-10 opacity-20 pointer-events-none select-none transition-all duration-500 ${activeBgColorClass}`}
+      />
+
+      {/* 1. WEEK SELECTION HORIZONTAL BAR */}
+      <div className="w-full bg-[color:var(--color-card-2)] backdrop-blur-md border-y border-[color:var(--color-line)] mb-2 no-print">
+        <div className="mx-auto px-6 md:px-10 flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-4">
+          <div
+            id="weekNav"
+            className="flex gap-4 overflow-x-auto scrollbar-hide text-3xl"
+          >
+            {["w1", "w2", "w3", "w4"].map((w) => {
+              const isActive = w === currentWeek;
+              return (
+                <button
+                  key={w}
+                  className={`px-4 py-2 border-b-4 transition-all font-brutalist tracking-[0.15em] text-xl cursor-pointer ${
+                    isActive
+                      ? "text-electric-blue border-electric-blue font-black shadow-[0_4px_10px_rgba(0,212,255,0.4)]"
+                      : "text-white/80 border-transparent hover:text-white hover:border-white/40"
+                  }`}
+                  onClick={() => {
+                    setSyncWithRealTime(false);
+                    setAutoFollow(false);
+                    setCurrentWeek(w);
+                  }}
+                >
+                  SEM {w.replace("w", "")}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* EXPORT ROW — solo acciones contextuales del DÍA ACTIVO. Las
+              exportaciones (TXT mes, Sync Sheets, PDF semana, Programa del día,
+              Guía IA) viven en la solapa Perfil & Bio → Datos & Nube. */}
+          <div className="flex gap-2 w-full sm:w-auto h-full items-center justify-start sm:justify-end shrink-0">
+            {/* DÍA ESPECIAL: subir JSON de día suelto como pestaña extra del día activo */}
+            {activeDay && (
+              <>
+                <input
+                  ref={specialFileInputRef}
+                  type="file"
+                  accept=".json,.txt,application/json,text/plain"
+                  className="hidden"
+                  onChange={handleSpecialDayFile}
+                />
+                <button
+                  onClick={() => specialFileInputRef.current?.click()}
+                  className="flex items-center gap-2 px-4 py-2 bg-black border border-white/30 hover:bg-white hover:text-black text-white rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
+                  title="Subir un día suelto (JSON o TXT con bloques) como pestaña ESPECIAL de este día"
+                >
+                  <span>{hasSpecialVariation(database, activeDay.id) ? "CAMBIAR ESPECIAL" : "+ DÍA ESPECIAL"}</span>
+                </button>
+                {hasSpecialVariation(database, activeDay.id) && (
+                  <button
+                    onClick={handleRemoveSpecialDay}
+                    className="flex items-center gap-2 px-4 py-2 bg-transparent border border-signal-red/50 text-signal-red hover:bg-signal-red hover:text-white rounded active:scale-95 transition-all text-[11px] sm:text-xs font-brutalist tracking-wider font-extrabold uppercase shrink-0 cursor-pointer self-start sm:self-auto"
+                    title="Eliminar la pestaña ESPECIAL de este día"
+                  >
+                    <span>✕ QUITAR ESPECIAL</span>
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* THREE INTERACTIVE SHEETS CONTAINER */}
+      <AnimatePresence mode="wait">
+        {activeSheet === 0 && (
+          <motion.div
+            key="sheet-workout"
+            initial={{
+              opacity: 0,
+              x: transitionDirection === "right" ? 300 : -300,
+            }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{
+              opacity: 0,
+              x: transitionDirection === "right" ? -300 : 300,
+            }}
+            transition={{ type: "spring", stiffness: 280, damping: 28 }}
+            className="flex-grow flex flex-col"
+          >
+            {/* RECAP: cierre de semana en el ÚLTIMO día disponible (no depende de
+                que el programa tenga domingo — si el JSON trae 5 días, aparece en
+                el último). Variante MES en el último día de la semana 4.
+                Exportable PNG/PDF. */}
+            {activeWeekPlan?.days?.length != null &&
+              currentDayIndex === activeWeekPlan.days.length - 1 && (
+              <div className="px-4 md:px-8 pt-4">
+                <RecapPanel variant={currentWeek === "w4" ? "month" : "week"} week={currentWeek} />
+              </div>
+            )}
+
+            {/* 2. DAY SELECTION FILTER CHIPS — "franja central": tono apenas por
+                encima del fondo (bg-hi), consistente en las 4 semanas. */}
+            <div className="w-full bg-[color:var(--color-bg-hi)] backdrop-blur-md mb-2 md:mb-4 no-print relative">
+              {/* Filo inferior blanco puro y uniforme — antes variaba de blanco a
+                  gradiente rojo en semana 4, ahora es el mismo indicador siempre. */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 z-0 bg-white/90 shadow-sm" />
+              <div className="mx-auto px-6 md:px-10 relative z-10">
+                <div
+                  id="dayNav"
+                  className="flex gap-2 overflow-x-auto py-3.5 scrollbar-hide text-xl"
+                >
+                  {/* Siempre 7 chips (L→D): un día que el JSON no trae se muestra
+                      como chip fantasma clickeable (día vacío) para conservar la
+                      correlatividad de la semana. */}
+                  {Array.from({
+                    length: Math.max(7, activeWeekPlan?.days.length ?? 0),
+                  }).map((_, idx) => {
+                    const day = activeWeekPlan?.days[idx];
+                    const isActive = idx === currentDayIndex;
+                    const label =
+                      ["L", "M", "M", "J", "V", "S", "D"][idx] ??
+                      day?.name.charAt(0) ??
+                      "·";
+
+                    const selectDay = () => {
+                      setSyncWithRealTime(false);
+                      setAutoFollow(false);
+                      setCurrentDayIndex(idx);
+                    };
+
+                    // Día no programado: chip fantasma (punteado, tenue).
+                    if (!day) {
+                      return (
+                        <button
+                          key={`empty-${idx}`}
+                          onClick={selectDay}
+                          className={`flex flex-col items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-[var(--radius-tile)] border border-dashed border-white/15 transition-all cursor-pointer shrink-0 ${
+                            isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
+                          }`}
+                        >
+                          <span className="font-mono text-xs font-bold text-white/35">{label}</span>
+                          <span className="w-1.5 h-1.5 rounded-full " />
+                        </button>
+                      );
+                    }
+
+                    const isCompleted = completedDays[day.id] === "completed";
+                    const isMissed = completedDays[day.id] === "missed";
+                    // "Hoy" visual = el día activo (rojo, levemente torcido — toque humano).
+                    const dot = isCompleted
+                      ? "bg-[color:var(--color-sem-green)] shadow-[0_0_8px_rgba(52,224,140,.7)]"
+                      : isMissed
+                        ? "border-[1.5px] border-[color:var(--color-sem-amber)]"
+                        : "border-[1.5px] border-[color:var(--color-label)]";
+
+                    return (
+                      <button
+                        key={day.id}
+                        onClick={selectDay}
+                        className={`flex flex-col items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-[var(--radius-tile)] transition-all cursor-pointer shrink-0 ${
+                          isActive
+                            ? "bg-[color:var(--color-sem-red)] -rotate-[1.5deg] scale-105 shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)]"
+                            : "bg-[color:var(--color-card)] shadow-[var(--shadow-card)] hover:bg-[color:var(--color-card-2)]"
+                        }`}
+                      >
+                        <span
+                          className={`font-mono text-xs font-bold ${
+                            isActive
+                              ? "text-white"
+                              : isMissed
+                                ? "text-[color:var(--color-label)] line-through"
+                                : "text-[color:var(--color-ink-2)]"
+                          }`}
+                        >
+                          {label}
+                        </span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-white" : dot}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Nota del coach: si se perdió un día ya pasado esta semana. */}
+                {(() => {
+                  const daysArr = activeWeekPlan?.days ?? [];
+                  const missedIdx = daysArr.findIndex(
+                    (d) => d && completedDays[d.id] === "missed",
+                  );
+                  const note = noteFor(
+                    computeCoachNotes({
+                      week: currentWeek,
+                      missedDayIndex: missedIdx >= 0 ? missedIdx : null,
+                      todayIndex: currentDayIndex,
+                    }),
+                    "days",
+                  );
+                  return note ? (
+                    <CoachNote note={note.text} rotate={-1} className="text-right mt-0.5 mb-1" />
+                  ) : null;
+                })()}
+              </div>
+            </div>
+
+            {/* Día seleccionado que el programa no trae: estado explícito en
+                vez de una pantalla en blanco (coherencia de la semana). */}
+            {!activeDay && activeWeekPlan && (
+              <div className="px-4 md:px-8 py-16 text-center">
+                <div className="mx-auto max-w-lg rounded-[var(--radius-card)] bg-[color:var(--color-card)] shadow-[var(--shadow-card)] p-8">
+                  <p className="font-brutalist text-3xl md:text-4xl tracking-widest text-white/60 uppercase">
+                    Día vacío
+                  </p>
+                  <p className="mt-3 font-mono text-[11px] md:text-xs text-[color:var(--color-ink-2)] uppercase leading-relaxed">
+                    El programa de este capítulo no trae este día. Importá un
+                    programa que lo incluya, o usá <span className="text-[color:var(--color-sem-cyan)]">+ DÍA ESPECIAL</span> sobre
+                    otro día para agregar un entrenamiento suelto.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 3. HERO WHITEBOARD HEADER */}
+            {activeDay && (
+              <header
+                className="mb-2 text-center flex flex-col justify-center items-center relative"
+                data-purpose="page-title"
+              >
+
+                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none uppercase flex flex-wrap justify-center items-center gap-x-4 transition-all duration-300 z-10">
+                  <span>{activeDay.name}</span>
+                  <img 
+                    src="/logo.svg" 
+                    alt="Nexus L4" 
+                    className="align-middle w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain cursor-pointer transition-all duration-300 hover:scale-110 inline-block"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.filter = `drop-shadow(0 0 12px var(--color-electric-blue)) drop-shadow(0 0 25px var(--color-electric-blue))`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.filter = "none";
+                    }}
+                  />
+                  {isEditingName ? (
+                    <input
+                      type="text"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      onBlur={saveName}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") saveName();
+                        if (e.key === "Escape") setIsEditingName(false);
+                      }}
+                      className="bg-zinc-900 text-white border-2 border-white/20 focus:border-electric-blue/50 font-brutalist text-5xl sm:text-6xl md:text-7xl uppercase px-4 py-1.5 focus:outline-none text-center max-w-[480px] inline-block transition-colors"
+                      autoFocus
+                    />
+                  ) : (
+                    <span
+                      className="text-white hover:text-electric-blue cursor-pointer transition-all relative group inline-flex items-center gap-2 border-0"
+                      onClick={startEditingName}
+                      title="Haz clic para cambiar nombre de atleta"
+                    >
+                      <span>{athlete.identity}</span>
+                      <span className="text-2xl md:text-3xl text-electric-blue opacity-50 group-hover:opacity-100 transition-opacity">
+                        ✎
+                      </span>
+                    </span>
+                  )}
+                </h1>
+              </header>
+            )}
+
+            {/* STICKY DAY TITLE WRAPPER WITH REACTIVE BRUTALIST BACKDROP */}
+            <ActiveDayHeader
+              activeDay={activeDay}
+              completedDays={completedDays}
+              headerHeight={headerHeight}
+              mousePos={mousePos}
+              setMousePos={setMousePos}
+              scrollY={scrollY}
+              isIntroGlitching={isIntroGlitching}
+              dayTitleAlertTrigger={dayTitleAlertTrigger}
+              onHeightChange={setDayHeaderHeight}
+            />
+
+            {/* HERO WHITEBOARD SUBHEADER & GOAL */}
+            {activeDay && (
+              <div
+                className="mb-6 md:mb-10 text-center flex flex-col justify-center items-center"
+                data-purpose="page-sub-title"
+              >
+                <div
+                  id="uiWeekIndicator"
+                  className="text-xs sm:text-sm md:text-base lg:text-lg text-white/95 font-bold tracking-[0.25em] mt-5 md:mt-8 font-condensed inline-block border-y border-white/25 py-2 px-8 bg-pure-black/70"
+                >
+                  ACTO I • SEMANA {currentWeek.replace("w", "")} •{" "}
+                  {activeWeekPlan?.meta?.intention ? (
+                    <span style={{ color: INTENTION_META[activeWeekPlan.meta.intention].color }}>
+                      {INTENTION_META[activeWeekPlan.meta.intention].label}
+                      {activeWeekPlan.meta.inferred && (
+                        <span
+                          className="ml-1 text-[8px] align-super font-mono text-[color:var(--color-label)]"
+                          title="Intención inferida del contenido del programa"
+                        >
+                          auto
+                        </span>
+                      )}
+                    </span>
+                  ) : currentWeek === "w1" ? (
+                    "ACUMULACIÓN"
+                  ) : currentWeek === "w2" ? (
+                    "INTENSIFICACIÓN"
+                  ) : currentWeek === "w3" ? (
+                    "PEAK WEEK / ÁPEX"
+                  ) : (
+                    "DELOAD / DESCARGA"
+                  )}
+                  {activeWeekPlan?.meta?.gear != null && (
+                    <span className="ml-2 text-[9px] font-mono tracking-normal bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded text-neutral-300 align-middle">
+                      {GEAR_LABEL[activeWeekPlan.meta.gear] || `GEAR ${activeWeekPlan.meta.gear}`}
+                    </span>
+                  )}
+                </div>
+
+                <DailyMissionPanel
+                  dayId={activeDay.id}
+                  dailyGoalText={deriveDayGoal(activeVariation, database?.[currentWeek]?.meta)}
+                  missionText={dailyGoals[activeDay.id] || ""}
+                  isGeneratingQuest={isGeneratingQuest}
+                  sideQuestCompleted={!!sideQuests[activeDay.id]?.completed}
+                  questData={sideQuests[activeDay.id]}
+                  rewards={getDayReward(activeDay.id)}
+                  isHelpOpen={isHelpOpen}
+                  setIsHelpOpen={setIsHelpOpen}
+                  dayTitleAlertTrigger={dayTitleAlertTrigger}
+                  handleFetchSideQuest={handleFetchSideQuest}
+                  handleResetQuest={handleResetQuest}
+                  onValidate={handleAutoValidate}
+                  mousePos={mousePos}
+                />
+              </div>
+            )}
+
+            {/* 4. SUB-TABS (VARIATIONS & DESKTOP LAYOUT CONTROL) */}
+            {/* Pinned directly under the sticky day title so the variation tabs
+                stay reachable while scrolling the board (Fase 7). */}
+            {activeDay && (
+              <div
+                id="tabContainer"
+                className="sticky z-[55] flex flex-col md:flex-row gap-4 mb-6 py-2.5 justify-between items-center max-w-6xl mx-auto w-full px-6 md:px-10 no-print bg-zinc-950/80 backdrop-blur-md"
+                style={{ top: `${headerHeight + dayHeaderHeight}px` }}
+              >
+                {/* Variations Selector Tabs */}
+                <div className="flex gap-2.5 flex-wrap justify-center md:justify-start">
+                  {activeDay.variations.length > 1 &&
+                    activeDay.variations.map((v, idx) => {
+                      const isActive = idx === currentVariationIndex;
+                      const tabBrand = resolveBlockBrand(
+                        v.tabName,
+                        v.warmup?.title || "",
+                        v.warmup?.items || [],
+                      );
+                      let shortTag = "";
+                      if (tabBrand.emblem.includes("HAEDO"))
+                        shortTag = "🪣 HAEDO";
+                      else if (tabBrand.emblem.includes("MAYHEM"))
+                        shortTag = "🔥 MAYHEM";
+                      else if (tabBrand.emblem.includes("HWPO"))
+                        shortTag = "⛓️ HWPO";
+                      else shortTag = "🧬 PRVN";
+                      return (
+                        <button
+                          key={idx}
+                          className={`tab-btn ${isActive ? "active" : ""} flex items-center gap-1.5`}
+                          onClick={() => setCurrentVariationIndex(idx)}
+                          id={`tab_variation_btn_${idx}`}
+                        >
+                          <span>{v.tabName}</span>
+                          <span
+                            className={`text-[7px] px-1 py-0.5 rounded font-mono font-black tracking-tighter ${
+                              isActive
+                                ? "bg-black/40 text-[#DC2626] border border-[#DC2626]/35"
+                                : "bg-[color:var(--color-card-2)] text-neutral-400 border border-transparent"
+                            }`}
+                          >
+                            {shortTag}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+
+                {/* Desktop Layout Switcher - Elegant Minimalist Pill Segmented Control */}
+                <div className="flex bg-[color:var(--color-card)] rounded-full p-0.5 select-none shadow-[var(--shadow-card)] no-print">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDesktopLayout("sidebar");
+                      localStorage.setItem("nexus_desktop_layout", "sidebar");
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-[9px] font-mono font-black tracking-widest uppercase transition-all duration-250 flex items-center gap-1.5 cursor-pointer ${
+                      desktopLayout === "sidebar"
+                        ? "bg-electric-blue text-black font-black shadow-sm"
+                        : "text-[color:var(--color-label)] hover:text-neutral-300"
+                    }`}
+                  >
+                    <LayoutDashboard size={10} className="shrink-0" />
+                    <span>SIDEBAR</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDesktopLayout("grid");
+                      localStorage.setItem("nexus_desktop_layout", "grid");
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-[9px] font-mono font-black tracking-widest uppercase transition-all duration-250 flex items-center gap-1.5 cursor-pointer ${
+                      desktopLayout === "grid"
+                        ? "bg-electric-blue text-black font-black shadow-sm"
+                        : "text-[color:var(--color-label)] hover:text-neutral-300"
+                    }`}
+                  >
+                    <Columns size={10} className="shrink-0" />
+                    <span>GRILLA</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDesktopLayout("papiro");
+                      localStorage.setItem("nexus_desktop_layout", "papiro");
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-[9px] font-mono font-black tracking-widest uppercase transition-all duration-250 flex items-center gap-1.5 cursor-pointer ${
+                      desktopLayout === "papiro"
+                        ? "bg-electric-blue text-black font-black shadow-sm"
+                        : "text-[color:var(--color-label)] hover:text-neutral-300"
+                    }`}
+                  >
+                    <Rows3 size={10} className="shrink-0" />
+                    <span>PAPIRO</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 5. MAIN BOARD BRUTALIST GRID */}
+            <div className="w-full px-6 md:px-10 flex flex-col flex-grow">
+              {activeVariation ? (
+                desktopLayout === "sidebar" ? (
+                  <div className="w-full flex-grow max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 md:gap-8 items-start relative select-none">
+                    {activeVariation.blocks?.length ? (() => {
+                      const flexBlocks = activeVariation.blocks!;
+                      const active = flexBlocks.find((b) => b.key === activeFlexKey) || flexBlocks[0];
+                      return (
+                        <>
+                          <aside className="w-full lg:w-72 shrink-0 space-y-3 no-print">
+                            <div className="text-[10px] font-mono tracking-widest text-[#DC2626] uppercase pb-2 mb-3 flex justify-between items-center">
+                              <span>// SESIÓN DE ENTRENAMIENTO</span>
+                              <span>[{flexBlocks.length} BLOQUES]</span>
+                            </div>
+                            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3">
+                              {flexBlocks.map((b) => {
+                                const c = BUCKET_COLOR[b.bucket] || "#71717A";
+                                const isOn = active.key === b.key;
+                                return (
+                                  <button
+                                    key={b.key}
+                                    onClick={() => setActiveFlexKey(b.key)}
+                                    className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${isOn ? "text-white shadow-sm" : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"}`}
+                                    style={isOn ? { borderColor: c, backgroundColor: `${c}26` } : undefined}
+                                  >
+                                    <div className="flex justify-between items-start mb-1 font-brutalist gap-1.5">
+                                      <span className="text-xs sm:text-[13px] font-extrabold tracking-wider truncate" style={isOn ? { color: c } : undefined}>
+                                        {b.title || b.key}
+                                      </span>
+                                      <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                                        {b.items.length}
+                                      </span>
+                                    </div>
+                                    <div className="text-[9px] font-mono truncate text-[color:var(--color-label)] group-hover:text-neutral-400 tracking-wider">
+                                      {b.scheme || "—"}
+                                    </div>
+                                    {isOn && <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: c }} />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </aside>
+                          <div className="flex-grow w-full h-full min-h-[420px] transition-all duration-300" id="workoutBoard">
+                            <motion.div
+                              key={active.key}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.18, ease: "easeInOut" }}
+                              className="h-full"
+                            >
+                              {renderBlockCard(active, false)}
+                            </motion.div>
+                            {renderDayExportActions()}
+                          </div>
+                        </>
+                      );
+                    })() : (
+                    <>
+                    {/* SIDEBAR DE BLOQUES EN COMPUTADORAS / BARRA DE TABS EN MÓVILES */}
+                    <aside className="w-full lg:w-72 shrink-0 space-y-3 no-print">
+                      <div className="text-[10px] font-mono tracking-widest text-[#DC2626] uppercase pb-2 mb-3 flex justify-between items-center">
+                        <span>// SESIÓN DE ENTRENAMIENTO</span>
+                        <span>[4 BLOQUES]</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3">
+                        <button
+                          onClick={() => setActiveBlockTab("warmup")}
+                          className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
+                            activeBlockTab === "warmup"
+                              ? "border-electric-blue bg-electric-blue/15 text-white shadow-sm"
+                              : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-1 font-brutalist">
+                            <span
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "warmup" ? "text-electric-blue" : "text-neutral-300 group-hover:text-white"}`}
+                            >
+                              01. CALENTAMIENTO
+                            </span>
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                              {activeVariation.warmup.items.length} MOV.
+                            </span>
+                          </div>
+                          <div className="text-[9px] font-mono truncate text-[color:var(--color-label)] group-hover:text-neutral-400 tracking-wider">
+                            {activeVariation.warmup.title || "Preparación"}
+                          </div>
+
+                          {/* COMPACT LIST OF EXERCISES inside the sidebar tab button */}
+                          <div className="mt-2.5 pt-2 border-t border-white/5 space-y-1 hidden lg:block">
+                            {activeVariation.warmup.items
+                              .slice(0, 5)
+                              .map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
+                                  title={getCompactSidebarText(item)}
+                                >
+                                  <span className="w-1 h-1 rounded-full bg-electric-blue shrink-0 " />
+                                  <span className="truncate">
+                                    {getCompactSidebarText(item)}
+                                  </span>
+                                </div>
+                              ))}
+                            {activeVariation.warmup.items.length > 5 && (
+                              <div className="text-[7.5px] text-[color:var(--color-label)] font-mono tracking-tight pt-0.5 pl-2 uppercase text-left">
+                                + {activeVariation.warmup.items.length - 5}{" "}
+                                más...
+                              </div>
+                            )}
+                          </div>
+
+                          {activeBlockTab === "warmup" && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-electric-blue" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => setActiveBlockTab("strength")}
+                          className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
+                            activeBlockTab === "strength"
+                              ? "border-[#FAFAFA] bg-[#FAFAFA]/15 text-white shadow-sm"
+                              : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-1 font-brutalist">
+                            <span
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "strength" ? "text-[#FAFAFA]" : "text-neutral-300 group-hover:text-white"}`}
+                            >
+                              02. FUERZA / OLY
+                            </span>
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                              {activeVariation.strength.items.length} MOVS.
+                            </span>
+                          </div>
+                          <div className="text-[9px] font-mono truncate text-[color:var(--color-label)] group-hover:text-neutral-400 tracking-wider">
+                            {activeVariation.strength.title || "Desarrollo"}
+                          </div>
+
+                          {/* COMPACT LIST OF EXERCISES inside the sidebar tab button */}
+                          <div className="mt-2.5 pt-2 border-t border-white/5 space-y-1 hidden lg:block">
+                            {activeVariation.strength.items
+                              .slice(0, 5)
+                              .map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
+                                  title={getCompactSidebarText(item)}
+                                >
+                                  <span className="w-1 h-1 rounded-full bg-[#FAFAFA] shrink-0 " />
+                                  <span className="truncate">
+                                    {getCompactSidebarText(item)}
+                                  </span>
+                                </div>
+                              ))}
+                            {activeVariation.strength.items.length > 5 && (
+                              <div className="text-[7.5px] text-[color:var(--color-label)] font-mono tracking-tight pt-0.5 pl-2 uppercase text-left">
+                                + {activeVariation.strength.items.length - 5}{" "}
+                                más...
+                              </div>
+                            )}
+                          </div>
+
+                          {activeBlockTab === "strength" && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FAFAFA]" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => setActiveBlockTab("metcon")}
+                          className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
+                            activeBlockTab === "metcon"
+                              ? "border-[#DC2626] bg-[#DC2626]/15 text-white shadow-sm"
+                              : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-1 font-brutalist">
+                            <span
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "metcon" ? "text-[#DC2626]" : "text-neutral-300 group-hover:text-white"}`}
+                            >
+                              03. METCON / WOD
+                            </span>
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                              {activeVariation.metcon.items.length} MOVS.
+                            </span>
+                          </div>
+                          <div className="text-[9px] font-mono truncate text-[color:var(--color-label)] group-hover:text-neutral-400 tracking-wider">
+                            {activeVariation.metcon.title || "Metcon"}
+                          </div>
+
+                          {/* COMPACT LIST OF EXERCISES inside the sidebar tab button */}
+                          <div className="mt-2.5 pt-2 border-t border-white/5 space-y-1 hidden lg:block">
+                            {activeVariation.metcon.items
+                              .slice(0, 5)
+                              .map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
+                                  title={getCompactSidebarText(item)}
+                                >
+                                  <span className="w-1 h-1 rounded-full bg-[#DC2626] shrink-0 " />
+                                  <span className="truncate">
+                                    {getCompactSidebarText(item)}
+                                  </span>
+                                </div>
+                              ))}
+                            {activeVariation.metcon.items.length > 5 && (
+                              <div className="text-[7.5px] text-[color:var(--color-label)] font-mono tracking-tight pt-0.5 pl-2 uppercase text-left">
+                                + {activeVariation.metcon.items.length - 5}{" "}
+                                más...
+                              </div>
+                            )}
+                          </div>
+
+                          {activeBlockTab === "metcon" && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#DC2626]" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => setActiveBlockTab("accessories")}
+                          className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
+                            activeBlockTab === "accessories"
+                              ? "border-[#A1A1AA] bg-[#A1A1AA]/15 text-white shadow-sm"
+                              : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-1 font-brutalist">
+                            <span
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "accessories" ? "text-[#A1A1AA]" : "text-neutral-300 group-hover:text-white"}`}
+                            >
+                              04. ACCESORIOS / ACC
+                            </span>
+                            <span className="text-[8.5px] font-mono tracking-tight shrink-0 bg-[color:var(--color-card-2)] px-1.5 py-0.5 rounded font-extrabold text-neutral-300">
+                              {activeVariation.accessories.items.length} MOVS.
+                            </span>
+                          </div>
+                          <div className="text-[9px] font-mono truncate text-[color:var(--color-label)] group-hover:text-neutral-400 tracking-wider">
+                            {activeVariation.accessories.title || "Longevidad"}
+                          </div>
+
+                          {/* COMPACT LIST OF EXERCISES inside the sidebar tab button */}
+                          <div className="mt-2.5 pt-2 border-t border-white/5 space-y-1 hidden lg:block">
+                            {activeVariation.accessories.items
+                              .slice(0, 5)
+                              .map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
+                                  title={getCompactSidebarText(item)}
+                                >
+                                  <span className="w-1 h-1 rounded-full bg-[#A1A1AA] shrink-0 " />
+                                  <span className="truncate">
+                                    {getCompactSidebarText(item)}
+                                  </span>
+                                </div>
+                              ))}
+                            {activeVariation.accessories.items.length > 5 && (
+                              <div className="text-[7.5px] text-[color:var(--color-label)] font-mono tracking-tight pt-0.5 pl-2 uppercase text-left">
+                                + {activeVariation.accessories.items.length - 5}{" "}
+                                más...
+                              </div>
+                            )}
+                          </div>
+
+                          {activeBlockTab === "accessories" && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#A1A1AA]" />
+                          )}
+                        </button>
+                      </div>
+                    </aside>
+
+                    {/* CONTENEDOR PRINCIPAL DEL BLOQUE ACTIVO */}
+                    <div
+                      className="flex-grow w-full h-full min-h-[420px] transition-all duration-300"
+                      id="workoutBoard"
+                    >
+                      <AnimatePresence mode="wait">
+                        {activeBlockTab === "warmup" && (
+                          <motion.div
+                            key="warmup"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="h-full"
+                          >
+                            {renderWarmupBlock()}
+                          </motion.div>
+                        )}
+                        {activeBlockTab === "strength" && (
+                          <motion.div
+                            key="strength"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="h-full"
+                          >
+                            {renderStrengthBlock()}
+                          </motion.div>
+                        )}
+                        {activeBlockTab === "metcon" && (
+                          <motion.div
+                            key="metcon"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="h-full"
+                          >
+                            {renderMetconBlock()}
+                          </motion.div>
+                        )}
+                        {activeBlockTab === "accessories" && (
+                          <motion.div
+                            key="accessories"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="h-full"
+                          >
+                            {renderAccessoriesBlock()}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {renderDayExportActions()}
+                    </div>
+                    </>
+                    )}
+                  </div>
+                ) : desktopLayout === "papiro" ? (
+                  // Papiro: a single wide column, block 1 → last, top to bottom.
+                  <main
+                    className="w-full flex-grow max-w-4xl mx-auto flex flex-col gap-6"
+                    id="workoutBoard"
+                    onTouchStart={handleVariationTouchStart}
+                    onTouchMove={handleVariationTouchMove}
+                    onTouchEnd={handleVariationTouchEnd}
+                  >
+                    {activeVariation.blocks?.length
+                      ? activeVariation.blocks.map((b) => renderBlockCard(b, false))
+                      : (
+                        <>
+                          {renderWarmupBlock(false)}
+                          {renderStrengthBlock(false)}
+                          {renderMetconBlock(false)}
+                          {renderAccessoriesBlock(false)}
+                        </>
+                      )}
+                    {renderDayExportActions(false)}
+                  </main>
+                ) : (
+                  // Grilla: adaptive columns (up to 6) — fewer blocks, fewer columns.
+                  <main
+                    className={`w-full flex-grow grid grid-cols-1 md:grid-cols-2 ${FULLVIEW_XL_COLS[Math.min(6, Math.max(1, activeVariation.blocks?.length || 4))]} gap-6 items-stretch`}
+                    id="workoutBoard"
+                    onTouchStart={handleVariationTouchStart}
+                    onTouchMove={handleVariationTouchMove}
+                    onTouchEnd={handleVariationTouchEnd}
+                  >
+                    {activeVariation.blocks?.length
+                      ? activeVariation.blocks.map((b) => renderBlockCard(b, true))
+                      : (
+                        <>
+                          {renderWarmupBlock(true)}
+                          {renderStrengthBlock(true)}
+                          {renderMetconBlock(true)}
+                          {renderAccessoriesBlock(true)}
+                        </>
+                      )}
+
+                    {renderDayExportActions(true)}
+                  </main>
+                )
+              ) : (
+                activeDay && (
+                  <main className="w-full flex-grow" id="workoutBoard">
+                    {/* Default rest day whiteboard rendering */}
+                    <section className="col-span-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[color:var(--color-line)] bg-pure-black/95 text-center space-y-6">
+                      <div className="text-5xl md:text-7xl font-brutalist text-electric-blue tracking-wider">
+                        REST DAY - PORTAL REGENT
+                      </div>
+                      <div className="max-w-xl space-y-4">
+                        <p className="text-xl md:text-2xl font-condensed font-bold tracking-wide text-neutral-300">
+                          LÍMITES DE ADHERENCIA RESPETADOS // RECARGANDO
+                          CAPACIDAD NEURAL
+                        </p>
+                        <div className="border-t border-white/20 pt-4 text-base text-white/60 font-condensed">
+                          PRESUPUESTO DE MANÁ: OPTIMIZADO // REGENERACIÓN
+                          COMPLETA PARA EL PRÓXIMO IMPACTO
+                        </div>
+                      </div>
+
+                    </section>
+                  </main>
+                )
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeSheet === 1 && (
+          <motion.div
+            key="sheet-rpe"
+            initial={{
+              opacity: 0,
+              x: transitionDirection === "right" ? 300 : -300,
+            }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{
+              opacity: 0,
+              x: transitionDirection === "right" ? -300 : 300,
+            }}
+            transition={{ type: "spring", stiffness: 280, damping: 28 }}
+            className="px-6 md:px-10 flex-grow flex flex-col space-y-6 w-full max-w-6xl mx-auto"
+          >
+            <RpeAnalyticsPanel
+              currentWeek={currentWeek}
+              activeDay={activeDay}
+              currentVariationIndex={currentVariationIndex}
+              logsVersion={logsVersion}
+              handleGenerateMonthlyReportPDF={handleGenerateMonthlyReportPDF}
+              getMonthlyVolumeStats={getMonthlyVolumeStats}
+              database={database}
+            />
+          </motion.div>
+        )}
+
+        {activeSheet === 2 && (
+          <motion.div
+            key="sheet-telemetry"
+            initial={{
+              opacity: 0,
+              x: transitionDirection === "right" ? 300 : -300,
+            }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{
+              opacity: 0,
+              x: transitionDirection === "right" ? -300 : 300,
+            }}
+            transition={{ type: "spring", stiffness: 280, damping: 28 }}
+            className="px-6 md:px-10 flex-grow flex flex-col gap-5 w-full max-w-6xl mx-auto"
+          >
+            <LensTabs
+              tabs={[
+                { key: "perfil", label: "Perfil" },
+                { key: "datos", label: "Datos & Nube" },
+                { key: "logros", label: "Logros" },
+              ]}
+              active={profileLens}
+              onChange={(k) => {
+                setProfileLens(k as "perfil" | "datos" | "logros");
+                localStorage.setItem("nexus_profile_lens", k);
+              }}
+              accent={activeColorSet.color}
+            />
+
+            {profileLens === "perfil" && (
+              <>
+                <ProfileSummaryCard
+                  athlete={athlete}
+                  handleUpdateAthlete={handleUpdateAthlete}
+                  onRecalibrate={() => setShowOnboarding(true)}
+                />
+
+                <ProgramCalendarCard />
+
+                <StrengthMarksCard athlete={athlete} handleUpdateAthlete={handleUpdateAthlete} />
+
+                <BlockImagesCard
+                  enableThemedBackgrounds={enableThemedBackgrounds}
+                  setEnableThemedBackgrounds={setEnableThemedBackgrounds}
+                  warmupBg={warmupBg}
+                  setWarmupBg={setWarmupBg}
+                  strengthBg={strengthBg}
+                  setStrengthBg={setStrengthBg}
+                  metconBg={metconBg}
+                  setMetconBg={setMetconBg}
+                  accessoriesBg={accessoriesBg}
+                  setAccessoriesBg={setAccessoriesBg}
+                />
+
+                {/* Paleta de color de la programación (10 combinaciones únicas).
+                    Se aplica al capítulo activo: acento, banda y gradiente del
+                    título de cada día. */}
+                <SectionCard
+                  title="PALETA DEL PROGRAMA"
+                  icon={<Palette size={16} className="text-[color:var(--color-sem-cyan)]" />}
+                  subtitle="Elegí los colores de tu programación mensual"
+                >
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                    {THEME_PALETTES.map((t) => {
+                      const sel = t.key === chapterTheme?.key;
+                      return (
+                        <button
+                          key={t.key}
+                          type="button"
+                          onClick={() => applyPalette(t)}
+                          aria-pressed={sel}
+                          title={t.label}
+                          className={`flex flex-col items-center gap-2 p-3 rounded-[var(--radius-tile)] transition-all cursor-pointer ${
+                            sel
+                              ? "bg-[color:var(--color-card-2)] ring-2 ring-[color:var(--color-sem-cyan)]"
+                              : "bg-[color:var(--color-card-2)] hover:brightness-125"
+                          }`}
+                        >
+                          <span
+                            className="w-full h-8 rounded-[4px] ring-1 ring-white/10 relative"
+                            style={{ background: t.titleGradient }}
+                          >
+                            {sel && (
+                              <Check size={14} className="absolute top-1 right-1 text-black drop-shadow" aria-hidden="true" />
+                            )}
+                          </span>
+                          <span className="font-mono text-[10px] font-bold uppercase tracking-wide text-[color:var(--color-ink-2)]">
+                            {t.label ?? t.key}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </SectionCard>
+              </>
+            )}
+
+            {profileLens === "datos" && (
+              <> {/* Datos & Nube lens */}
+            {/* CLOUD PERSISTENCE PANEL: SECURE SYNC ENGINE */}
+            <CloudSyncPanel
+              currentUser={currentUser}
+              isCloudSyncing={isCloudSyncing}
+              setIsCloudSyncing={setIsCloudSyncing}
+              syncStatus={syncStatus}
+              setConfettiTrigger={setConfettiTrigger}
+              onRefreshFromSheet={handleRefreshFromSheet}
+              isRefreshingSheet={isRefreshingSheet}
+              currentDatabase={database}
+              onProgramImported={(db, meta) => {
+                // A new chapter — never overwrite the prior one. createChapter
+                // archives the current chapter and starts this one fresh; it
+                // sets the live program, so reflect it in state here.
+                createChapter(
+                  { title: meta?.title || "NUEVO CAPÍTULO", lore: meta?.lore },
+                  db,
+                );
+                setDatabase(db);
+                setCurrentVariationIndex(0);
+                setCompletedDays(() => {
+                  const fresh: Record<string, DayStatus> = {};
+                  ["w1", "w2", "w3", "w4"].forEach((w) => {
+                    for (let d = 1; d <= 7; d++) fresh[`${w}d${d}`] = false;
+                  });
+                  return fresh;
+                });
+                window.dispatchEvent(new Event("nexus_logs_updated"));
+                // Fase 3: classify each block's inspiration ONCE (AI when a key
+                // is configured, else the keyword heuristic), then persist the
+                // tagged program into the now-active chapter (LIVE_PROGRAM).
+                tagChapterInspiration(db)
+                  .then((tagged) => {
+                    setDatabase(tagged);
+                    saveCachedWorkouts(tagged);
+                  })
+                  .catch((e) => console.error("tagChapterInspiration failed:", e));
+              }}
+            />
+
+            {/* EXPORTACIONES & UTILIDADES — reubicadas desde la barra de menú.
+                Cada acción con su descripción de qué hace y cuándo usarla. */}
+            <section className="mt-4 p-5 bg-pure-black/95 text-left" data-purpose="exports-panel">
+              <label className="text-[10px] font-mono font-black tracking-widest text-white uppercase flex items-center gap-1.5">
+                <FileText size={11} /> EXPORTACIONES & UTILIDADES
+              </label>
+              <p className="mt-1 text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
+                Sacá tu programación y tus registros fuera de la app: texto, PDF, Google Sheets o Markdown.
+              </p>
+
+              <div className="mt-4 space-y-4">
+                {/* TXT MES */}
+                <div className="pt-3 border-t border-[color:var(--color-line)]">
+                  <button
+                    onClick={handleMonthTextExport}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-zinc-600 text-zinc-200 hover:bg-zinc-200 hover:text-pure-black font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> TXT DEL MES
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
+                    Descarga el mes completo (4 semanas) como texto plano. Ideal para archivar o pegar en un editor / IA.
+                  </p>
+                </div>
+
+                {/* SYNC SHEETS */}
+                <div className="pt-3 border-t border-[color:var(--color-line)]">
+                  <button
+                    onClick={handleExportGoogleSheets}
+                    disabled={isExportingSheets}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-emerald-600/60 text-emerald-300 hover:bg-emerald-500 hover:text-pure-black disabled:opacity-50 disabled:cursor-not-allowed font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <Upload size={12} className={isExportingSheets ? "animate-bounce" : ""} />
+                    {isExportingSheets ? "SINCRONIZANDO..." : "SYNC GOOGLE SHEETS"}
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
+                    Sube programación y resultados a tu Google Sheet vinculado. Backup en la nube y base para análisis externo.
+                  </p>
+                </div>
+
+                {/* EXPORTAR SEMANA (PDF) */}
+                <div className="pt-3 border-t border-[color:var(--color-line)]">
+                  <button
+                    id="btn-quick-pdf"
+                    onClick={handleBatchPDFExport}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-blue-600/60 text-blue-300 hover:bg-blue-500 hover:text-pure-black font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> EXPORTAR SEMANA (PDF)
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
+                    PDF consolidado de los 7 días de la semana activa, con la distribución de RPE. Para imprimir o compartir.
+                  </p>
+                </div>
+
+                {/* PROGRAMA DEL DÍA (Markdown) */}
+                <div className="pt-3 border-t border-[color:var(--color-line)]">
+                  <button
+                    onClick={handleExportDayMarkdown}
+                    disabled={!activeDay}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 border border-indigo-500/60 text-indigo-300 hover:bg-indigo-500 hover:text-pure-black disabled:opacity-40 disabled:cursor-not-allowed font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> PROGRAMA DEL DÍA (MD)
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
+                    {activeDay
+                      ? "Markdown del día activo, listo para llevar a una IA o editor."
+                      : "Seleccioná un día en el pizarrón para exportarlo."}
+                  </p>
+                </div>
+
+                {/* GUÍA IA */}
+                <div className="pt-3 border-t border-[color:var(--color-line)]">
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([guiaDiaEspecial], { type: "text/markdown;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "GUIA-dia-especial.md";
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#A1A1AA] hover:bg-[color:var(--color-card-2)] hover:text-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                  >
+                    <FileText size={12} /> GUÍA IA (DÍA ESPECIAL)
+                  </button>
+                  <p className="mt-1.5 text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
+                    Descarga la guía para pedirle a una IA externa (ChatGPT / Claude / Gemini) un día especial en el formato que la app importa.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* 1RM BRZYCKI CALIBRATOR TOOL */}
+            <section className="mt-4">
+              <BrzyckiCalculator />
+            </section>
+              </>
+            )}
+
+            {profileLens === "logros" && (
+            <TelemetryBoard
+              athlete={athlete}
+              currentWeek={currentWeek}
+              weeklyCompletionInfo={weeklyCompletionInfo}
+              activeDay={activeDay}
+              activeDayLoggingPercentage={activeDayLoggingPercentage}
+              earnedLootList={earnedLootList}
+              currentUser={currentUser}
+              manualSyncState={manualSyncState}
+              setManualSyncState={setManualSyncState}
+              setShowResetModal={setShowResetModal}
+              handleExportLocalHistory={handleExportLocalHistory}
+              handleExportLocalHistoryCSV={handleExportLocalHistoryCSV}
+              activeColorSet={activeColorSet}
+            />
+            )}
+          </motion.div>
+        )}
+
+        {activeSheet === 3 && (
+          <motion.div
+            key="sheet-guerrero"
+            initial={{
+              opacity: 0,
+              x: transitionDirection === "right" ? 300 : -300,
+            }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{
+              opacity: 0,
+              x: transitionDirection === "right" ? -300 : 300,
+            }}
+            transition={{ type: "spring", stiffness: 280, damping: 28 }}
+            className="px-4 md:px-10 flex-grow flex flex-col w-full max-w-6xl mx-auto"
+          >
+            <WarriorScreen
+              athlete={athlete}
+              currentXp={currentXp}
+              xpPercentage={xpPercentage}
+              unlockedAchievements={unlockedAchievements}
+              activeColorSet={activeColorSet}
+              currentWeek={currentWeek}
+              currentDayIndex={currentDayIndex}
+              activeDayId={activeDay?.id ?? `${currentWeek}d${currentDayIndex + 1}`}
+              activeDayName={activeDay?.title || activeDay?.name || "LA GRIETA"}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 7. CUSTOM CONFIRM BRUTALIST DIALOGS (Replaces standard popup blockages) */}
+      <AnimatePresence>
+        {showResetModal && (
+          <ResetConfirmModal
+            key="reset-modal"
+            onConfirm={handleConfirmReset}
+            onCancel={() => setShowResetModal(false)}
+          />
+        )}
+
+
+        {/* GLOBAL TOAST NOTIFICATIONS (CSV export feedback, etc.) */}
+        <Toast key="global-toast" />
+
+        {/* BRUTALIST CF-L4 ACHIEVEMENT UNLOCKED POPUP BANNER */}
+        {activeAchievement && (
+          <div key="achievement-banner" className="fixed inset-0 bg-transparent pointer-events-none flex items-start justify-center z-[200] p-4 text-center pt-12 md:pt-16">
+            <motion.div
+              initial={{ y: -80, scale: 0.9, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: -80, scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 220, damping: 16 }}
+              className="pointer-events-auto max-w-sm sm:max-w-md w-full bg-black/95 backdrop-blur-md border-2 p-5 relative overflow-hidden flex flex-col items-center select-none shadow-[0_15px_40px_rgba(0,0,0,0.85)]"
+              style={{
+                borderColor: activeAchievement.color,
+                boxShadow: `0 0 35px ${activeAchievement.color}25`,
+              }}
+            >
+              {/* aesthetic color bar */}
+              <div
+                className="absolute top-0 left-0 right-0 h-1"
+                style={{ backgroundColor: activeAchievement.color }}
+              />
+
+              <div className="flex items-center gap-3 w-full">
+                <div
+                  className="rounded-none p-3 text-3xl shrink-0 flex items-center justify-center border"
+                  style={{
+                    backgroundColor: `${activeAchievement.color}15`,
+                    borderColor: `${activeAchievement.color}40`,
+                    color: activeAchievement.color,
+                  }}
+                >
+                  {activeAchievement.icon}
+                </div>
+
+                <div className="text-left flex-grow min-w-0">
+                  <div className="flex justify-between items-center bg-white/0">
+                    <span
+                      className="text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 tracking-wider"
+                      style={{
+                        backgroundColor: `${activeAchievement.color}20`,
+                        color: activeAchievement.color,
+                      }}
+                    >
+                      LOGRO DE RENDIMIENTO • {activeAchievement.rarity}
+                    </span>
+                    <button
+                      onClick={() => setActiveAchievement(null)}
+                      className="text-[color:var(--color-label)] hover:text-white transition-colors p-1"
+                    >
+                      <Check size={14} />
+                    </button>
+                  </div>
+                  <h4
+                    className="text-sm sm:text-base font-brutalist tracking-wider text-pure-white leading-tight mt-1 uppercase"
+                    style={{ color: activeAchievement.color }}
+                  >
+                    {activeAchievement.title}
+                  </h4>
+                  <p className="font-condensed text-neutral-300 font-bold text-[10px] sm:text-xs mt-1 leading-normal">
+                    {activeAchievement.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Countdown progress loading bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-900 overflow-hidden">
+                <motion.div
+                  initial={{ width: "100%" }}
+                  animate={{ width: "0%" }}
+                  transition={{ duration: 5, ease: "linear" }}
+                  className="h-full"
+                  style={{ backgroundColor: activeAchievement.color }}
+                />
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {showOnboarding && (
+          <OnboardingWizard
+            key="onboarding"
+            onDone={() => {
+              setShowOnboarding(false);
+              window.dispatchEvent(new Event("nexus_logs_updated"));
+              toast("Punto de referencia computado — bienvenido, atleta");
+            }}
+            onSkip={() => setShowOnboarding(false)}
+          />
+        )}
+
+      </AnimatePresence>
+
+      {/* 9. DECORATION COMPACT FOOTER — pb clears the floating buttons. */}
+      <footer className="mt-8 pt-6 pb-24 opacity-40" data-purpose="footer-texture">
+        <div className="flex justify-between border-t border-white/40 py-4 text-xs font-condensed font-bold uppercase tracking-wider">
+          <span>{SYSTEM_NAME} // {SYSTEM_VERSION}</span>
+          <span>READY FOR IMPACT // {SYSTEM_TAGLINE}</span>
+        </div>
+      </footer>
+
+      {/* 9.5 FULLSCREEN INTERACTIVE PREVIEW MODAL */}
+      {isFullscreenPreview && shareCardProps && (
+        <div className="fixed inset-0 z-[999] bg-[#0a0a0f]/95 backdrop-blur-md flex flex-col no-print items-center justify-center overflow-hidden">
+          {/* Header Controls */}
+          <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+            <div className="flex items-center gap-2 pointer-events-auto">
+              <MousePointer2 className="text-amber-500 animate-bounce" size={20} />
+              <span className="font-mono text-xs font-black tracking-widest text-amber-500 uppercase drop-shadow-md bg-black/40 px-2 py-1 rounded">
+                MODO INTERACTIVO: ARRASTRAR ELEMENTOS
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-3 pointer-events-auto">
+              <button
+                onClick={() => setBlockPositions({})}
+                className="bg-red-900/80 hover:bg-red-800 text-white font-mono text-xs font-black tracking-widest px-4 py-2 uppercase rounded border border-red-500/30 transition-all active:scale-95 cursor-pointer"
+              >
+                RESET LAYOUT
+              </button>
+              <button
+                onClick={() => setIsFullscreenPreview(false)}
+                className="bg-zinc-800/80 hover:bg-zinc-700 text-white p-2 rounded-full border border-zinc-600/50 transition-all active:scale-95 cursor-pointer"
+              >
+                <X size={24} />
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Card Container */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {/* The scale factor should ensure it fits perfectly within the viewport */}
+            <div className="pointer-events-auto relative" style={{ transform: `scale(${previewScale})`, transformOrigin: "center" }}>
+              {videoMode && videoBgUrl && (
+                <video
+                  src={videoBgUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 pointer-events-none object-cover"
+                  style={{ width: "1080px", height: "1920px" }}
+                />
+              )}
+              <ShareCardOverlay
+                {...shareCardProps}
+                interactiveMode={true}
+                previewMode={true}
+                transparentBase={videoMode && !!videoBgFile}
+                dragScale={previewScale}
+              />
+            </div>
+          </div>
+
+          {/* Bottom Export Button */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
+            <button
+              onClick={() => {
+                setIsFullscreenPreview(false);
+                setTimeout(videoMode && videoBgFile ? handleExportDayVideo : handleExportDayJPG, 300);
+              }}
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white font-mono text-sm font-black tracking-widest px-8 py-4 uppercase rounded shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all active:scale-95 cursor-pointer"
+            >
+              <Share2 size={18} />
+              {videoMode && videoBgFile ? "CONFIRMAR Y EXPORTAR VIDEO" : "CONFIRMAR Y EXPORTAR"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 9.7 STRUCTURED LOGGING — WIZARD "ANOTAR WOD" */}
+      {activeDay && activeVariation && (() => {
+        const existingSession = getSessionForDay(activeDay.id);
+        return (
+        <>
+          <button
+            onClick={() => setWizardOpen(true)}
+            title={existingSession ? "Editar el WOD anotado" : "Anotar tu WOD paso a paso, como en la pizarra del box"}
+            className="fixed bottom-5 left-5 z-[90] no-print bg-[color:var(--color-sem-red)] text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+          >
+            {existingSession ? <Pencil size={16} aria-hidden="true" /> : <Swords size={16} aria-hidden="true" />}
+            {existingSession ? "EDITAR WOD" : "ANOTAR WOD"}
+          </button>
+          {/* Cerrar un día que no se entrenó: lo marca perdido (sin datos) para
+              que no quede pendiente eternamente y cierre el hueco en gráficos.
+              Oculto si el día ya está completado. */}
+          {completedDays[activeDay.id] !== "completed" && (
+            completedDays[activeDay.id] === "missed" ? (
+              <button
+                onClick={() => unmarkDayMissed(activeDay.id)}
+                title="Deshacer: volver a día pendiente"
+                className="fixed bottom-5 right-5 z-[90] no-print bg-black text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+              >
+                <RotateCcw size={16} aria-hidden="true" /> DESHACER
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (window.confirm(`¿Marcar ${activeDay.name} como día perdido? Se cierra sin registrar datos (no suma XP ni % de la semana).`)) {
+                    markDayMissed(activeDay.id);
+                  }
+                }}
+                title="No entrené este día: cerrarlo como perdido"
+                className="fixed bottom-5 right-5 z-[90] no-print bg-black text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+              >
+                <X size={16} aria-hidden="true" /> DÍA PERDIDO
+              </button>
+            )
+          )}
+          <SessionWizard
+            open={wizardOpen}
+            onClose={() => setWizardOpen(false)}
+            dayId={activeDay.id}
+            dayName={activeDay.name}
+            dayTitle={activeDay.title}
+            variation={activeVariation}
+            initialSession={existingSession}
+            onSealed={(session) => {
+              markDayComplete(session.dayId || activeDay.id);
+            }}
+          />
+        </>
+        );
+      })()}
+
+      {/* 10. HIDDEN OFF-SCREEN CARD FOR JPG EXPORT */}
+      {shareCardProps && (
+        <ShareCardOverlay {...shareCardProps} transparentBase={videoMode && !!videoBgFile} />
+      )}
+    </div>
+  );
+}

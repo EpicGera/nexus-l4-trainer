@@ -87,11 +87,8 @@ export default function ExportCustomizationPanel({
   if (!exportBgImage && !clipMode) return null;
 
   return (
-    <div className="w-full col-span-full no-print bg-[#0a0a0f]/95 border-2 border-amber-500/40 p-6 mb-6 text-left flex flex-col gap-5 shadow-[0_25px_60px_rgba(0,0,0,0.85)] rounded-xl relative">
-      {/* Decorative top dot neon glow */}
-      <div className="absolute top-0 left-10 right-10 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-80" />
-
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-3.5">
+    <div className="w-full no-print text-left flex flex-col gap-4 relative">
+      <div className="hidden border-b border-zinc-800 pb-3.5">
         <div className="flex items-center gap-2">
           <Camera className="text-amber-500 animate-pulse" size={18} />
           <span className="font-mono text-xs font-black tracking-widest text-amber-500 uppercase">
@@ -159,9 +156,9 @@ export default function ExportCustomizationPanel({
         )}
 
         {/* ── CONTROLS ──────────────────────────────────────────────────── */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="flex-1 grid grid-cols-2 gap-3">
           {/* Alineación Horizontal */}
-          <div className="flex flex-col gap-2 font-condensed">
+          <div className="flex flex-col gap-1.5 font-condensed">
             <SectionLabel>Alineación Horizontal</SectionLabel>
             <div className="grid grid-cols-3 gap-1 bg-black/80 p-1 border border-zinc-800 rounded">
               <button
@@ -186,7 +183,7 @@ export default function ExportCustomizationPanel({
           </div>
 
           {/* Alineación Vertical */}
-          <div className="flex flex-col gap-2 font-condensed">
+          <div className="flex flex-col gap-1.5 font-condensed">
             <SectionLabel>Alineación Vertical</SectionLabel>
             <div className="grid grid-cols-3 gap-1 bg-black/80 p-1 border border-zinc-800 rounded">
               <button
@@ -213,7 +210,7 @@ export default function ExportCustomizationPanel({
             </div>
           </div>
           {/* Tema Visual */}
-          <div className="flex flex-col gap-2 font-condensed col-span-1 md:col-span-2 mb-4">
+          <div className="flex flex-col gap-1.5 font-condensed col-span-2 mb-2">
             <SectionLabel>Estilo Gráfico (Tema)</SectionLabel>
             <div className="grid grid-cols-4 gap-1 bg-black/80 p-1 border border-zinc-800 rounded">
               <button
@@ -304,7 +301,7 @@ export default function ExportCustomizationPanel({
           </div>
 
           {/* Efecto Cristal Esmerilado */}
-          <div className="flex flex-col gap-2 font-condensed">
+          <div className="flex flex-col gap-1.5 font-condensed">
             <SectionLabel>Efecto Cristal Esmerilado</SectionLabel>
             <div className="grid grid-cols-2 gap-1 bg-black/80 p-1 border border-zinc-800 rounded">
               <button
@@ -325,12 +322,12 @@ export default function ExportCustomizationPanel({
           </div>
 
           {/* Nombre del Atleta */}
-          <div className="flex flex-col gap-2 font-condensed">
+          <div className="flex flex-col gap-1.5 font-condensed">
             <SectionLabel>Nombre del Atleta (Neón)</SectionLabel>
             <input
               type="text"
               placeholder="Ej. GERA Y FLOR..."
-              className="bg-black/90 border border-zinc-800 text-white text-xs px-3.5 py-2.5 rounded uppercase focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono transition-all"
+              className="bg-black/90 border border-zinc-800 text-white text-[10px] px-2 py-1.5 rounded uppercase focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono transition-all"
               value={exportAthleteName}
               onChange={(e) => setExportAthleteName(e.target.value)}
               onClick={(e) => e.stopPropagation()}
@@ -339,12 +336,12 @@ export default function ExportCustomizationPanel({
           </div>
 
           {/* Inspiración */}
-          <div className="flex flex-col gap-2 font-condensed">
-            <SectionLabel>Inspiración / Sello Inferior</SectionLabel>
+          <div className="flex flex-col gap-1.5 font-condensed">
+            <SectionLabel>Inspiración / Sello</SectionLabel>
             <input
               type="text"
               placeholder="Ej. MAYHEM INSPIRED..."
-              className="bg-black/90 border border-zinc-800 text-white text-xs px-3.5 py-2.5 rounded uppercase focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono transition-all"
+              className="bg-black/90 border border-zinc-800 text-white text-[10px] px-2 py-1.5 rounded uppercase focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono transition-all"
               value={exportInspiration}
               onChange={(e) => setExportInspiration(e.target.value)}
               onClick={(e) => e.stopPropagation()}
@@ -353,8 +350,8 @@ export default function ExportCustomizationPanel({
           </div>
 
           {/* Opacidad Slider */}
-          <div className="flex flex-col gap-2 bg-black/60 p-4 border border-zinc-800 rounded font-condensed">
-            <div className="flex justify-between items-center text-[10px] font-mono font-black text-zinc-400 tracking-wider uppercase mb-1">
+          <div className="flex flex-col gap-1 bg-black/60 px-3 py-2 border border-zinc-800 rounded font-condensed">
+            <div className="flex justify-between items-center text-[9px] font-mono font-black text-zinc-400 tracking-wider uppercase mb-1">
               <span>Opacidad de Rutina</span>
               {exportCardOpacity === 0 ? (
                 <span className="text-[#00f0ff] font-bold animate-pulse">
@@ -369,7 +366,7 @@ export default function ExportCustomizationPanel({
               min="0"
               max="100"
               step="5"
-              className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
               value={exportCardOpacity}
               onChange={(e) => setExportCardOpacity(Number(e.target.value))}
               onClick={(e) => e.stopPropagation()}
@@ -377,9 +374,9 @@ export default function ExportCustomizationPanel({
           </div>
 
           {/* Altura Máxima Slider */}
-          <div className="flex flex-col gap-2 bg-black/60 p-4 border border-zinc-800 rounded font-condensed">
-            <div className="flex justify-between items-center text-[10px] font-mono font-black text-zinc-400 tracking-wider uppercase mb-1">
-              <span>Uso de Imagen (Altura)</span>
+          <div className="flex flex-col gap-1 bg-black/60 px-3 py-2 border border-zinc-800 rounded font-condensed">
+            <div className="flex justify-between items-center text-[9px] font-mono font-black text-zinc-400 tracking-wider uppercase mb-1">
+              <span>Altura (Uso de Imagen)</span>
               <span className="text-amber-500">{exportCardHeightLimit}%</span>
             </div>
             <input
@@ -387,7 +384,7 @@ export default function ExportCustomizationPanel({
               min="30"
               max="70"
               step="1"
-              className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
               value={exportCardHeightLimit}
               onChange={(e) => setExportCardHeightLimit(Number(e.target.value))}
               onClick={(e) => e.stopPropagation()}

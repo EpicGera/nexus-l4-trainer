@@ -95,7 +95,7 @@ export default function NavigationHeader({
           >
             <img src="/logo.svg" alt="Nexus L4 Emblem" className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] shrink-0 -rotate-3" />
             <div className="border-l-2 border-white/40 px-1 sm:px-3 py-0.5 sm:py-1 transition-colors">
-              <span className="text-white font-brutalist text-[5.5px] min-[320px]:text-[6.5px] min-[350px]:text-[7.5px] min-[375px]:text-[10px] sm:text-xs md:text-sm tracking-widest font-extrabold uppercase ">
+              <span className="text-white font-brutalist text-[7.5px] min-[350px]:text-[8.5px] min-[375px]:text-[10px] sm:text-xs md:text-sm tracking-widest font-extrabold uppercase ">
                 NEXUS L4 MASTER
               </span>
             </div>
@@ -105,7 +105,7 @@ export default function NavigationHeader({
           </div>
 
           <div className="bg-[color:var(--color-card-2)] rounded-[var(--radius-tile)] px-1.5 py-0.5 flex items-center xl:hidden mt-0">
-            <span className="text-[7.5px] min-[320px]:text-[8px] min-[375px]:text-[9px] sm:text-[10px] font-mono font-bold text-neutral-300">
+            <span className="text-[7.5px] min-[320px]:text-[8px] min-[375px]:text-[9px] sm:text-[10px] font-mono font-bold text-[color:var(--color-label)]">
               HOJA {activeSheet + 1}/{sheets.length}
             </span>
           </div>
@@ -117,7 +117,7 @@ export default function NavigationHeader({
             <span
               className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${syncWithRealTime ? "bg-white" : "bg-signal-red"}`}
             />
-            <span className="text-white text-[7px] min-[375px]:text-[8px] sm:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">
+            <span className="text-white text-[7.5px] min-[375px]:text-[8.5px] sm:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">
               {realTime
                 .toLocaleDateString("es-ES", {
                   weekday: "short",
@@ -151,7 +151,7 @@ export default function NavigationHeader({
 
           <button
             onClick={handleToggleSync}
-            className={`px-1 min-[375px]:px-1.5 sm:px-3 py-0.5 sm:py-1 font-brutalist text-[7px] min-[320px]:text-[7.5px] min-[375px]:text-[8.5px] sm:text-[10px] tracking-wider transition-all cursor-pointer rounded-sm shrink-0 font-bold inline-flex items-center gap-1 ${
+            className={`px-1 min-[375px]:px-1.5 sm:px-3 py-0.5 sm:py-1 font-brutalist text-[7.5px] min-[375px]:text-[8.5px] sm:text-[10px] tracking-wider transition-all cursor-pointer rounded-sm shrink-0 font-bold inline-flex items-center gap-1 ${
               syncWithRealTime
                 ? "bg-transparent text-white hover:bg-white hover:text-black"
                 : "bg-white text-black hover:bg-neutral-200"
@@ -174,7 +174,7 @@ export default function NavigationHeader({
           </button>
 
           <div className="bg-[color:var(--color-card-2)] rounded-[var(--radius-tile)] px-2 py-0.5 items-center gap-1 shrink-0 hidden md:flex">
-            <span className="text-[9px] font-mono font-bold text-neutral-300">
+            <span className="text-[9px] font-mono font-bold text-[color:var(--color-ink-2)]">
               HOJA {activeSheet + 1}/{sheets.length}
             </span>
           </div>

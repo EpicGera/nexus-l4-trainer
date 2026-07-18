@@ -55,7 +55,7 @@ import { BUCKET_COLOR } from "./lib/buckets";
 import { getSessionForDay, backfillMetconDerivedSets, repairMetconSnapshots } from "./lib/sessionStore";
 import { parseSpecialDay, injectSpecialVariation, removeSpecialVariation, hasSpecialVariation, SPECIAL_TAB } from "./lib/specialDay";
 import { getMonthlyVolumeStats } from "./lib/exportService";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, MotionConfig } from "motion/react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -115,6 +115,7 @@ import {
   Swords,
   Pencil,
   Palette,
+  Image as ImageIcon,
 } from "lucide-react";
 
 // Firebase core & sync integration
@@ -1416,333 +1417,25 @@ export default function App() {
   // Day share actions — STORY JPG (primary) with the "+ FOTO" attach folded in
   // as a borderless secondary. (PROGRAMA DEL DÍA / Markdown lives in the month
   // toolbar now.) Single source of truth for every board layout.
-  const renderDayExportActions = (columns = false) => (
-    <>
-      {activeDay && (
-        <div className={`no-print${columns ? " col-span-full" : ""}`}>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={exportFileInputRef}
-            onChange={handleBgImageUpload}
-          />
-          {/* Flotante, centrado abajo — misma fila que ANOTAR WOD (izquierda)
-              y DÍA PERDIDO (derecha). */}
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[90] flex overflow-hidden rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)]">
-            <button
-              type="button"
-              onClick={handleExportDayJPG}
-              disabled={isExportingJPG}
-              className="flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white active:scale-95 disabled:opacity-50 cursor-pointer text-center"
-              title="Guardar el día como una imagen para compartir"
-            >
-              <Camera size={16} className={`shrink-0 ${isExportingJPG ? "animate-spin text-amber-200" : "text-amber-100 "}`} />
-              <span>{isExportingJPG ? "EXPORTANDO..." : "CAPTURA DEL DÍA"}</span>
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowStoryMenu((s) => !s);
-              }}
-              aria-expanded={showStoryMenu}
-              className={`shrink-0 flex items-center justify-center gap-1.5 px-3 py-3 font-brutalist text-sm tracking-widest font-extrabold uppercase transition-all duration-300 border-none active:scale-95 cursor-pointer ${showStoryMenu ? "bg-amber-700/60 text-amber-100" : "bg-amber-900/40 hover:bg-amber-800/50 text-amber-300"}`}
-              title="Opciones de la imagen: foto de fondo y personalización"
-            >
-              <Settings2 size={16} />
-              <ChevronDown size={14} className={`transition-transform duration-200 ${showStoryMenu ? "rotate-180" : ""}`} />
-            </button>
-          </div>
 
-          {showStoryMenu && (
-            <div className="mt-2 space-y-3 bg-black/40 p-3 rounded-sm">
-              {/* web: input con capture abre la cámara del teléfono; nativo usa el plugin */}
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                ref={cameraInputRef}
-                onChange={handleBgImageUpload}
-              />
-              {/* Selector explícito de variación para la Story (incl. ESPECIAL) */}
-              {activeDay.variations.length > 1 && (
-                <div className="space-y-1.5">
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Día a compartir</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeDay.variations.map((v) => {
-                      const sel = (storyVariationTab ?? activeVariation?.tabName) === v.tabName;
-                      const isSpecial = v.tabName === SPECIAL_TAB;
-                      return (
-                        <button
-                          key={v.tabName}
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setStoryVariationTab(v.tabName); }}
-                          className={`px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${
-                            sel
-                              ? isSpecial ? "bg-signal-red text-white border-signal-red" : "bg-white text-black border-white"
-                              : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"
-                          }`}
-                        >
-                          {v.tabName}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    exportFileInputRef.current?.click();
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white active:scale-95 cursor-pointer"
-                  title="Subir una foto ya tomada"
-                >
-                  <Camera size={16} />
-                  <span>{exportBgImage ? "CAMBIAR FOTO" : "SUBIR FOTO"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void handleTakePhoto();
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-wider font-extrabold uppercase transition-all duration-300 bg-white text-black hover:bg-neutral-200 active:scale-95 cursor-pointer"
-                  title="Tomar la foto ahora con la cámara"
-                >
-                  <Camera size={16} />
-                  <span>TOMAR FOTO</span>
-                </button>
-              </div>
-              {isFxProcessing && (
-                <div className="text-[10px] font-mono text-[#A1A1AA] uppercase tracking-widest animate-pulse text-center">
-                  Detectando personas y aplicando efecto…
-                </div>
-              )}
+  // Escape cierra el preview fullscreen — mismo patrón que ModalSheet
+  // (primitives.tsx), este modal no lo reusaba y quedaba sin salida por teclado.
+  React.useEffect(() => {
+    if (!isFullscreenPreview) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsFullscreenPreview(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isFullscreenPreview]);
 
-              {/* ── VIDEO (Fase A): movimiento + música local ─────────────── */}
-              <div className="space-y-2.5 border-t border-[color:var(--color-line)] pt-3">
-                <div className="grid grid-cols-2 gap-1 bg-black/60 p-1 rounded-sm">
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setVideoMode(false); }}
-                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${!videoMode ? "bg-white text-black" : "text-[#A1A1AA] hover:bg-[color:var(--color-card-2)]"}`}
-                  >
-                    Foto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setVideoMode(true); }}
-                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${videoMode ? "bg-white text-black" : "text-[#A1A1AA] hover:bg-[color:var(--color-card-2)]"}`}
-                  >
-                    Video
-                  </button>
-                </div>
-
-                {videoMode && (
-                  <div className="space-y-2.5">
-                    {/* FONDO: foto animada (default) o clip de video real */}
-                    <div className="space-y-1.5">
-                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Fondo</div>
-                      <input type="file" accept="video/*" className="hidden" ref={videoBgInputRef} onChange={handleVideoBgFile} />
-                      {videoBgFile ? (
-                        <div className="flex items-center gap-2 px-3 py-2.5 border border-signal-red/40 bg-signal-red/10 rounded-sm">
-                          <Film size={14} className="text-signal-red shrink-0" />
-                          <span className="truncate flex-1 font-mono text-[10px] text-white">{videoBgName}</span>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); clearVideoBg(); }}
-                            className="text-white/50 hover:text-white cursor-pointer shrink-0"
-                            aria-label="Quitar clip de video"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); videoBgInputRef.current?.click(); }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
-                        >
-                          <Film size={14} />
-                          USAR CLIP DE VIDEO
-                        </button>
-                      )}
-                      {!videoBgFile && (
-                        <div className="text-[8px] font-mono text-white/35 leading-snug">
-                          Sin clip: se anima la foto del fondo. Con clip: la tarjeta va encima del video.
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Movimiento solo aplica a la foto animada */}
-                    {!videoBgFile && (
-                    <div className="space-y-1.5">
-                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Movimiento</div>
-                      <div className="grid grid-cols-3 gap-1">
-                        {(["kenburns", "pulse", "none"] as const).map((fx) => (
-                          <button
-                            key={fx}
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setVideoEffect(fx); }}
-                            className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
-                          >
-                            {fx === "kenburns" ? "Zoom" : fx === "pulse" ? "Pulso" : "Estático"}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    )}
-
-                    {/* Efectos combinables — se aplican al exportar (no en el
-                        preview). Destellos/Shake requieren música o audio del clip. */}
-                    {(() => {
-                      const hasAudioSource = !!audioBuffer || !!videoBgFile;
-                      const fxButtons: { k: "beatFlash" | "beatShake" | "stardust" | "retro70s"; label: string; needsAudio: boolean }[] = [
-                        { k: "beatFlash", label: "Destellos", needsAudio: true },
-                        { k: "beatShake", label: "Shake", needsAudio: true },
-                        { k: "stardust", label: "Stardust", needsAudio: false },
-                        { k: "retro70s", label: "Glitch 70s", needsAudio: false },
-                      ];
-                      return (
-                        <div className="space-y-1.5">
-                          <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Efectos (al exportar)</div>
-                          <div className="grid grid-cols-2 gap-1">
-                            {fxButtons.map(({ k, label, needsAudio }) => {
-                              const disabled = needsAudio && !hasAudioSource;
-                              const on = !!videoFx[k];
-                              return (
-                                <button
-                                  key={k}
-                                  type="button"
-                                  disabled={disabled}
-                                  title={disabled ? "Elegí música (o usá un clip con audio) para sincronizar con los beats" : undefined}
-                                  onClick={(e) => { e.stopPropagation(); toggleVideoFx(k); }}
-                                  className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all ${disabled ? "opacity-40 cursor-not-allowed bg-[color:var(--color-card-2)] text-[#52525B] border-[color:var(--color-line)]" : on ? "bg-cyan-400 text-black border-cyan-400 cursor-pointer" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)] cursor-pointer"}`}
-                                >
-                                  {label}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    <div className="space-y-1.5">
-                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
-                      {videoBgFile ? (
-                        videoBgDurationSec != null && videoBgDurationSec < 15 ? (
-                          // clip corto: elegir dejarlo tal cual o loopearlo hasta 15s
-                          <div className="grid grid-cols-2 gap-1">
-                            {([false, true] as const).map((loop) => (
-                              <button
-                                key={String(loop)}
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); setVideoLoop(loop); }}
-                                className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoLoop === loop ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
-                              >
-                                {loop ? "Loop a 15s" : `Clip (${Math.round(videoBgDurationSec)}s)`}
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="px-3 py-2 rounded-sm bg-[color:var(--color-card-2)] font-mono text-[10px] text-white/80">
-                            {clipExportSec}s{" "}
-                            <span className="text-white/60">
-                              ({videoBgDurationSec == null
-                                ? "duración del clip"
-                                : videoBgDurationSec > 15
-                                  ? "clip recortado a 15s"
-                                  : "duración del clip"})
-                            </span>
-                          </div>
-                        )
-                      ) : (
-                        <div className="grid grid-cols-2 gap-1">
-                          {([10, 15] as const).map((d) => (
-                            <button
-                              key={d}
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
-                              className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
-                            >
-                              {d}s
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">
-                        Música (archivo local){videoBgFile && !audioBuffer ? " — reemplaza el audio del clip" : ""}
-                      </div>
-                      <input type="file" accept="audio/*" className="hidden" ref={audioInputRef} onChange={handleAudioFile} />
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
-                      >
-                        <Music size={14} />
-                        <span className="truncate max-w-[70%]">{audioName || "ELEGIR TEMA"}</span>
-                      </button>
-                      {audioBuffer && (() => {
-                        const segLen = videoBgFile ? clipExportSec : videoDurationSec;
-                        const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
-                        return (
-                          <div className="space-y-1.5">
-                            <label className="block text-[9px] font-mono text-white/50 uppercase tracking-widest">
-                              Usar de {fmt(audioOffsetSec)} a {fmt(audioOffsetSec + segLen)}
-                              <input
-                                type="range"
-                                min={0}
-                                max={Math.max(0, Math.floor(audioBuffer.duration - segLen))}
-                                value={audioOffsetSec}
-                                onChange={(e) => setAudioOffsetSec(Number(e.target.value))}
-                                className="w-full accent-white mt-1"
-                              />
-                            </label>
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); toggleAudioPreview(); }}
-                              className={`w-full flex items-center justify-center gap-2 py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${isPreviewingAudio ? "bg-cyan-400 text-black border-cyan-400" : "bg-[color:var(--color-card-2)] text-[#A1A1AA] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
-                            >
-                              {isPreviewingAudio ? "■ Parar" : "▶ Escuchar segmento"}
-                            </button>
-                          </div>
-                        );
-                      })()}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); void handleExportDayVideo(); }}
-                      disabled={isExportingVideo}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-widest font-extrabold uppercase bg-signal-red hover:brightness-110 text-white rounded-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-                    >
-                      <Share2 size={15} className={isExportingVideo ? "animate-spin" : ""} />
-                      {isExportingVideo ? `RENDERIZANDO ${videoProgress}%` : "EXPORTAR VIDEO"}
-                    </button>
-                    {isExportingVideo && <ProgressBar value={videoProgress / 100} />}
-                  </div>
-                )}
-              </div>
-
-              {renderExportCustomizationPanel()}
-            </div>
-          )}
-        </div>
-      )}
-    </>
-  );
 
 
   return (
+    // MotionConfig reducedMotion="user": respeta prefers-reduced-motion del SO
+    // para TODA animación de motion/react en la app (springs, keyframes, layout
+    // transitions) — el @media de index.css solo cubre animaciones CSS nativas.
+    <MotionConfig reducedMotion="user">
     <div
       style={
         {
@@ -1949,7 +1642,7 @@ export default function App() {
                             isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
                           }`}
                         >
-                          <span className="font-mono text-xs font-bold text-white/35">{label}</span>
+                          <span className="font-mono text-xs font-bold text-[color:var(--color-ink-faint)]">{label}</span>
                           <span className="w-1.5 h-1.5 rounded-full " />
                         </button>
                       );
@@ -2088,6 +1781,13 @@ export default function App() {
               isIntroGlitching={isIntroGlitching}
               dayTitleAlertTrigger={dayTitleAlertTrigger}
               onHeightChange={setDayHeaderHeight}
+              athlete={athlete}
+              isEditingName={isEditingName}
+              setIsEditingName={setIsEditingName}
+              tempName={tempName}
+              setTempName={setTempName}
+              saveName={saveName}
+              startEditingName={startEditingName}
             />
 
             {/* HERO WHITEBOARD SUBHEADER & GOAL */}
@@ -2184,10 +1884,10 @@ export default function App() {
                         >
                           <span>{v.tabName}</span>
                           <span
-                            className={`text-[7px] px-1 py-0.5 rounded font-mono font-black tracking-tighter ${
+                            className={`text-[7.5px] px-1 py-0.5 rounded font-mono font-black tracking-tighter ${
                               isActive
-                                ? "bg-black/40 text-[#DC2626] border border-[#DC2626]/35"
-                                : "bg-[color:var(--color-card-2)] text-neutral-400 border border-transparent"
+                                ? "bg-black/40 text-[color:var(--color-sem-red)] border border-[color:var(--color-sem-red)]/35"
+                                : "bg-[color:var(--color-card-2)] text-[color:var(--color-ink-2)] border border-transparent"
                             }`}
                           >
                             {shortTag}
@@ -2259,20 +1959,20 @@ export default function App() {
                       return (
                         <>
                           <aside className="w-full lg:w-72 shrink-0 space-y-3 no-print">
-                            <div className="text-[10px] font-mono tracking-widest text-[#DC2626] uppercase pb-2 mb-3 flex justify-between items-center">
+                            <div className="text-[10px] font-mono tracking-widest text-[color:var(--color-sem-red)] uppercase pb-2 mb-3 flex justify-between items-center">
                               <span>// SESIÓN DE ENTRENAMIENTO</span>
                               <span>[{flexBlocks.length} BLOQUES]</span>
                             </div>
                             <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3">
                               {flexBlocks.map((b) => {
-                                const c = BUCKET_COLOR[b.bucket] || "#71717A";
+                                const c = BUCKET_COLOR[b.bucket] || "var(--color-ink-faint)";
                                 const isOn = active.key === b.key;
                                 return (
                                   <button
                                     key={b.key}
                                     onClick={() => setActiveFlexKey(b.key)}
                                     className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${isOn ? "text-white shadow-sm" : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"}`}
-                                    style={isOn ? { borderColor: c, backgroundColor: `${c}26` } : undefined}
+                                    style={isOn ? { borderColor: c, backgroundColor: `color-mix(in srgb, ${c} 15%, transparent)` } : undefined}
                                   >
                                     <div className="flex justify-between items-start mb-1 font-brutalist gap-1.5">
                                       <span className="text-xs sm:text-[13px] font-extrabold tracking-wider truncate" style={isOn ? { color: c } : undefined}>
@@ -2301,7 +2001,7 @@ export default function App() {
                             >
                               {renderBlockCard(active, false)}
                             </motion.div>
-                            {renderDayExportActions()}
+                            {/* renderDayExportActions removed from layout */}
                           </div>
                         </>
                       );
@@ -2309,7 +2009,7 @@ export default function App() {
                     <>
                     {/* SIDEBAR DE BLOQUES EN COMPUTADORAS / BARRA DE TABS EN MÓVILES */}
                     <aside className="w-full lg:w-72 shrink-0 space-y-3 no-print">
-                      <div className="text-[10px] font-mono tracking-widest text-[#DC2626] uppercase pb-2 mb-3 flex justify-between items-center">
+                      <div className="text-[10px] font-mono tracking-widest text-[color:var(--color-sem-red)] uppercase pb-2 mb-3 flex justify-between items-center">
                         <span>// SESIÓN DE ENTRENAMIENTO</span>
                         <span>[4 BLOQUES]</span>
                       </div>
@@ -2370,13 +2070,13 @@ export default function App() {
                           onClick={() => setActiveBlockTab("strength")}
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "strength"
-                              ? "border-[#FAFAFA] bg-[#FAFAFA]/15 text-white shadow-sm"
+                              ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)]/15 text-white shadow-sm"
                               : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
                             <span
-                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "strength" ? "text-[#FAFAFA]" : "text-neutral-300 group-hover:text-white"}`}
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "strength" ? "text-[color:var(--color-ink)]" : "text-neutral-300 group-hover:text-white"}`}
                             >
                               02. FUERZA / OLY
                             </span>
@@ -2398,7 +2098,7 @@ export default function App() {
                                   className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
                                   title={getCompactSidebarText(item)}
                                 >
-                                  <span className="w-1 h-1 rounded-full bg-[#FAFAFA] shrink-0 " />
+                                  <span className="w-1 h-1 rounded-full bg-[color:var(--color-ink)] shrink-0 " />
                                   <span className="truncate">
                                     {getCompactSidebarText(item)}
                                   </span>
@@ -2413,7 +2113,7 @@ export default function App() {
                           </div>
 
                           {activeBlockTab === "strength" && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FAFAFA]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[color:var(--color-ink)]" />
                           )}
                         </button>
 
@@ -2421,13 +2121,13 @@ export default function App() {
                           onClick={() => setActiveBlockTab("metcon")}
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "metcon"
-                              ? "border-[#DC2626] bg-[#DC2626]/15 text-white shadow-sm"
+                              ? "border-[color:var(--color-sem-red)] bg-[color:var(--color-sem-red)]/15 text-white shadow-sm"
                               : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
                             <span
-                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "metcon" ? "text-[#DC2626]" : "text-neutral-300 group-hover:text-white"}`}
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "metcon" ? "text-[color:var(--color-sem-red)]" : "text-neutral-300 group-hover:text-white"}`}
                             >
                               03. METCON / WOD
                             </span>
@@ -2449,7 +2149,7 @@ export default function App() {
                                   className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
                                   title={getCompactSidebarText(item)}
                                 >
-                                  <span className="w-1 h-1 rounded-full bg-[#DC2626] shrink-0 " />
+                                  <span className="w-1 h-1 rounded-full bg-[color:var(--color-sem-red)] shrink-0 " />
                                   <span className="truncate">
                                     {getCompactSidebarText(item)}
                                   </span>
@@ -2464,7 +2164,7 @@ export default function App() {
                           </div>
 
                           {activeBlockTab === "metcon" && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#DC2626]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[color:var(--color-sem-red)]" />
                           )}
                         </button>
 
@@ -2472,13 +2172,13 @@ export default function App() {
                           onClick={() => setActiveBlockTab("accessories")}
                           className={`group w-full text-left p-3.5 sm:p-4 border transition-all duration-200 uppercase relative overflow-hidden cursor-pointer rounded-xs ${
                             activeBlockTab === "accessories"
-                              ? "border-[#A1A1AA] bg-[#A1A1AA]/15 text-white shadow-sm"
+                              ? "border-[color:var(--color-label)] bg-[color:var(--color-label)]/15 text-white shadow-sm"
                               : "border-[color:var(--color-line)] hover:border-white/30 bg-[#000000]/60 text-neutral-400 hover:text-white"
                           }`}
                         >
                           <div className="flex justify-between items-start mb-1 font-brutalist">
                             <span
-                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "accessories" ? "text-[#A1A1AA]" : "text-neutral-300 group-hover:text-white"}`}
+                              className={`text-xs sm:text-[14px] font-extrabold tracking-wider ${activeBlockTab === "accessories" ? "text-[color:var(--color-label)]" : "text-neutral-300 group-hover:text-white"}`}
                             >
                               04. ACCESORIOS / ACC
                             </span>
@@ -2500,7 +2200,7 @@ export default function App() {
                                   className="text-[8.5px] text-neutral-400 group-hover:text-neutral-300 font-condensed tracking-wide flex items-center gap-1.5 normal-case truncate"
                                   title={getCompactSidebarText(item)}
                                 >
-                                  <span className="w-1 h-1 rounded-full bg-[#A1A1AA] shrink-0 " />
+                                  <span className="w-1 h-1 rounded-full bg-[color:var(--color-label)] shrink-0 " />
                                   <span className="truncate">
                                     {getCompactSidebarText(item)}
                                   </span>
@@ -2515,7 +2215,7 @@ export default function App() {
                           </div>
 
                           {activeBlockTab === "accessories" && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#A1A1AA]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[color:var(--color-label)]" />
                           )}
                         </button>
                       </div>
@@ -2577,7 +2277,7 @@ export default function App() {
                         )}
                       </AnimatePresence>
 
-                      {renderDayExportActions()}
+                      {/* renderDayExportActions removed from layout */}
                     </div>
                     </>
                     )}
@@ -2601,7 +2301,7 @@ export default function App() {
                           {renderAccessoriesBlock(false)}
                         </>
                       )}
-                    {renderDayExportActions(false)}
+                    {/* renderDayExportActions removed from layout */}
                   </main>
                 ) : (
                   // Grilla: adaptive columns (up to 6) — fewer blocks, fewer columns.
@@ -2623,25 +2323,23 @@ export default function App() {
                         </>
                       )}
 
-                    {renderDayExportActions(true)}
+                    {/* renderDayExportActions removed from layout */}
                   </main>
                 )
               ) : (
                 activeDay && (
                   <main className="w-full flex-grow" id="workoutBoard">
                     {/* Default rest day whiteboard rendering */}
-                    <section className="col-span-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[color:var(--color-line)] bg-pure-black/95 text-center space-y-6">
-                      <div className="text-5xl md:text-7xl font-brutalist text-electric-blue tracking-wider">
-                        REST DAY - PORTAL REGENT
+                    <section className="col-span-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[color:var(--color-line-strong)] bg-[color:var(--color-card)] text-center space-y-6">
+                      <div className="text-5xl md:text-7xl font-brutalist text-[color:var(--color-sem-cyan)] tracking-wider">
+                        DÍA DE DESCANSO
                       </div>
                       <div className="max-w-xl space-y-4">
-                        <p className="text-xl md:text-2xl font-condensed font-bold tracking-wide text-neutral-300">
-                          LÍMITES DE ADHERENCIA RESPETADOS // RECARGANDO
-                          CAPACIDAD NEURAL
+                        <p className="text-xl md:text-2xl font-condensed font-bold tracking-wide text-[color:var(--color-ink-2)]">
+                          RECUPERACIÓN PROGRAMADA // SIN CARGA DE ENTRENAMIENTO HOY
                         </p>
-                        <div className="border-t border-white/20 pt-4 text-base text-white/60 font-condensed">
-                          PRESUPUESTO DE MANÁ: OPTIMIZADO // REGENERACIÓN
-                          COMPLETA PARA EL PRÓXIMO IMPACTO
+                        <div className="border-t border-[color:var(--color-line)] pt-4 text-base text-[color:var(--color-label)] font-condensed">
+                          El volumen de la semana ya está distribuido — hoy toca descansar para llegar entero al próximo bloque.
                         </div>
                       </div>
 
@@ -2850,7 +2548,7 @@ export default function App() {
                     disabled={isExportingSheets}
                     className="w-full sm:w-auto flex items-center justify-center gap-2 border border-emerald-600/60 text-emerald-300 hover:bg-emerald-500 hover:text-pure-black disabled:opacity-50 disabled:cursor-not-allowed font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
                   >
-                    <Upload size={12} className={isExportingSheets ? "animate-bounce" : ""} />
+                    <Upload size={12} className={isExportingSheets ? "animate-spin" : ""} />
                     {isExportingSheets ? "SINCRONIZANDO..." : "SYNC GOOGLE SHEETS"}
                   </button>
                   <p className="mt-1.5 text-[9px] font-mono text-[color:var(--color-label)] uppercase leading-relaxed">
@@ -2902,7 +2600,7 @@ export default function App() {
                       document.body.removeChild(a);
                       URL.revokeObjectURL(url);
                     }}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#A1A1AA] hover:bg-[color:var(--color-card-2)] hover:text-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-[color:var(--color-label)] hover:bg-[color:var(--color-card-2)] hover:text-white font-mono py-2.5 px-4 text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer"
                   >
                     <FileText size={12} /> GUÍA IA (DÍA ESPECIAL)
                   </button>
@@ -3088,22 +2786,26 @@ export default function App() {
           {/* Header Controls */}
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
             <div className="flex items-center gap-2 pointer-events-auto">
-              <MousePointer2 className="text-amber-500 animate-bounce" size={20} />
-              <span className="font-mono text-xs font-black tracking-widest text-amber-500 uppercase drop-shadow-md bg-black/40 px-2 py-1 rounded">
+              <MousePointer2 className="text-[color:var(--color-sem-cyan)] animate-pulse" size={20} />
+              <span className="font-mono text-xs font-black tracking-widest text-[color:var(--color-sem-cyan)] uppercase drop-shadow-md bg-black/40 px-2 py-1 rounded">
                 MODO INTERACTIVO: ARRASTRAR ELEMENTOS
               </span>
             </div>
-            
+
             <div className="flex items-center gap-3 pointer-events-auto">
               <button
-                onClick={() => setBlockPositions({})}
-                className="bg-red-900/80 hover:bg-red-800 text-white font-mono text-xs font-black tracking-widest px-4 py-2 uppercase rounded border border-red-500/30 transition-all active:scale-95 cursor-pointer"
+                onClick={() => {
+                  if (window.confirm("¿Reiniciar la posición de los elementos arrastrados?")) {
+                    setBlockPositions({});
+                  }
+                }}
+                className="bg-[color:var(--color-sem-red)]/80 hover:bg-[color:var(--color-sem-red)] text-white font-mono text-xs font-black tracking-widest px-4 py-2 uppercase rounded-[var(--radius-tile)] transition-all active:scale-95 cursor-pointer"
               >
                 RESET LAYOUT
               </button>
               <button
                 onClick={() => setIsFullscreenPreview(false)}
-                className="bg-zinc-800/80 hover:bg-zinc-700 text-white p-2 rounded-full border border-zinc-600/50 transition-all active:scale-95 cursor-pointer"
+                className="bg-[color:var(--color-card-2)]/90 hover:bg-[color:#26262e] text-white p-2 rounded-full transition-all active:scale-95 cursor-pointer"
               >
                 <X size={24} />
               </button>
@@ -3142,7 +2844,7 @@ export default function App() {
                 setIsFullscreenPreview(false);
                 setTimeout(videoMode && videoBgFile ? handleExportDayVideo : handleExportDayJPG, 300);
               }}
-              className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-white font-mono text-sm font-black tracking-widest px-8 py-4 uppercase rounded shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 bg-white hover:brightness-90 text-black font-mono text-sm font-black tracking-widest px-8 py-4 uppercase rounded-[var(--radius-tile)] shadow-[var(--shadow-float)] transition-all active:scale-95 cursor-pointer"
             >
               <Share2 size={18} />
               {videoMode && videoBgFile ? "CONFIRMAR Y EXPORTAR VIDEO" : "CONFIRMAR Y EXPORTAR"}
@@ -3156,40 +2858,372 @@ export default function App() {
         const existingSession = getSessionForDay(activeDay.id);
         return (
         <>
-          <button
-            onClick={() => setWizardOpen(true)}
-            title={existingSession ? "Editar el WOD anotado" : "Anotar tu WOD paso a paso, como en la pizarra del box"}
-            className="fixed bottom-5 left-5 z-[90] no-print bg-[color:var(--color-sem-red)] text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-          >
-            {existingSession ? <Pencil size={16} aria-hidden="true" /> : <Swords size={16} aria-hidden="true" />}
-            {existingSession ? "EDITAR WOD" : "ANOTAR WOD"}
-          </button>
-          {/* Cerrar un día que no se entrenó: lo marca perdido (sin datos) para
-              que no quede pendiente eternamente y cierre el hueco en gráficos.
-              Oculto si el día ya está completado. */}
-          {completedDays[activeDay.id] !== "completed" && (
-            completedDays[activeDay.id] === "missed" ? (
+          {/* --- UNIFIED COMMAND BAR --- */}
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[90] flex items-center justify-between bg-[color:var(--color-card)] p-1.5 rounded-[var(--radius-tile)] shadow-[var(--shadow-card)] overflow-hidden w-[92%] sm:w-auto min-w-[340px] max-w-md no-print">
               <button
-                onClick={() => unmarkDayMissed(activeDay.id)}
-                title="Deshacer: volver a día pendiente"
-                className="fixed bottom-5 right-5 z-[90] no-print bg-black text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                onClick={() => setWizardOpen(true)}
+                title={existingSession ? "Editar el WOD anotado" : "Anotar tu WOD paso a paso, como en la pizarra del box"}
+                className="flex-1 flex items-center justify-center gap-2 bg-[color:var(--color-sem-red)] text-white hover:brightness-110 font-brutalist text-sm sm:text-base tracking-widest uppercase px-4 py-3.5 rounded-[var(--radius-tile)] transition-all active:scale-95 cursor-pointer"
               >
-                <RotateCcw size={16} aria-hidden="true" /> DESHACER
+                {existingSession ? <Pencil size={18} aria-hidden="true" /> : <Swords size={18} aria-hidden="true" />}
+                {existingSession ? "EDITAR WOD" : "ANOTAR WOD"}
               </button>
-            ) : (
-              <button
-                onClick={() => {
-                  if (window.confirm(`¿Marcar ${activeDay.name} como día perdido? Se cierra sin registrar datos (no suma XP ni % de la semana).`)) {
-                    markDayMissed(activeDay.id);
-                  }
-                }}
-                title="No entrené este día: cerrarlo como perdido"
-                className="fixed bottom-5 right-5 z-[90] no-print bg-black text-white hover:-translate-y-0.5 font-brutalist text-sm tracking-widest uppercase px-4 py-3 rounded-[var(--radius-tile)] shadow-[0_10px_26px_-6px_rgba(0,0,0,.6)] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-              >
-                <X size={16} aria-hidden="true" /> DÍA PERDIDO
-              </button>
-            )
-          )}
+              <div className="flex shrink-0 items-center gap-1.5 ml-1.5">
+                {/* Estado del día: mismo tamaño de target que cámara/ajustes (w-12
+                    h-12, ≥44px) y en la misma fila — no enterrado en Ajustes de
+                    Exportación ni como pill chico separado (ver crítica). */}
+                {completedDays[activeDay.id] !== "completed" && completedDays[activeDay.id] !== "missed" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`¿Marcar ${activeDay.name} como día perdido? Se cierra sin registrar datos (no suma XP ni % de la semana).`)) {
+                        markDayMissed(activeDay.id);
+                      }
+                    }}
+                    className="w-12 h-12 flex items-center justify-center bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-sem-red)]/20 text-[color:var(--color-label)] hover:text-[color:var(--color-sem-red)] rounded-[var(--radius-tile)] transition-colors cursor-pointer"
+                    title="Marcar el día como perdido"
+                  >
+                    <X size={18} aria-hidden="true" />
+                  </button>
+                )}
+                {completedDays[activeDay.id] === "missed" && (
+                  <button
+                    type="button"
+                    onClick={() => unmarkDayMissed(activeDay.id)}
+                    className="w-12 h-12 flex items-center justify-center bg-[color:var(--color-sem-red)] shadow-[0_10px_26px_-6px_rgba(255,69,58,.6)] text-white rounded-[var(--radius-tile)] transition-colors cursor-pointer"
+                    title="Día marcado como perdido — deshacer"
+                  >
+                    <RotateCcw size={18} aria-hidden="true" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleExportDayJPG}
+                  disabled={isExportingJPG}
+                  className="w-12 h-12 flex items-center justify-center bg-[color:var(--color-card-2)] hover:bg-[color:#26262e] text-[color:var(--color-ink-2)] rounded-[var(--radius-tile)] transition-colors cursor-pointer"
+                  title="Guardar el día como una imagen para compartir"
+                >
+                  <Camera size={20} className={isExportingJPG ? "animate-spin" : ""} />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowStoryMenu((s) => !s);
+                  }}
+                  className={`w-12 h-12 flex items-center justify-center rounded-[var(--radius-tile)] transition-colors cursor-pointer ${showStoryMenu ? "bg-[color:var(--color-sem-cyan)] text-black" : "bg-[color:var(--color-card-2)] hover:bg-[color:#26262e] text-[color:var(--color-ink-2)]"}`}
+                  title="Opciones de la imagen y papiro"
+                >
+                  <Settings2 size={20} />
+                </button>
+              </div>
+          </div>
+
+          {/* Menu Oculto de la Story y Botones Flotantes (Reconstruidos) */}
+          <div className="no-print">
+            {activeDay && (
+              <>
+                {showStoryMenu && (
+                  <div className="fixed inset-0 z-[100] flex flex-col pointer-events-none bg-[color:var(--color-card)]">
+                    <div className="relative bg-[color:var(--color-card)] pointer-events-auto w-full h-full flex flex-col animate-slide-up pb-safe-offset-2">
+                      <div className="sticky top-0 bg-[color:var(--color-card)]/95 backdrop-blur z-10 flex justify-between items-center p-4 border-b border-[color:var(--color-line)] rounded-t-2xl">
+                        <span className="text-sm font-brutalist tracking-wider text-white">AJUSTES DE EXPORTACIÓN</span>
+                        <div className="flex items-center gap-2">
+                          {/* Estado del día (perdido/deshacer) vive en la command bar
+                              principal, no acá — ver crítica de descubribilidad. */}
+                          <button onClick={() => setShowStoryMenu(false)} className="relative p-1.5 bg-white/10 rounded-full text-white hover:bg-white/20 cursor-pointer after:absolute after:-inset-2 after:content-['']">
+                              <X size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3 overflow-y-auto scrollbar-hide flex-1">
+                    {/* web: input con capture abre la cámara del teléfono; nativo usa el plugin */}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      ref={cameraInputRef}
+                      onChange={handleBgImageUpload}
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      ref={exportFileInputRef}
+                      onChange={handleBgImageUpload}
+                    />
+                    
+                    {/* Selector de variación */}
+                    {activeDay.variations.length > 1 && (
+                      <div className="space-y-1.5 border-b border-white/10 pb-2">
+                        <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Día a compartir</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {activeDay.variations.map((v) => {
+                            const sel = (storyVariationTab ?? activeVariation?.tabName) === v.tabName;
+                            const isSpecial = v.tabName === SPECIAL_TAB;
+                            return (
+                              <button
+                                key={v.tabName}
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setStoryVariationTab(v.tabName); }}
+                                className={`px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${
+                                  sel
+                                    ? isSpecial ? "bg-signal-red text-white border-signal-red" : "bg-white text-black border-white"
+                                    : "bg-[color:var(--color-card-2)] text-[color:var(--color-label)] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"
+                                }`}
+                              >
+                                {v.tabName}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          exportFileInputRef.current?.click();
+                        }}
+                        className="flex-1 flex flex-col items-center justify-center gap-2 p-2 font-brutalist text-[10px] tracking-wider font-extrabold uppercase transition-all duration-300 bg-[color:var(--color-card-2)] hover:bg-[color:#26262e] text-white active:scale-95 cursor-pointer rounded"
+                      >
+                        <ImageIcon size={18} />
+                        <span>{exportBgImage ? "CAMBIAR FOTO" : "SUBIR FOTO"}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void handleTakePhoto();
+                        }}
+                        className="flex-1 flex flex-col items-center justify-center gap-2 p-2 font-brutalist text-[10px] tracking-wider font-extrabold uppercase transition-all duration-300 bg-white text-black hover:bg-neutral-200 active:scale-95 cursor-pointer rounded"
+                      >
+                        <Camera size={18} />
+                        <span>TOMAR FOTO</span>
+                      </button>
+                    </div>
+
+                    {isFxProcessing && (
+                      <div className="text-[10px] font-mono text-[color:var(--color-label)] uppercase tracking-widest animate-pulse text-center">
+                        Detectando personas y aplicando efecto…
+                      </div>
+                    )}
+
+                    {/* ── VIDEO (Fase A): movimiento + música local ─────────────── */}
+                    <div className="space-y-2.5 border-t border-[color:var(--color-line)] pt-3">
+                      <div className="grid grid-cols-2 gap-1 bg-black/60 p-1 rounded-sm">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setVideoMode(false); }}
+                          className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${!videoMode ? "bg-white text-black" : "text-[color:var(--color-label)] hover:bg-[color:var(--color-card-2)]"}`}
+                        >
+                          Foto
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setVideoMode(true); }}
+                          className={`py-2 font-mono text-[10px] font-black uppercase tracking-widest rounded-sm transition-all cursor-pointer ${videoMode ? "bg-white text-black" : "text-[color:var(--color-label)] hover:bg-[color:var(--color-card-2)]"}`}
+                        >
+                          Video
+                        </button>
+                      </div>
+
+                      {videoMode && (
+                        <div className="space-y-2.5">
+                          {/* FONDO: foto animada (default) o clip de video real */}
+                          <div className="space-y-1.5">
+                            <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Fondo</div>
+                            <input type="file" accept="video/*" className="hidden" ref={videoBgInputRef} onChange={handleVideoBgFile} />
+                            {videoBgFile ? (
+                              <div className="flex items-center gap-2 px-3 py-2.5 border border-signal-red/40 bg-signal-red/10 rounded-sm">
+                                <Film size={14} className="text-signal-red shrink-0" />
+                                <span className="truncate flex-1 font-mono text-[10px] text-white">{videoBgName}</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); clearVideoBg(); }}
+                                  className="text-white/50 hover:text-white cursor-pointer shrink-0"
+                                  aria-label="Quitar clip de video"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); videoBgInputRef.current?.click(); }}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
+                              >
+                                <Film size={14} />
+                                USAR CLIP DE VIDEO
+                              </button>
+                            )}
+                            {!videoBgFile && (
+                              <div className="text-[8px] font-mono text-[color:var(--color-label)] leading-snug">
+                                Sin clip: se anima la foto del fondo. Con clip: la tarjeta va encima del video.
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Movimiento solo aplica a la foto animada */}
+                          {!videoBgFile && (
+                          <div className="space-y-1.5">
+                            <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Movimiento</div>
+                            <div className="grid grid-cols-3 gap-1">
+                              {(["kenburns", "pulse", "none"] as const).map((fx) => (
+                                <button
+                                  key={fx}
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setVideoEffect(fx); }}
+                                  className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoEffect === fx ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[color:var(--color-label)] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                                >
+                                  {fx === "kenburns" ? "Zoom" : fx === "pulse" ? "Pulso" : "Estático"}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          )}
+
+                          {/* Efectos combinables */}
+                          {(() => {
+                            const hasAudioSource = !!audioBuffer || !!videoBgFile;
+                            const fxButtons: { k: "beatFlash" | "beatShake" | "stardust" | "retro70s"; label: string; needsAudio: boolean }[] = [
+                              { k: "beatFlash", label: "Destellos", needsAudio: true },
+                              { k: "beatShake", label: "Shake", needsAudio: true },
+                              { k: "stardust", label: "Stardust", needsAudio: false },
+                              { k: "retro70s", label: "Glitch 70s", needsAudio: false },
+                            ];
+                            return (
+                              <div className="space-y-1.5">
+                                <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Efectos (al exportar)</div>
+                                <div className="grid grid-cols-2 gap-1">
+                                  {fxButtons.map(({ k, label, needsAudio }) => {
+                                    const disabled = needsAudio && !hasAudioSource;
+                                    const on = !!videoFx[k];
+                                    return (
+                                      <button
+                                        key={k}
+                                        type="button"
+                                        disabled={disabled}
+                                        title={disabled ? "Elegí música (o usá un clip con audio) para sincronizar con los beats" : undefined}
+                                        onClick={(e) => { e.stopPropagation(); toggleVideoFx(k); }}
+                                        className={`py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all ${disabled ? "opacity-40 cursor-not-allowed bg-[color:var(--color-card-2)] text-[#52525B] border-[color:var(--color-line)]" : on ? "bg-[color:var(--color-sem-cyan)] text-black border-[color:var(--color-sem-cyan)] cursor-pointer" : "bg-[color:var(--color-card-2)] text-[color:var(--color-label)] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)] cursor-pointer"}`}
+                                      >
+                                        {label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })()}
+
+                          <div className="space-y-1.5">
+                            <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">Duración</div>
+                            {videoBgFile ? (
+                              videoBgDurationSec != null && videoBgDurationSec < 15 ? (
+                                <div className="grid grid-cols-2 gap-1">
+                                  {([false, true] as const).map((loop) => (
+                                    <button
+                                      key={String(loop)}
+                                      type="button"
+                                      onClick={(e) => { e.stopPropagation(); setVideoLoop(loop); }}
+                                      className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoLoop === loop ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[color:var(--color-label)] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                                    >
+                                      {loop ? "Loop a 15s" : `Clip (${Math.round(videoBgDurationSec)}s)`}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="px-3 py-2 rounded-sm bg-[color:var(--color-card-2)] font-mono text-[10px] text-white/80">
+                                  {clipExportSec}s{" "}
+                                  <span className="text-white/60">
+                                    ({videoBgDurationSec == null
+                                      ? "duración del clip"
+                                      : videoBgDurationSec > 15
+                                        ? "clip recortado a 15s"
+                                        : "duración del clip"})
+                                  </span>
+                                </div>
+                              )
+                            ) : (
+                              <div className="grid grid-cols-2 gap-1">
+                                {([10, 15] as const).map((d) => (
+                                  <button
+                                    key={d}
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setVideoDurationSec(d); }}
+                                    className={`py-2 font-mono text-[10px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${videoDurationSec === d ? "bg-white text-black border-white" : "bg-[color:var(--color-card-2)] text-[color:var(--color-label)] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                                  >
+                                    {d}s
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <div className="text-[9px] font-mono uppercase tracking-widest text-white/50">
+                              Música (archivo local){videoBgFile && !audioBuffer ? " — reemplaza el audio del clip" : ""}
+                            </div>
+                            <input type="file" accept="audio/*" className="hidden" ref={audioInputRef} onChange={handleAudioFile} />
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-wider bg-[color:var(--color-card-2)] hover:bg-[color:var(--color-card-2)] text-white rounded-sm transition-all cursor-pointer"
+                            >
+                              <Music size={14} />
+                              <span className="truncate max-w-[70%]">{audioName || "ELEGIR TEMA"}</span>
+                            </button>
+                            {audioBuffer && (() => {
+                              const segLen = videoBgFile ? clipExportSec : videoDurationSec;
+                              const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+                              return (
+                                <div className="space-y-1.5">
+                                  <label className="block text-[9px] font-mono text-white/50 uppercase tracking-widest">
+                                    Usar de {fmt(audioOffsetSec)} a {fmt(audioOffsetSec + segLen)}
+                                    <input
+                                      type="range"
+                                      min={0}
+                                      max={Math.max(0, Math.floor(audioBuffer.duration - segLen))}
+                                      value={audioOffsetSec}
+                                      onChange={(e) => setAudioOffsetSec(Number(e.target.value))}
+                                      className="w-full accent-white mt-1"
+                                    />
+                                  </label>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); toggleAudioPreview(); }}
+                                    className={`w-full flex items-center justify-center gap-2 py-2 font-mono text-[9px] font-black uppercase tracking-wider rounded-sm border transition-all cursor-pointer ${isPreviewingAudio ? "bg-[color:var(--color-sem-cyan)] text-black border-[color:var(--color-sem-cyan)]" : "bg-[color:var(--color-card-2)] text-[color:var(--color-label)] border-[color:var(--color-line)] hover:bg-[color:var(--color-card-2)]"}`}
+                                  >
+                                    {isPreviewingAudio ? "■ Parar" : "▶ Escuchar segmento"}
+                                  </button>
+                                </div>
+                              );
+                            })()}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); void handleExportDayVideo(); }}
+                            disabled={isExportingVideo}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 font-brutalist text-[11px] tracking-widest font-extrabold uppercase bg-signal-red hover:brightness-110 text-white rounded-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                          >
+                            <Share2 size={15} className={isExportingVideo ? "animate-spin" : ""} />
+                            {isExportingVideo ? `RENDERIZANDO ${videoProgress}%` : "EXPORTAR VIDEO"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {renderExportCustomizationPanel()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
           <SessionWizard
             open={wizardOpen}
             onClose={() => setWizardOpen(false)}
@@ -3211,5 +3245,6 @@ export default function App() {
         <ShareCardOverlay {...shareCardProps} transparentBase={videoMode && !!videoBgFile} />
       )}
     </div>
+    </MotionConfig>
   );
 }

@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-15T00:00:00Z",
+  "title": "Design System: Nexus L4",
+  "extensions": {
+    "colorMeta": {
+      "rojo-intensidad": { "role": "primary", "displayName": "Rojo Intensidad", "canonical": "#ff453a", "tonalRamp": ["#3d0d0a", "#6b1712", "#99211b", "#c72c23", "#ff453a", "#ff7a72", "#ffaba5", "#ffd9d6"] },
+      "cian-telemetria": { "role": "primary", "displayName": "Cian Telemetría", "canonical": "#35d6f0", "tonalRamp": ["#0a2d33", "#11515c", "#187685", "#219bae", "#2ac0d7", "#35d6f0", "#84e6f6", "#c8f4fb"] },
+      "ambar-estado": { "role": "primary", "displayName": "Ámbar Estado", "canonical": "#ffb020", "tonalRamp": ["#3b2704", "#684508", "#95630c", "#c28211", "#ffb020", "#ffc453", "#ffd88c", "#ffecc6"] },
+      "verde-mejora": { "role": "primary", "displayName": "Verde Mejora", "canonical": "#34e08c", "tonalRamp": ["#0a3320", "#125c3a", "#1a8554", "#22ae6e", "#34e08c", "#6fe9ad", "#a6f1cc", "#d5f9e8"] },
+      "birome-coach": { "role": "secondary", "displayName": "Birome del Coach", "canonical": "#ffd54a", "tonalRamp": ["#3b3008", "#68550f", "#957a16", "#c2a01d", "#ffd54a", "#ffe07a", "#ffebaa", "#fff5d5"] },
+      "grafito-fondo": { "role": "neutral", "displayName": "Grafito Fondo", "canonical": "#242429", "tonalRamp": ["#0d0d10", "#17171b", "#242429", "#33333a", "#4a4a54", "#6b6b78", "#9a9aa6", "#d0d0d8"] },
+      "negro-consola": { "role": "neutral", "displayName": "Negro Consola", "canonical": "#131318", "tonalRamp": ["#0a0a0d", "#131318", "#1c1c23", "#26262c", "#2f2f38", "#4a4a54", "#8a8a96", "#cfcfd6"] },
+      "tinta-label": { "role": "neutral", "displayName": "Tinta Label", "canonical": "#bcbcca", "tonalRamp": ["#2a2a30", "#44444d", "#5e5e6a", "#787886", "#9292a1", "#a2a2b0", "#bcbcca", "#e8e8ee"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display / bigValue", "purpose": "El número protagonista de cada métrica. Anton, uppercase, tabular-nums." },
+      "headline": { "displayName": "Título de sección", "purpose": "Título de toda SectionCard. Anton uppercase tracking 0.12em." },
+      "body": { "displayName": "Cuerpo de tarjeta", "purpose": "JetBrains Mono 12px; prosa larga usa Inter." },
+      "label": { "displayName": "Label de dato", "purpose": "Mono bold 10px uppercase tracking 0.15em. El piso normativo para texto identificador." },
+      "micro": { "displayName": "Micro", "purpose": "7.5px, contadores y badges de sidebar. Piso real de densidad — no bajar de acá." },
+      "micro-2": { "displayName": "Micro 2", "purpose": "8.5px, segundo escalón de densidad entre micro y label." },
+      "data-sm": { "displayName": "Data pequeño", "purpose": "11px, texto de dato secundario en tarjetas densas." },
+      "data-md": { "displayName": "Data mediano", "purpose": "13px, valores inline entre Label y Body." },
+      "hand": { "displayName": "Mano del coach", "purpose": "Caveat en birome amarilla; solo notas generadas por datos reales." }
+    },
+    "shadows": [
+      { "name": "shadow-card", "value": "0 26px 60px -14px rgb(0 0 0 / 0.85), 0 6px 18px rgb(0 0 0 / 0.5)", "purpose": "Toda SectionCard y ModalSheet. La sombra ES la estructura; sin bordes." },
+      { "name": "shadow-float", "value": "0 14px 32px -8px rgb(0 0 0 / 0.65)", "purpose": "Botones primarios y elementos que se despegan." },
+      { "name": "shadow-accent-red", "value": "0 10px 26px -6px rgba(255,69,58,.6)", "purpose": "Glow semántico de botones danger; el glow toma el color del elemento." },
+      { "name": "shadow-accent-green", "value": "0 10px 26px -6px rgba(52,224,140,.5)", "purpose": "Glow semántico de botones good." }
+    ],
+    "motion": [
+      { "name": "transition-fast", "value": "all 0.15s ease-in-out", "purpose": "Tabs y controles compactos." },
+      { "name": "transition-standard", "value": "all 0.2s ease-in-out", "purpose": "Botones y estados; feedback físico con active:scale-95." },
+      { "name": "rpe-alert-pulse", "value": "rpeAlertPulse 2s infinite", "purpose": "Pulso rojo de alerta RPE alto; anulado por prefers-reduced-motion global." }
+    ],
+    "breakpoints": [
+      { "name": "xs", "value": "375px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "xl", "value": "1200px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón Primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal: blanco contundente sobre la consola oscura, se despega al hover y se hunde al presionar.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">GUARDAR SESIÓN</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; min-height: 34px; border: none; border-radius: 5px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1; cursor: pointer; transition: all 0.2s ease-in-out; } .ds-btn:active { transform: scale(0.95); } .ds-btn:focus-visible { outline: 2px solid #35d6f0; outline-offset: 2px; } .ds-btn-primary { background: #ffffff; color: #000000; font-weight: 800; box-shadow: 0 14px 32px -8px rgb(0 0 0 / 0.65); } .ds-btn-primary:hover { transform: translateY(-1px); }"
+    },
+    {
+      "name": "Botón Ghost",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Acción secundaria: tile oscuro que se aclara al hover.",
+      "html": "<button class=\"ds-btn ds-btn-ghost\">VER HISTORIAL</button>",
+      "css": ".ds-btn-ghost { background: #1c1c23; color: #e8e8ee; } .ds-btn-ghost:hover { background: #26262e; color: #ffffff; }"
+    },
+    {
+      "name": "Botón Danger",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Acción intensa/destructiva: rojo semántico con glow de su propio color.",
+      "html": "<button class=\"ds-btn ds-btn-danger\">DESCARTAR DÍA</button>",
+      "css": ".ds-btn-danger { background: #ff453a; color: #ffffff; box-shadow: 0 10px 26px -6px rgba(255,69,58,.6); } .ds-btn-danger:hover { transform: translateY(-1px); }"
+    },
+    {
+      "name": "Input con unidad",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de registro sin borde: tile oscuro, mono, focus ring cian, unidad como sufijo.",
+      "html": "<div class=\"ds-input-wrap\"><input class=\"ds-input\" placeholder=\"100\" /><span class=\"ds-input-unit\">KG</span></div>",
+      "css": ".ds-input-wrap { position: relative; width: 200px; } .ds-input { width: 100%; box-sizing: border-box; background: #1c1c23; border: none; border-radius: 5px; height: 38px; padding: 0 40px 0 12px; color: #ffffff; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; outline: none; transition: box-shadow 0.2s; } .ds-input:focus { box-shadow: 0 0 0 2px #35d6f0; } .ds-input::placeholder { color: #a2a2b0; } .ds-input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #bcbcca; text-transform: uppercase; pointer-events: none; }"
+    },
+    {
+      "name": "Pill semántica",
+      "kind": "chip",
+      "refersTo": "stat-tile",
+      "description": "Chip de estado: fondo semántico pleno, mono uppercase 10px.",
+      "html": "<span class=\"ds-pill ds-pill-good\">COMPLETADO</span> <span class=\"ds-pill ds-pill-warn\">RPE ALTO</span> <span class=\"ds-pill ds-pill-danger\">HOY</span>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 5px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1; margin-right: 6px; } .ds-pill-good { background: #34e08c; color: #000000; } .ds-pill-warn { background: #ffb020; color: #000000; } .ds-pill-danger { background: #ff453a; color: #ffffff; }"
+    },
+    {
+      "name": "StatBox",
+      "kind": "card",
+      "refersTo": "stat-tile",
+      "description": "Tile de métrica: label mono arriba, número Anton protagonista, tono semántico.",
+      "html": "<div class=\"ds-statbox\"><div class=\"ds-statbox-label\">BACK SQUAT</div><div class=\"ds-statbox-value\">142<span class=\"ds-statbox-unit\">KG</span></div></div>",
+      "css": ".ds-statbox { background: #1c1c23; border-radius: 5px; padding: 12px; text-align: center; width: 140px; } .ds-statbox-label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; font-weight: 700; color: #bcbcca; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; } .ds-statbox-value { font-family: 'Anton', Impact, sans-serif; font-size: 24px; color: #35d6f0; letter-spacing: -0.01em; line-height: 1; font-variant-numeric: tabular-nums; } .ds-statbox-unit { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #e8e8ee; margin-left: 4px; }"
+    },
+    {
+      "name": "SectionCard",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Tarjeta madre: negra mate, flota con sombra sobre el fondo grafito, sin borde.",
+      "html": "<section class=\"ds-card\"><h3 class=\"ds-card-title\">TELEMETRÍA</h3><p class=\"ds-card-sub\">ÚLTIMAS 4 SEMANAS</p><p class=\"ds-card-body\">Volumen sostenido y RPE promedio 7.4 — margen para subir carga.</p></section>",
+      "css": ".ds-card { background: #131318; border-radius: 7px; box-shadow: 0 26px 60px -14px rgb(0 0 0 / 0.85), 0 6px 18px rgb(0 0 0 / 0.5); padding: 20px; text-align: left; max-width: 340px; } .ds-card-title { font-family: 'Anton', Impact, sans-serif; font-size: 14px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 4px; } .ds-card-sub { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; font-weight: 700; color: #bcbcca; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px; } .ds-card-body { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #e8e8ee; line-height: 1.6; margin: 0; }"
+    },
+    {
+      "name": "Nota del Coach",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "La voz humana: nota manuscrita en birome amarilla con rotación leve, generada por datos reales.",
+      "html": "<p class=\"ds-coach-note\">¡3 kg más que el mes pasado — sigue así!</p>",
+      "css": ".ds-coach-note { font-family: 'Caveat', 'Segoe Print', cursive; color: #ffd54a; font-size: 17px; line-height: 1.25; transform: rotate(-1.5deg); margin: 0; }"
+    },
+    {
+      "name": "Tabs de lente",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Navegación por segmentos: mono compacto uppercase, activo cian sobre texto negro.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab ds-tab-active\">SESIÓN</button><button class=\"ds-tab\">ANÁLISIS</button><button class=\"ds-tab\">PERFIL</button></div>",
+      "css": ".ds-tabs { display: inline-flex; gap: 4px; } .ds-tab { background: #000000; color: #ffffff; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.15s ease-in-out; } .ds-tab:hover { background: rgba(255,255,255,0.12); } .ds-tab-active { background: #35d6f0; color: #000000; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Consola del Atleta",
+    "overview": "Nexus L4 es un HUD de videojuego serio: telemetría, rangos y misiones sobre fondo oscuro, con el coach como narrador. El fondo grafito es la sala a oscuras y las tarjetas negras mate flotan sobre él como paneles de instrumentos, sin un solo borde. La jerarquía la construyen la tipografía (Anton para lo épico, monospacio para lo medible) y cuatro colores que significan, nunca decoran. Encima de esa precisión de máquina aparece la mano humana: la birome amarilla del coach anota, rodea valores y resalta — generada por reglas sobre datos reales, jamás como adorno fijo.",
+    "keyCharacteristics": [
+      "Fondo más claro que las tarjetas: las superficies oscuras flotan con sombra, nunca con borde.",
+      "Cuatro colores semánticos estrictos: rojo=intensidad, cian=datos, ámbar=estado, verde=mejora.",
+      "Doble voz tipográfica: Anton brutalista para lo épico, monospacio para lo medible, Caveat para el coach.",
+      "Operable entre series: tiles compactos, botones de 34px+, valores tabulares legibles de un vistazo.",
+      "Motion que comunica estado (150–250ms, pulsos de alerta RPE), con prefers-reduced-motion global."
+    ],
+    "rules": [
+      { "name": "La Regla del Color con Significado", "body": "Cada acento ES un mensaje: rojo=intensidad, cian=datos, ámbar=estado, verde=mejora, birome=voz del coach. Prohibido usar un acento fuera de su significado o inventar un quinto.", "section": "colors" },
+      { "name": "La Regla del Piso de Contraste", "body": "Ningún texto por debajo de Tinta Label (#bcbcca) sobre tarjeta. Los grises legacy están remapeados hacia arriba; no regresarlos.", "section": "colors" },
+      { "name": "La Regla de los 7.5px", "body": "El piso real es 7.5px (micro), reservado a contadores y badges dentro de listas compactas — nunca a texto que el atleta necesita leer sin acercarse. Por debajo de 7.5px es un bug de legibilidad, no un paso de la escala.", "section": "typography" },
+      { "name": "La Regla de las Tres Voces", "body": "Anton = épica (títulos/números), Mono = medición (labels/datos), Caveat = coach (solo notas generadas por datos). Un rol por voz.", "section": "typography" },
+      { "name": "La Regla Sin Jaula", "body": "Prohibido border como contorno de tarjeta o tile. Si algo necesita separarse, se eleva (sombra) o cambia de superficie.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do hacer flotar toda superficie con sombra sobre el fondo más claro; jerarquía = elevación + tipografía.",
+      "Do usar cada acento solo con su significado y la birome solo para la voz del coach.",
+      "Do mantener valores numéricos en Anton tabular-nums y labels en JetBrains Mono 10px uppercase tracking 0.15em.",
+      "Do dar feedback físico: active:scale-95, hover que despega 1px, transiciones 150–250ms, y alternativa prefers-reduced-motion para todo.",
+      "Do usar EmptyState (dashed + mensaje honesto) en vez de datos fabricados."
+    ],
+    "donts": [
+      "Don't parecer la app de fitness genérica tipo Strava/Fitbod: nada de cards blancas, gradientes azul-violeta, anillos de actividad ni tono corporativo.",
+      "Don't poner borde de contorno a tarjetas o tiles (la jaula está prohibida); los divisores viven solo dentro de modales y empty states.",
+      "Don't bajar texto de 10px ni usar grises por debajo de Tinta Label (#bcbcca) sobre tarjeta.",
+      "Don't usar la birome amarilla como acento de UI, ni glow/neón decorativo: la sombra de color solo acompaña a su elemento semántico.",
+      "Don't mezclar voces tipográficas: Anton nunca en cuerpo ni labels, Caveat nunca en controles."
+    ]
+  }
+}

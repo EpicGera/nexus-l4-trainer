@@ -5,10 +5,10 @@ import { X } from "lucide-react";
  * Nexus L4 design primitives — single source of truth for section cards,
  * buttons, stat boxes and empty states across analytics & profile screens.
  *
- * Readability rules (do not regress):
- *  - No body/label text below 10px.
- *  - Labels: neutral-400 minimum contrast. Body: neutral-300.
- *  - One accent color per section, passed via `accent`.
+ * Readability rules (do not regress; see DESIGN.md §2-3 for the source of truth):
+ *  - Piso de tamaño: 7.5px (micro), texto identificador nunca baja de 10px (label).
+ *  - Piso de contraste: --color-label (#bcbcca) mínimo sobre tarjeta. Body: --color-ink-2.
+ *  - Un color semántico por sección, pasado vía `accent`.
  */
 
 // Revamp "A×B humanizada": tarjetas mate elevadas (sombra, sin borde) sobre un

@@ -6,6 +6,13 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["vite", "--port", "5181", "--strictPort"],
       "port": 5181
+    },
+    {
+      "name": "forja",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:/Users/JDB/Documents/nexus-l4-mockup", "run", "dev", "--", "--port", "5199", "--strictPort"],
+      "port": 5199,
+      "env": { "VITE_USE_FIREBASE_EMULATOR": "true" }
     }
   ]
 }

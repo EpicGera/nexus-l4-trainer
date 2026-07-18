@@ -10,6 +10,7 @@ import { parseDayId } from "../lib/storageKeys";
 import { resolveWmRange, wmRangeLabel } from "../lib/workingMax";
 import { ENERGY_META, TIMEDOMAIN_META } from "../lib/blockMeta";
 import { cleanBlockTitle } from "../lib/titleClean";
+import { BUCKET_COLOR } from "../lib/buckets";
 
 interface WorkoutBlockCardProps {
   blockType: "warmup" | "strength" | "metcon" | "accessories";
@@ -94,7 +95,13 @@ export default function WorkoutBlockCard({
         </div>
       )}
 
-      <header className="relative z-10 px-4 py-3 flex items-center justify-between gap-2 bg-electric-blue shadow-md shadow-electric-blue/40 min-h-[78px] border-l-[7px] border-amber-400">
+      <header
+        className="relative z-10 px-4 py-3 flex items-center justify-between gap-2 shadow-md min-h-[78px]"
+        style={{
+          backgroundColor: BUCKET_COLOR[blockType],
+          boxShadow: `0 4px 14px -2px color-mix(in srgb, ${BUCKET_COLOR[blockType]} 40%, transparent)`,
+        }}
+      >
         <h2
           className={`font-brutalist italic leading-[0.9] tracking-[-0.02em] text-pure-black break-words min-w-0 flex-1 ${
             isColumns
@@ -133,7 +140,7 @@ export default function WorkoutBlockCard({
           )}
           {block.capSec != null && (
             <span
-              className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] px-2 py-0.5 border border-amber-400/60 text-amber-300"
+              className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] px-2 py-0.5 border border-[color:var(--color-sem-amber)]/60 text-[color:var(--color-sem-amber)]"
               title="Time Cap — escudo de fatiga (enciclopedia cap. 43)"
             >
               CAP {Math.round(block.capSec / 60)}′
@@ -187,7 +194,7 @@ export default function WorkoutBlockCard({
                   >
                     <div
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedItem) }}
-                      className="text-[15px] sm:text-base font-condensed font-semibold italic text-amber-300 border-l-[3px] border-amber-400 pl-3 py-0.5"
+                      className="text-[15px] sm:text-base font-condensed font-semibold italic text-[color:var(--color-sem-amber)] bg-[color:var(--color-sem-amber)]/10 rounded-[var(--radius-tile)] px-3 py-1"
                     />
                   </li>
                 );

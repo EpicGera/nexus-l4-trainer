@@ -39,7 +39,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
   );
   const ModalBar = ({ m, pct }: { m: string; pct: number }) => (
     <div className="mb-1.5 last:mb-0">
-      <div className="flex justify-between text-[9px] font-mono text-neutral-400 uppercase tracking-widest mb-0.5">
+      <div className="flex justify-between text-[9px] font-mono text-[color:var(--color-label)] uppercase tracking-widest mb-0.5">
         <span>{MODAL_LABEL[m]}</span><span>{pct}%</span>
       </div>
       <div className="h-1.5 bg-[color:var(--color-card-2)]"><div className="h-full bg-white" style={{ width: `${pct}%` }} /></div>
@@ -65,7 +65,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
 
         {variant === "week" && data.wk && (
           <>
-            <p className="text-[12px] font-mono text-neutral-300 leading-relaxed mb-4">{data.wk.headline}</p>
+            <p className="text-[12px] font-mono text-[color:var(--color-ink-2)] leading-relaxed mb-4">{data.wk.headline}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
               <Stat label="Sesiones" value={data.wk.sessions} />
               <Stat label="Tonelaje" value={<>{data.wk.tonnageKg.toLocaleString("es-ES")}<span className="text-[10px] text-[color:var(--color-label)] ml-1">kg</span></>} />
@@ -80,7 +80,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
               <div>
                 <div className="text-[10px] font-mono font-bold text-[color:var(--color-label)] uppercase tracking-widest mb-2">Movimientos top</div>
                 {data.wk.topMovements.length ? data.wk.topMovements.map((mv) => (
-                  <div key={mv.name} className="flex justify-between text-[11px] font-mono text-neutral-300 mb-1">
+                  <div key={mv.name} className="flex justify-between text-[11px] font-mono text-[color:var(--color-ink-2)] mb-1">
                     <span className="truncate pr-2">{mv.name}</span>
                     <span className="text-white shrink-0">{mv.tonnageKg > 0 ? `${mv.tonnageKg.toLocaleString("es-ES")} kg` : `${mv.reps} reps`}</span>
                   </div>
@@ -92,7 +92,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
                 <div className="text-[10px] font-mono font-bold text-[color:var(--color-label)] uppercase tracking-widest mb-2">Mejores marcas (e1RM estimado)</div>
                 <div className="flex flex-wrap gap-2">
                   {data.wk.marks.map((mk) => (
-                    <span key={mk.name} className="text-[11px] font-mono px-2 py-1 text-white">{mk.name} <span className="text-neutral-400">{mk.e1rmKg}kg</span></span>
+                    <span key={mk.name} className="text-[11px] font-mono px-2 py-1 text-white">{mk.name} <span className="text-[color:var(--color-label)]">{mk.e1rmKg}kg</span></span>
                   ))}
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
 
         {variant === "month" && data.month && (
           <>
-            <p className="text-[12px] font-mono text-neutral-300 leading-relaxed mb-4">{data.month.headline}</p>
+            <p className="text-[12px] font-mono text-[color:var(--color-ink-2)] leading-relaxed mb-4">{data.month.headline}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
               <Stat label="Sesiones" value={data.month.totalSessions} />
               <Stat label="Tonelaje" value={<>{data.month.totalTonnageKg.toLocaleString("es-ES")}<span className="text-[10px] text-[color:var(--color-label)] ml-1">kg</span></>} />
@@ -114,7 +114,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
             <div className="space-y-1.5 mb-5">
               {(() => { const max = Math.max(1, ...data.month!.weeks.map((w) => w.tonnageKg)); return data.month!.weeks.map((w) => (
                 <div key={w.week}>
-                  <div className="flex justify-between text-[10px] font-mono text-neutral-400 uppercase tracking-wider mb-0.5">
+                  <div className="flex justify-between text-[10px] font-mono text-[color:var(--color-label)] uppercase tracking-wider mb-0.5">
                     <span>SEM {w.weekNumber}{w.weekNumber === 4 ? " · descarga" : ""}</span>
                     <span>{w.tonnageKg.toLocaleString("es-ES")} kg{w.avgRpe != null ? ` · RPE ${w.avgRpe}` : ""}</span>
                   </div>
@@ -130,7 +130,7 @@ export default function RecapPanel({ variant, week, onClose }: Props) {
               <div>
                 <div className="text-[10px] font-mono font-bold text-[color:var(--color-label)] uppercase tracking-widest mb-2">Mejores marcas del mes</div>
                 {data.month.marks.length ? data.month.marks.map((mk) => (
-                  <div key={mk.name} className="flex justify-between text-[11px] font-mono text-neutral-300 mb-1">
+                  <div key={mk.name} className="flex justify-between text-[11px] font-mono text-[color:var(--color-ink-2)] mb-1">
                     <span className="truncate pr-2">{mk.name}</span><span className="text-white shrink-0">{mk.e1rmKg}kg</span>
                   </div>
                 )) : <div className="text-[11px] font-mono text-[color:var(--color-label)]">Sin marcas</div>}

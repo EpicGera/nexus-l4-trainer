@@ -15,6 +15,14 @@ interface ActiveDayHeaderProps {
   dayTitleAlertTrigger: boolean;
   /** Reports the rendered height of the sticky band so callers can stack under it. */
   onHeightChange?: (height: number) => void;
+  // Props for the consolidated header
+  athlete: { identity: string };
+  isEditingName: boolean;
+  setIsEditingName: (val: boolean) => void;
+  tempName: string;
+  setTempName: (val: string) => void;
+  saveName: () => void;
+  startEditingName: () => void;
 }
 
 export default function ActiveDayHeader({
@@ -27,6 +35,13 @@ export default function ActiveDayHeader({
   isIntroGlitching,
   dayTitleAlertTrigger,
   onHeightChange,
+  athlete,
+  isEditingName,
+  setIsEditingName,
+  tempName,
+  setTempName,
+  saveName,
+  startEditingName,
 }: ActiveDayHeaderProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -41,8 +56,6 @@ export default function ActiveDayHeader({
 
   if (!activeDay) return null;
 
-  // Per-chapter theme + per-day-type visual (boss=red, team=green, volume=orange,
-  // recovery=teal, else the chapter accent) and the chapter's title font.
   const chapterTheme = getActiveChapter()?.theme || THEME_PALETTES[0];
   const blockText = (activeDay.variations?.[0]?.blocks || [])
     .map((b: any) => `${b.title} ${(b.items || []).join(" ")}`)
@@ -53,7 +66,7 @@ export default function ActiveDayHeader({
   return (
     <motion.div
       ref={rootRef}
-      className="sticky z-[60] w-full overflow-hidden select-none border-y border-[color:var(--color-line)] py-3 flex items-center justify-center transition-all duration-300 bg-zinc-950/85 backdrop-blur-md mb-6"
+      className="sticky z-[60] w-full overflow-hidden select-none border-y border-[color:var(--color-line)] py-2 flex items-center justify-center transition-all duration-300 bg-zinc-950/85 backdrop-blur-md mb-6"
       whileHover={{ scale: 1.03 }}
       style={{
         top: `${headerHeight}px`,
@@ -70,18 +83,16 @@ export default function ActiveDayHeader({
     >
       <motion.div
         id="uiDayTitle"
-        className="font-brutalist text-white uppercase tracking-[0.05em] leading-none m-0 p-0 text-center font-black select-none w-full"
+        className="text-white m-0 p-0 text-center select-none w-full flex flex-col items-center justify-center gap-1.5 md:gap-2 h-full"
         animate={
           isIntroGlitching
             ? {
-                // entrada sobria: un zoom rápido, sin glitch de color ni skew
                 scale: [1.06, 1],
                 opacity: [0, 1],
                 color: "#ffffff",
               }
             : dayTitleAlertTrigger
               ? {
-                  // alerta contundente pero adulta: micro-shake + flash rojo señal
                   x: [0, -6, 6, -4, 4, 0],
                   scale: [1, 1.04, 1],
                   color: ["#ffffff", "#DC2626", "#ffffff"],
@@ -111,32 +122,68 @@ export default function ActiveDayHeader({
               : {}
         }
       >
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 py-1.5 px-4 h-full">
-          {/* STATUS INDICATOR: verde=completado · gris tachado=perdido · acento=pendiente */}
-          <div className="flex items-center gap-2.5 shrink-0 select-none">
-            <span
-              className="w-3.5 h-3.5 rounded-full transition-all duration-500 shrink-0 shadow-sm"
-              style={{
-                backgroundColor:
-                  completedDays[activeDay.id] === "completed"
-                    ? "#10b981"
-                    : completedDays[activeDay.id] === "missed"
-                      ? "#525252"
-                      : dv.accent,
+        {/* Top row: Day Name + Logo + Editable Athlete Name */}
+        <div className="flex items-center justify-center gap-3 flex-wrap leading-none">
+          <span className="text-xl sm:text-2xl font-black font-brutalist tracking-wider text-white opacity-80 uppercase">
+            {activeDay.name}
+          </span>
+          <img 
+            src="/logo.svg" 
+            alt="Nexus L4" 
+            className="w-8 h-8 sm:w-10 sm:h-10 object-contain inline-block drop-shadow-lg"
+          />
+          {isEditingName ? (
+            <input
+              type="text"
+              value={tempName}
+              onChange={(e) => setTempName(e.target.value)}
+              onBlur={saveName}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveName();
+                if (e.key === "Escape") setIsEditingName(false);
               }}
-              title={
-                completedDays[activeDay.id] === "completed"
-                  ? "¡Entrenamiento Completado!"
-                  : completedDays[activeDay.id] === "missed"
-                    ? "Día perdido — cerrado sin registro"
-                    : "Entrenamiento Incompleto"
-              }
+              className="bg-zinc-900 text-white border border-white/20 focus:border-electric-blue/50 font-brutalist text-xl sm:text-2xl uppercase px-2 py-0 focus:outline-none text-center max-w-[200px] inline-block transition-colors"
+              autoFocus
             />
-          </div>
+          ) : (
+            <span
+              className="text-white hover:text-electric-blue cursor-pointer transition-all relative group inline-flex items-center gap-1.5 border-0 font-brutalist text-xl sm:text-2xl uppercase"
+              onClick={startEditingName}
+              title="Haz clic para cambiar nombre de atleta"
+            >
+              <span>{athlete.identity}</span>
+              <span className="text-sm text-electric-blue opacity-50 group-hover:opacity-100 transition-opacity">
+                ✎
+              </span>
+            </span>
+          )}
+        </div>
+
+        {/* Bottom row: Status Dot + Day Title */}
+        <div className="flex items-center justify-center gap-3 leading-none w-full px-4">
+          {/* STATUS INDICATOR: verde=completado · gris tachado=perdido · acento=pendiente */}
+          <span
+            className="w-3.5 h-3.5 rounded-full transition-all duration-500 shrink-0 shadow-sm"
+            style={{
+              backgroundColor:
+                completedDays[activeDay.id] === "completed"
+                  ? "#10b981"
+                  : completedDays[activeDay.id] === "missed"
+                    ? "#525252"
+                    : dv.accent,
+            }}
+            title={
+              completedDays[activeDay.id] === "completed"
+                ? "¡Entrenamiento Completado!"
+                : completedDays[activeDay.id] === "missed"
+                  ? "Día perdido — cerrado sin registro"
+                  : "Entrenamiento Incompleto"
+            }
+          />
 
           {/* TITLE TEXT — per-chapter font when set */}
           <span
-            className="text-[clamp(1.8rem,7vw,3.6rem)] font-black tracking-wide leading-none select-none"
+            className="text-sm sm:text-lg md:text-xl font-black tracking-wide leading-tight select-none uppercase font-brutalist text-zinc-100 line-clamp-1"
             style={titleFont ? { fontFamily: titleFont } : undefined}
           >
             {activeDay.title}
@@ -146,3 +193,4 @@ export default function ActiveDayHeader({
     </motion.div>
   );
 }
+

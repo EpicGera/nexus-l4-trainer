@@ -65,17 +65,17 @@ export default function DailyMissionPanel({
     >
       <div className="flex justify-between items-center text-[7.5px] sm:text-[8px] font-bold text-[color:var(--color-label)] border-b border-white/5 pb-0.5 mb-1.5 uppercase tracking-widest leading-none">
         <span className="flex items-center gap-1">
-          <Sparkles size={8} className="text-amber-500" />★ OBJ. DIARIO
+          <Sparkles size={8} className="text-[color:var(--color-sem-amber)]" />★ OBJ. DIARIO
         </span>
-        <span className="text-amber-500 font-extrabold pb-0.5">
+        <span className="text-[color:var(--color-sem-amber)] font-extrabold pb-0.5">
           MISIÓN SECUNDARIA
         </span>
       </div>
 
       {/* OBJ. DIARIO: meta del día derivada del JSON del programa */}
       {dailyGoalText && (
-        <div className="mb-1.5 bg-[color:var(--color-card-2)] border-l-2 border-amber-500 pl-1.5 py-0.5">
-          <p className="font-bold text-[9px] sm:text-[9.5px] tracking-wide uppercase text-amber-300 leading-snug break-words">
+        <div className="mb-1.5 bg-[color:var(--color-card-2)] px-2 py-1 rounded-sm">
+          <p className="font-bold text-[9px] sm:text-[9.5px] tracking-wide uppercase text-[color:var(--color-sem-amber)] leading-snug break-words">
             {dailyGoalText}
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function DailyMissionPanel({
       <div className="grid grid-cols-12 gap-x-2 gap-y-1.5 items-center">
         <div className="col-span-12 sm:col-span-7 flex justify-between items-center gap-1.5 border-b sm:border-b-0 sm:border-r border-[color:var(--color-line)] pb-1 sm:pb-0 sm:pr-2.5">
           <div className="flex-1 min-h-[1.2rem] flex items-center">
-            <p className="font-bold text-[9.5px] sm:text-[10px] tracking-wide uppercase text-zinc-100 border-l-2 border-[var(--color-accent)] pl-1.5 py-0 w-full whitespace-normal break-words leading-snug">
+            <p className="font-bold text-[9.5px] sm:text-[10px] tracking-wide uppercase text-[color:var(--color-ink)] px-1 py-0 w-full whitespace-normal break-words leading-snug">
               {isGeneratingQuest ? (
                 <span className="text-[color:var(--color-label)] flex items-center gap-1">
                   <span>GENERANDO MISIÓN…</span>
@@ -98,7 +98,7 @@ export default function DailyMissionPanel({
             <button
               onClick={handleFetchSideQuest}
               disabled={isGeneratingQuest}
-              className="bg-electric-blue/15 text-electric-blue hover:bg-electric-blue/25 disabled:bg-neutral-800 disabled:text-[color:var(--color-label)] p-0.5 shadow-sm hover:shadow-sm active:scale-95 transition-all cursor-pointer rounded-[var(--radius-tile)] shrink-0 group relative overflow-hidden flex items-center justify-center"
+              className="bg-electric-blue/15 text-electric-blue hover:bg-electric-blue/25 disabled:bg-[color:var(--color-card-2)] disabled:text-[color:var(--color-label)] p-0.5 shadow-sm hover:shadow-sm active:scale-95 transition-all cursor-pointer rounded-[var(--radius-tile)] shrink-0 group relative flex items-center justify-center after:absolute after:-inset-3.5 after:content-['']"
               title="Obtener misión seleccionada por IA según el entreno del día"
               style={{ width: "20px", height: "20px" }}
             >
@@ -113,48 +113,48 @@ export default function DailyMissionPanel({
         <div className="col-span-12 sm:col-span-5">
           {sideQuestCompleted && questData ? (
             <div className="animate-fade-in space-y-1">
-              <div className="bg-amber-500/10 p-1 rounded-[var(--radius-tile)] flex justify-between items-center gap-2">
+              <div className="bg-[color:var(--color-sem-amber)]/10 p-1 rounded-[var(--radius-tile)] flex justify-between items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <div className="bg-amber-500 text-black p-0.5 rounded-[var(--radius-tile)] shrink-0">
+                  <div className="bg-[color:var(--color-sem-amber)] text-black p-0.5 rounded-[var(--radius-tile)] shrink-0">
                     <Trophy size={9} />
                   </div>
-                  <span className="text-[7.5px] font-black text-amber-400 uppercase tracking-wider leading-none">
+                  <span className="text-[7.5px] font-black text-[color:var(--color-sem-amber)] uppercase tracking-wider leading-none">
                     PRUEBA VALIDADA
                   </span>
                 </div>
                 <button
                   onClick={() => handleResetQuest(dayId)}
-                  className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[7px] font-bold uppercase tracking-wider py-0.5 px-1 flex items-center gap-0.5 transition-all rounded-[var(--radius-tile)] shrink-0"
+                  className="relative bg-[color:var(--color-card-2)] hover:bg-[color:#26262e] text-[color:var(--color-ink-2)] font-mono text-[7.5px] font-bold uppercase tracking-wider py-0.5 px-1 flex items-center gap-0.5 transition-all rounded-[var(--radius-tile)] shrink-0 after:absolute after:-inset-y-3.5 after:-inset-x-1 after:content-['']"
                   type="button"
                 >
                   <RotateCcw size={7} /> REABRIR
                 </button>
               </div>
 
-              <div className="bg-zinc-900/40 p-1 space-y-0.5 text-[9px] text-left rounded-[var(--radius-tile)] font-mono">
+              <div className="bg-[color:var(--color-card-2)]/60 p-1 space-y-0.5 text-[9px] text-left rounded-[var(--radius-tile)] font-mono">
                 <div className="grid grid-cols-3 gap-0.5">
                   <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)]">
-                    <span className="text-[6.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
+                    <span className="text-[7.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
                       XP
                     </span>
-                    <span className="text-[8.5px] font-black text-[#00f0ff]">
+                    <span className="text-[8.5px] font-black text-[color:var(--color-sem-cyan)]">
                       +{questData.xpEarned || rewards.xp}
                     </span>
                   </div>
                   <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)]">
-                    <span className="text-[6.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
+                    <span className="text-[7.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
                       SCORE
                     </span>
-                    <span className="text-[8.5px] font-black text-amber-400">
+                    <span className="text-[8.5px] font-black text-[color:var(--color-sem-amber)]">
                       {questData.evalScore || 90}/100
                     </span>
                   </div>
                   <div className="bg-black/40 p-0.5 text-center rounded-[var(--radius-tile)] flex flex-col justify-center">
-                    <span className="text-[6.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
+                    <span className="text-[7.5px] text-[color:var(--color-label)] block uppercase font-bold leading-none mb-0.5">
                       BOTÍN
                     </span>
                     <span
-                      className="text-[7.5px] font-black text-emerald-400 line-clamp-1"
+                      className="text-[7.5px] font-black text-[color:var(--color-sem-green)] line-clamp-1"
                       title={questData.rewardItem}
                     >
                       🛡️ {questData.rewardItem || rewards.item}
@@ -162,18 +162,18 @@ export default function DailyMissionPanel({
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-0.5 pt-0.5 text-[6.5px]">
-                  <span className="inline-flex items-center gap-0.5 bg-emerald-500/10 text-emerald-400 font-bold px-1 py-0.2 rounded-[var(--radius-tile)]">
+                <div className="flex flex-wrap gap-0.5 pt-0.5 text-[7.5px]">
+                  <span className="inline-flex items-center gap-0.5 bg-[color:var(--color-sem-green)]/10 text-[color:var(--color-sem-green)] font-bold px-1 py-0.2 rounded-[var(--radius-tile)]">
                     <Check size={7} /> ROM
                   </span>
-                  <span className="inline-flex items-center gap-0.5 bg-emerald-500/10 text-emerald-400 font-bold px-1 py-0.2 rounded-[var(--radius-tile)]">
+                  <span className="inline-flex items-center gap-0.5 bg-[color:var(--color-sem-green)]/10 text-[color:var(--color-sem-green)] font-bold px-1 py-0.2 rounded-[var(--radius-tile)]">
                     <Check size={7} /> POSTURA
                   </span>
                 </div>
 
                 {questData.aiFeedback && (
                   <div
-                    className="bg-black p-1 rounded-[var(--radius-tile)] leading-tight text-zinc-400 text-[8px] line-clamp-2"
+                    className="bg-black p-1 rounded-[var(--radius-tile)] leading-tight text-[color:var(--color-ink-2)] text-[8px] line-clamp-2"
                     title={questData.aiFeedback}
                   >
                     <p className="italic font-sans leading-tight">
@@ -188,7 +188,7 @@ export default function DailyMissionPanel({
               <div className="flex justify-between items-center text-[7.5px] pb-0.5 font-mono leading-none">
                 <span className="text-[color:var(--color-label)] font-bold">RECOMPENSAS:</span>
                 <span className="text-electric-blue font-bold flex items-center gap-0.5">
-                  <Sparkles size={7} className="text-amber-500" />
+                  <Sparkles size={7} className="text-[color:var(--color-sem-amber)]" />
                   <span>+{rewards.xp} XP</span>
                 </span>
               </div>
@@ -199,14 +199,14 @@ export default function DailyMissionPanel({
                   onClick={() => setIsHelpOpen(!isHelpOpen)}
                   className="flex items-center gap-1 text-[8px] font-black text-[var(--color-ink-muted)] uppercase tracking-wider font-mono hover:text-white transition-colors focus:outline-none cursor-pointer"
                 >
-                  <Sparkles size={7} className="text-amber-400 shrink-0" />
+                  <Sparkles size={7} className="text-[color:var(--color-sem-amber)] shrink-0" />
                   <span>{isHelpOpen ? "▲ OCULTAR" : "▼ GUÍA"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setValidation(onValidate(dayId))}
-                  className="py-1 px-1.5 font-brutalist text-[8px] font-black tracking-widest text-center bg-[var(--color-accent)] text-white hover:brightness-110 cursor-pointer active:scale-[0.98] uppercase flex items-center gap-0.5 transition-all"
+                  className="relative py-1 px-1.5 font-brutalist text-[8px] font-black tracking-widest text-center bg-[var(--color-accent)] text-white hover:brightness-110 cursor-pointer active:scale-[0.98] uppercase flex items-center gap-0.5 transition-all after:absolute after:-inset-3.5 after:content-['']"
                 >
                   <ShieldCheck size={9} /> VALIDAR MISIÓN
                 </button>
@@ -214,11 +214,11 @@ export default function DailyMissionPanel({
 
               {/* checks del validador determinista */}
               {validation && !validation.ok && (
-                <div className="bg-[#111113] p-1 space-y-0.5 rounded-[var(--radius-tile)]">
+                <div className="bg-[color:var(--color-card)] p-1 space-y-0.5 rounded-[var(--radius-tile)]">
                   {validation.checks.map((c, i) => (
                     <div key={i} className="flex items-center gap-1 text-[7.5px] font-mono leading-tight">
                       {c.pass ? (
-                        <Check size={8} className="text-emerald-400 shrink-0" />
+                        <Check size={8} className="text-[color:var(--color-sem-green)] shrink-0" />
                       ) : (
                         <X size={8} className="text-[var(--color-accent-soft)] shrink-0" />
                       )}
@@ -227,7 +227,7 @@ export default function DailyMissionPanel({
                       </span>
                     </div>
                   ))}
-                  <p className="text-[7px] font-mono text-[var(--color-ink-faint)] pt-0.5 leading-tight">
+                  <p className="text-[7.5px] font-mono text-[var(--color-ink-faint)] pt-0.5 leading-tight">
                     Registrá la sesión con ANOTAR WOD para completar la misión.
                   </p>
                 </div>
